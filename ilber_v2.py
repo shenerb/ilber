@@ -480,6 +480,8 @@ class OutputRedirector:
         self.logbox = logbox
 
     def write(self, text):
+        if getattr(self.app, "cancel_requested", False):
+            raise RuntimeError("__USER_CANCELLED__")
         s = text.strip()
         if not s:
             return
@@ -496,7 +498,8 @@ class OutputRedirector:
         self.app.after(0, lambda t=s: self.app._log(self.logbox, t))
 
     def flush(self):
-        pass
+        if getattr(self.app, "cancel_requested", False):
+            raise RuntimeError("__USER_CANCELLED__")
 
 
 class ILBERTechV2(ctk.CTk):
@@ -507,6 +510,8 @@ class ILBERTechV2(ctk.CTk):
         self.trans_tokenizer = None
         self.llm_instance = None
         self.is_processing = False
+        self.cancel_requested = False
+        self._current_run_id = 0
         self.is_recording = False
         self.ui_lang = "en"
         self.audio_frames = []
@@ -2395,8 +2400,20 @@ class ILBERTechV2(ctk.CTk):
             text_color="#1D4ED8",
         )
         status_lbl.pack(side="left", padx=14, pady=6)
+        banner_stop_btn = ctk.CTkButton(
+            status_banner,
+            text=self.L("⏹ Durdur", "⏹ Stop", "⏹ Stopp"),
+            width=90,
+            height=26,
+            corner_radius=6,
+            fg_color="#DC2626",
+            hover_color="#B91C1C",
+            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+            command=lambda pid=page_id: self.stop_pipeline(pid),
+        )
+        banner_stop_btn.pack(side="right", padx=(4, 12), pady=6)
         status_pbar = ctk.CTkProgressBar(status_banner, mode="indeterminate", width=180, height=10, progress_color="#2563EB")
-        status_pbar.pack(side="right", padx=14, pady=8)
+        status_pbar.pack(side="right", padx=10, pady=8)
 
         ctrls["status_banner"] = status_banner
         ctrls["status_lbl"] = status_lbl
@@ -2598,8 +2615,10 @@ class ILBERTechV2(ctk.CTk):
             send_btn.configure(command=on_global_chat_send)
             chat_entry.bind("<Return>", on_global_chat_send)
 
+            action_row = ctk.CTkFrame(bottom_area, fg_color="transparent")
+            action_row.pack(pady=(0, 2))
             start_btn = ctk.CTkButton(
-                bottom_area,
+                action_row,
                 text=self.t("chat_memorize"),
                 height=42,
                 fg_color="#10B981",
@@ -2607,20 +2626,53 @@ class ILBERTechV2(ctk.CTk):
                 font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"),
                 command=lambda: self.start_pipeline(page_id, file_var.get(), src_var.get(), "Turkish", start_btn),
             )
-            start_btn.pack(pady=(0, 2))
+            start_btn.pack(side="left", padx=(0, 10))
+            stop_btn = ctk.CTkButton(
+                action_row,
+                text=self.L("⏹ İşlemi Durdur", "⏹ Stop Process", "⏹ Prozess stoppen"),
+                height=42,
+                width=155,
+                state="disabled",
+                fg_color="#94A3B8",
+                hover_color="#B91C1C",
+                text_color_disabled="#F1F5F9",
+                font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+                command=lambda pid=page_id: self.stop_pipeline(pid),
+            )
+            stop_btn.pack(side="left")
             ctrls["start_btn"] = start_btn
+            ctrls["stop_btn"] = stop_btn
+            ctrls["action_row"] = action_row
         else:
+            action_row = ctk.CTkFrame(bottom_area, fg_color="transparent")
+            action_row.pack(pady=(4, 2))
             start_btn = ctk.CTkButton(
-                bottom_area,
+                action_row,
                 text=self.t("btn_start_proc"),
                 height=45,
+                width=210,
                 fg_color="#4C1D95",
                 hover_color="#5B21B6",
                 font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"),
                 command=lambda: self.start_pipeline(page_id, file_var.get(), src_var.get(), "Turkish", start_btn),
             )
-            start_btn.pack(pady=(4, 2))
+            start_btn.pack(side="left", padx=(0, 12))
+            stop_btn = ctk.CTkButton(
+                action_row,
+                text=self.L("⏹ İşlemi Durdur", "⏹ Stop Process", "⏹ Prozess stoppen"),
+                height=45,
+                width=170,
+                state="disabled",
+                fg_color="#94A3B8",
+                hover_color="#B91C1C",
+                text_color_disabled="#F1F5F9",
+                font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"),
+                command=lambda pid=page_id: self.stop_pipeline(pid),
+            )
+            stop_btn.pack(side="left")
             ctrls["start_btn"] = start_btn
+            ctrls["stop_btn"] = stop_btn
+            ctrls["action_row"] = action_row
 
     def show_page(self, name):
         if name in ("tool_ses_kaydet", "tool_ai_ozet", "tool_video_cevir", "tool_ai_rapor"):
@@ -2888,7 +2940,8 @@ class ILBERTechV2(ctk.CTk):
             if not ctrls.get("busy_active"):
                 return
             try:
-                banner.pack(fill="x", pady=(0, 6), before=ctrls.get("start_btn"))
+                before_w = ctrls.get("action_row") or ctrls.get("start_btn")
+                banner.pack(fill="x", pady=(0, 6), before=before_w)
             except Exception:
                 banner.pack(fill="x", pady=(0, 6))
             pbar.start()
@@ -2964,11 +3017,64 @@ class ILBERTechV2(ctk.CTk):
                 f"⏳ [Kostenlose Testversion — Verbleibende Vorgänge: {r}/5]",
             )))
 
+        self.cancel_requested = False
+        self._current_run_id = getattr(self, "_current_run_id", 0) + 1
+        run_id = self._current_run_id
         self.is_processing = True
         btn.configure(state="disabled", text=self.t("btn_processing"))
+        stop_btn = ctrls.get("stop_btn")
+        if stop_btn and stop_btn.winfo_exists():
+            stop_btn.configure(
+                state="normal",
+                fg_color="#DC2626",
+                text=self.L("⏹ İşlemi Durdur", "⏹ Stop Process", "⏹ Prozess stoppen"),
+            )
         self._start_busy_indicator(mode, self.t("busy_thinking"))
         self._log(logbox, "-" * 52)
-        threading.Thread(target=self._run_engine, args=(mode, filepath, src, tgt, logbox, btn), daemon=True).start()
+        threading.Thread(target=self._run_engine, args=(mode, filepath, src, tgt, logbox, btn, run_id), daemon=True).start()
+
+    def stop_pipeline(self, mode=None):
+        """Immediately stops any running transcription, translation, OCR, or video processing across MIC/EDU/GLOBE/FIELD."""
+        self.cancel_requested = True
+        self.is_processing = False
+        self._current_run_id = getattr(self, "_current_run_id", 0) + 1
+        if self.is_recording:
+            self.is_recording = False
+
+        # Terminate any active child ffmpeg process if running
+        try:
+            if os.name == "nt":
+                subprocess.run(["taskkill", "/F", "/IM", "ffmpeg.exe", "/T"], capture_output=True, creationflags=0x08000000)
+            else:
+                subprocess.run(["pkill", "-f", "ffmpeg"], capture_output=True)
+        except Exception:
+            pass
+
+        target_modes = [mode] if mode else list(self.page_controls.keys())
+        for m in target_modes:
+            self._stop_busy_indicator(m)
+            ctrls = self.page_controls.get(m, {})
+            s_btn = ctrls.get("start_btn")
+            st_btn = ctrls.get("stop_btn")
+            if s_btn and s_btn.winfo_exists():
+                s_btn.configure(
+                    state="normal",
+                    text=self.t("chat_memorize") if m == "tool_ai_chat" else self.t("btn_start_proc"),
+                )
+            if st_btn and st_btn.winfo_exists():
+                st_btn.configure(
+                    state="disabled",
+                    fg_color="#94A3B8",
+                    text=self.L("⏹ İşlemi Durdur", "⏹ Stop Process", "⏹ Prozess stoppen"),
+                )
+
+        active_log = self.log_boxes.get(mode) if mode else None
+        if active_log and active_log.winfo_exists():
+            self._log(active_log, self.L(
+                "🛑 İşlem kullanıcı tarafından durduruldu. Yeni bir dosya seçebilir veya işlemi tekrar başlatabilirsiniz.",
+                "🛑 Process stopped by user. You can select a new file or start again immediately.",
+                "🛑 Prozess vom Benutzer gestoppt. Sie können sofort eine neue Datei auswählen oder neu starten.",
+            ))
 
     def _run_llm(self, sys_prompt, user_text, max_tokens=800, temperature=0.1, history_messages=None):
         try:
@@ -3030,17 +3136,51 @@ class ILBERTechV2(ctk.CTk):
         if s_code == t_code:
             return list(lines_arr)
 
-        t_lines_arr = []
-        chunk_size = 5
         self.trans_tokenizer.src_lang = s_code
-        for i in range(0, len(lines_arr), chunk_size):
-            batch = [s.replace("\n", " ").strip() if s.strip() else " " for s in lines_arr[i : i + chunk_size]]
-            encoded = self.trans_tokenizer(batch, return_tensors="pt", padding=True, truncation=True)
-            gen_tokens = self.trans_model.generate(**encoded, forced_bos_token_id=self.trans_tokenizer.get_lang_id(t_code))
+        bos_id = self.trans_tokenizer.get_lang_id(t_code)
+
+        # Split long multi-sentence paragraphs into individual sentences so M2M100 never drops sentences or loops
+        flat_sentences = []
+        line_sentence_ranges = []
+        for raw_line in lines_arr:
+            clean_line = raw_line.replace("\n", " ").strip()
+            if not clean_line:
+                line_sentence_ranges.append((0, 0))
+                continue
+            if len(clean_line) > 110:
+                sents = [s.strip() for s in re.split(r"(?<=[.!?])\s+", clean_line) if s.strip()]
+            else:
+                sents = [clean_line]
+            start_idx = len(flat_sentences)
+            flat_sentences.extend(sents)
+            line_sentence_ranges.append((start_idx, len(flat_sentences)))
+
+        translated_flat = []
+        chunk_size = 4
+        total_sents = max(1, len(flat_sentences))
+        for i in range(0, len(flat_sentences), chunk_size):
+            if getattr(self, "cancel_requested", False):
+                raise RuntimeError("__USER_CANCELLED__")
+            batch = [s if s else " " for s in flat_sentences[i : i + chunk_size]]
+            encoded = self.trans_tokenizer(batch, return_tensors="pt", padding=True, truncation=True, max_length=256)
+            gen_tokens = self.trans_model.generate(
+                **encoded,
+                forced_bos_token_id=bos_id,
+                max_new_tokens=256,
+                no_repeat_ngram_size=3,
+                repetition_penalty=1.25,
+            )
             t_chunks = self.trans_tokenizer.batch_decode(gen_tokens, skip_special_tokens=True)
-            t_lines_arr.extend(t_chunks)
-            progress = min(100, int((i + chunk_size) / max(1, len(lines_arr)) * 100))
+            translated_flat.extend([c.strip() for c in t_chunks])
+            progress = min(100, int((i + chunk_size) / total_sents * 100))
             self.after(0, lambda p=progress, lp=label_prefix: self._log(logbox, f"      -> {lp} {self.t('log_trans_prog')} ({s_code.upper()} ➔ {t_code.upper()}): %{p}"))
+
+        t_lines_arr = []
+        for start_idx, end_idx in line_sentence_ranges:
+            if start_idx == end_idx:
+                t_lines_arr.append("")
+            else:
+                t_lines_arr.append(" ".join(translated_flat[start_idx:end_idx]))
         return t_lines_arr
 
     def _transcribe_media(self, filepath, src_selection, logbox, verbatim=False):
@@ -3116,8 +3256,10 @@ class ILBERTechV2(ctk.CTk):
             }]
         return raw_segments, detected_lang
 
-    def _run_engine(self, mode, filepath, src, tgt, logbox, btn):
+    def _run_engine(self, mode, filepath, src, tgt, logbox, btn, run_id=0):
         try:
+            if getattr(self, "cancel_requested", False):
+                raise RuntimeError("__USER_CANCELLED__")
             workspace_dir = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace")
             for sub in ["Uploads", "Transcripts", "Subtitles", "Reports"]:
                 os.makedirs(os.path.join(workspace_dir, sub), exist_ok=True)
@@ -3674,15 +3816,21 @@ class ILBERTechV2(ctk.CTk):
                     )))
 
         except Exception as e:
-            err = f"❌ Error: {str(e)}"
-            self.after(0, lambda msg=err: self._log(logbox, msg))
+            if "__USER_CANCELLED__" not in str(e) and not getattr(self, "cancel_requested", False):
+                err = f"❌ Error: {str(e)}"
+                self.after(0, lambda msg=err: self._log(logbox, msg))
         finally:
-            self.is_processing = False
-            self._stop_busy_indicator(mode)
-            if mode == "tool_ai_chat":
-                self.after(0, lambda: btn.configure(state="normal", text=self.t("chat_memorize")))
-            else:
-                self.after(0, lambda: btn.configure(state="normal", text=self.t("btn_start_proc")))
+            if run_id == getattr(self, "_current_run_id", 0):
+                self.is_processing = False
+                self._stop_busy_indicator(mode)
+                ctrls_fin = self.page_controls.get(mode, {})
+                st_btn = ctrls_fin.get("stop_btn")
+                if st_btn:
+                    self.after(0, lambda b=st_btn: b.winfo_exists() and b.configure(state="disabled", fg_color="#94A3B8"))
+                if mode == "tool_ai_chat":
+                    self.after(0, lambda: btn.configure(state="normal", text=self.t("chat_memorize")))
+                else:
+                    self.after(0, lambda: btn.configure(state="normal", text=self.t("btn_start_proc")))
 
 
 if __name__ == "__main__":
