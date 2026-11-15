@@ -44,9 +44,11 @@ try:
     def _safe_imeta_version(pkg_name):
         try:
             return _orig_imeta_version(pkg_name)
-        except Exception:
+        except Exception as e:
             key = str(pkg_name).lower().replace("_", "-")
-            return _FALLBACK_PKG_VERSIONS.get(key, _FALLBACK_PKG_VERSIONS.get(str(pkg_name).lower(), "1.0.0"))
+            if key in _FALLBACK_PKG_VERSIONS:
+                return _FALLBACK_PKG_VERSIONS[key]
+            raise e
     _imeta.version = _safe_imeta_version
 except Exception:
     pass
@@ -91,6 +93,15 @@ def _lazy_import_whisper():
     """Import numba/torch/whisper on demand so startup UI opens in <0.8 seconds."""
     if "whisper" in sys.modules:
         return sys.modules["whisper"]
+    try:
+        import numpy as np
+        import numpy.core._multiarray_umath  # Ensure NumPy C-API is loaded before torch._C initializes
+    except Exception:
+        pass
+    try:
+        import torch
+    except Exception:
+        pass
     try:
         import types as _types
         import numba as _numba
@@ -755,7 +766,7 @@ class ILBERTechV2(ctk.CTk):
                 self.after(200, lambda: self.iconbitmap(ico_p))
         except Exception:
             pass
-        self.title("ILBERTech Platform v2.0 — MIC · EDU · GLOBE · FIELD")
+        self.title("ILBERTech Platform v2.1 — MIC · EDU · GLOBE · FIELD")
         self.geometry("1320x840")
         self.resizable(True, True)
         self.configure(fg_color=BG)
@@ -3675,6 +3686,19 @@ class ILBERTechV2(ctk.CTk):
 
 
 if __name__ == "__main__":
+    if "--selftest" in sys.argv:
+        import numpy as np
+        wh = _lazy_import_whisper()
+        import torch
+        from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
+        t_arr = torch.from_numpy(np.zeros(16, dtype=np.float32))
+        assert t_arr.shape[0] == 16, "torch.from_numpy bridge failed!"
+        assert hasattr(M2M100ForConditionalGeneration, "from_pretrained"), "M2M100 class invalid!"
+        ff_res = subprocess.run(["ffmpeg", "-version"], capture_output=True, text=True)
+        assert ff_res.returncode == 0, f"Bundled ffmpeg failed: {ff_res.stderr}"
+        print(f"✅ SELFTEST PASSED | NumPy={np.__version__} | PyTorch={torch.__version__} | FFmpeg=OK")
+        sys.exit(0)
+
     app = ILBERTechV2()
     try:
         app.deiconify()

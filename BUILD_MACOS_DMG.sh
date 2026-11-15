@@ -5,21 +5,22 @@ ARCH_LABEL="${1:-Universal}"
 export MACOSX_DEPLOYMENT_TARGET="10.15"
 
 echo "============================================================================"
-echo "🍎 ILBERTech Platform v2.0 — macOS ($ARCH_LABEL) .app + .dmg Derleniyor..."
+echo "🍎 ILBERTech Platform v2.1 — macOS ($ARCH_LABEL) .app + .dmg Derleniyor..."
 echo "============================================================================"
 
 cd "$(dirname "$0")"
 
 # 0. Pre-flight verification: ensure NumPy <-> PyTorch C bridge & M2M100 work 100% before bundling
-echo "🧪 NumPy <-> PyTorch köprüsü ve M2M100 motoru doğrulanıyor..."
+echo "🧪 Python ortamında NumPy <-> PyTorch köprüsü ve M2M100 motoru doğrulanıyor..."
 python -c "
 import numpy as np
 import torch
 import whisper
+import imageio_ffmpeg
 from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
 t = torch.from_numpy(np.zeros(8, dtype=np.float32))
 assert t.shape[0] == 8, 'torch.from_numpy failed!'
-print('✅ Dogrulama Basarili -> NumPy:', np.__version__, '| PyTorch:', torch.__version__)
+print('✅ Python Ortami Dogrulandi -> NumPy:', np.__version__, '| PyTorch:', torch.__version__, '| Static FFmpeg:', imageio_ffmpeg.get_ffmpeg_exe())
 "
 
 # 1. Generate macOS .icns icon from ilber_logo.jpg using macOS built-in sips + iconutil
@@ -46,7 +47,7 @@ if [ -f "ilber_logo.icns" ]; then
     ICON_ARG="--icon=ilber_logo.icns"
 fi
 
-# 2. Bundle with PyInstaller into macOS .app bundle (including all package metadata & numpy/torch C extensions)
+# 2. Bundle with PyInstaller into macOS .app bundle
 echo "⚙️ PyInstaller ile ILBERTech_Platform.app derleniyor..."
 rm -rf build dist
 python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform" \
@@ -57,6 +58,8 @@ python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform
     --add-data "ilber_logo.ico:." \
     --collect-all "customtkinter" \
     --collect-all "numpy" \
+    --collect-all "torch" \
+    --collect-all "transformers" \
     --collect-data "whisper" \
     --collect-data "tiktoken_ext" \
     --collect-data "certifi" \
@@ -102,7 +105,7 @@ python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform
     --hidden-import "onnxruntime" \
     ilber_v2.py
 
-# 3. Ensure Info.plist supports macOS 10.15+ (Catalina, Big Sur, Monterey, Ventura, Sonoma, Sequoia)
+# 3. Ensure Info.plist supports macOS 10.15+
 PLIST_PATH="dist/ILBERTech_Platform.app/Contents/Info.plist"
 if [ -f "$PLIST_PATH" ]; then
     /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion 10.15.0" "$PLIST_PATH" 2>/dev/null || \
@@ -111,20 +114,22 @@ if [ -f "$PLIST_PATH" ]; then
     /usr/libexec/PlistBuddy -c "Add :NSHighResolutionCapable bool true" "$PLIST_PATH" 2>/dev/null || true
 fi
 
-# 4. Bundle ffmpeg & ffprobe binaries inside .app/Contents/MacOS
-if command -v ffmpeg >/dev/null 2>&1; then
-    cp -f "$(command -v ffmpeg)" "dist/ILBERTech_Platform.app/Contents/MacOS/" || true
-    chmod +x "dist/ILBERTech_Platform.app/Contents/MacOS/ffmpeg" || true
-fi
-if command -v ffprobe >/dev/null 2>&1; then
-    cp -f "$(command -v ffprobe)" "dist/ILBERTech_Platform.app/Contents/MacOS/" || true
-    chmod +x "dist/ILBERTech_Platform.app/Contents/MacOS/ffprobe" || true
-fi
-
+# 4. Bundle 100% STATIC ffmpeg binary (from imageio-ffmpeg — zero external .dylib dependencies!)
+echo "🎬 100% Statik FFmpeg ikili dosyası (.dylib bağımlılığı olmayan) .app içine gömülüyor..."
+STATIC_FFMPEG_PATH=$(python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+cp -f "$STATIC_FFMPEG_PATH" "dist/ILBERTech_Platform.app/Contents/MacOS/ffmpeg"
+chmod +x "dist/ILBERTech_Platform.app/Contents/MacOS/ffmpeg"
 chmod +x "dist/ILBERTech_Platform.app/Contents/MacOS/ILBERTech_Platform"
 
-# 5. Stage with `ditto` (preserves PyInstaller 6 symlinks in .app/Contents/Frameworks)
-OUT_DMG="ILBERTech_Platform_Mac_${ARCH_LABEL}_Setup_v2.dmg"
+echo "🔍 Statik FFmpeg bağımlılık kontrolü (otool -L):"
+otool -L "dist/ILBERTech_Platform.app/Contents/MacOS/ffmpeg" || true
+
+# 5. Run end-to-end SELFTEST on the compiled .app binary itself!
+echo "🚀 Derlenen .app paketi üzerinde uçtan uca SELFTEST çalıştırılıyor (NumPy + PyTorch + M2M100 + FFmpeg)..."
+"dist/ILBERTech_Platform.app/Contents/MacOS/ILBERTech_Platform" --selftest
+
+# 6. Stage with `ditto` (preserves PyInstaller 6 symlinks in .app/Contents/Frameworks)
+OUT_DMG="ILBERTech_Platform_v2.1_Mac_${ARCH_LABEL}_Setup.dmg"
 echo "💿 $OUT_DMG oluşturuluyor (ditto ile sembolik bağlar korunuyor)..."
 rm -rf dmg_staging "$OUT_DMG"
 mkdir -p dmg_staging
@@ -135,7 +140,7 @@ ln -s /Applications dmg_staging/Applications
 xattr -cr "dmg_staging/ILBERTech_Platform.app" || true
 codesign --force --deep --sign - "dmg_staging/ILBERTech_Platform.app" || true
 
-hdiutil create -volname "ILBERTech Platform v2.0" \
+hdiutil create -volname "ILBERTech Platform v2.1" \
     -srcfolder dmg_staging \
     -ov -format UDZO \
     "$OUT_DMG"

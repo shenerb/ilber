@@ -1,4 +1,4 @@
-name: Build macOS DMG Installer (ILBERTech Platform v2.0)
+name: Build macOS DMG Installer (ILBERTech Platform v2.1)
 
 on:
   workflow_dispatch:
@@ -22,15 +22,15 @@ jobs:
           activate-environment: ilber_arm64
           channels: conda-forge
 
-      - name: Install FFmpeg, PortAudio & Python Dependencies (arm64)
+      - name: Install PortAudio & Python Dependencies (arm64)
         shell: bash -el {0}
         run: |
-          conda install -y -c conda-forge ffmpeg portaudio tk pymupdf "numpy=1.26.4"
+          conda install -y -c conda-forge portaudio tk pymupdf "numpy=1.26.4"
           python -m pip install --upgrade pip
           python -m pip install --prefer-binary -r requirements_macos.txt
           python -m pip install --force-reinstall --no-deps "numpy==1.26.4"
 
-      - name: Build Apple Silicon .app & .dmg Installer
+      - name: Build Apple Silicon .app & .dmg Installer (with Self-Test)
         shell: bash -el {0}
         run: |
           chmod +x BUILD_MACOS_DMG.sh
@@ -39,8 +39,8 @@ jobs:
       - name: Upload Apple Silicon macOS .dmg Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ILBERTech_Mac_AppleSilicon_M1_M2_M3_DMG
-          path: ILBERTech_Platform_Mac_AppleSilicon_M1_M2_M3_Setup_v2.dmg
+          name: ILBERTech_v2.1_Mac_AppleSilicon_M1_M2_M3_DMG
+          path: ILBERTech_Platform_v2.1_Mac_AppleSilicon_M1_M2_M3_Setup.dmg
           retention-days: 30
 
   # 2) Intel Mac (x86_64) & Universal Rosetta Build
@@ -64,15 +64,15 @@ jobs:
           activate-environment: ilber_intel
           channels: conda-forge
 
-      - name: Install FFmpeg, PortAudio & Python Dependencies (Intel x86_64)
+      - name: Install PortAudio & Python Dependencies (Intel x86_64)
         shell: bash -el {0}
         run: |
-          CONDA_SUBDIR=osx-64 conda install -y -c conda-forge python=3.11 ffmpeg portaudio tk pymupdf "numpy=1.26.4" scipy pillow lxml
+          CONDA_SUBDIR=osx-64 conda install -y -c conda-forge python=3.11 portaudio tk pymupdf "numpy=1.26.4" scipy pillow lxml
           arch -x86_64 python -m pip install --upgrade pip
           arch -x86_64 python -m pip install --prefer-binary -r requirements_macos.txt
           arch -x86_64 python -m pip install --force-reinstall --no-deps "numpy==1.26.4"
 
-      - name: Build Intel x86_64 .app & .dmg Installer
+      - name: Build Intel x86_64 .app & .dmg Installer (with Self-Test)
         shell: bash -el {0}
         run: |
           chmod +x BUILD_MACOS_DMG.sh
@@ -81,6 +81,6 @@ jobs:
       - name: Upload Intel / Universal macOS .dmg Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ILBERTech_Mac_Intel_ve_Tum_Macler_DMG
-          path: ILBERTech_Platform_Mac_Intel_ve_Tum_Macler_Setup_v2.dmg
+          name: ILBERTech_v2.1_Mac_Intel_ve_Tum_Macler_DMG
+          path: ILBERTech_Platform_v2.1_Mac_Intel_ve_Tum_Macler_Setup.dmg
           retention-days: 30
