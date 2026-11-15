@@ -6,34 +6,79 @@ on:
     branches: [ main, master ]
 
 jobs:
-  build-macos-dmg:
+  # 1) Apple Silicon (M1 / M2 / M3 / M4) Native Build — Fixed with `ditto` symlink preservation & macOS 10.15+ compatibility
+  build-macos-apple-silicon:
+    name: macOS (Apple Silicon M1/M2/M3/M4)
     runs-on: macos-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11 on macOS
-        uses: actions/setup-python@v5
+      - name: Set up Python 3.11 (arm64)
+        uses: conda-incubator/setup-miniconda@v3
         with:
+          miniforge-version: latest
           python-version: "3.11"
+          activate-environment: ilber_arm64
+          channels: conda-forge
 
-      - name: Install FFmpeg & PortAudio via Homebrew
+      - name: Install FFmpeg, PortAudio & Python Dependencies (arm64)
+        shell: bash -el {0}
         run: |
-          brew install ffmpeg portaudio python-tk@3.11
+          conda install -y -c conda-forge ffmpeg portaudio tk
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements_macos.txt
 
-      - name: Install Python Dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install -r requirements_macos.txt
-
-      - name: Build ILBERTech_Platform.app & .dmg Installer
+      - name: Build Apple Silicon .app & .dmg Installer
+        shell: bash -el {0}
         run: |
           chmod +x BUILD_MACOS_DMG.sh
-          ./BUILD_MACOS_DMG.sh
+          ./BUILD_MACOS_DMG.sh "AppleSilicon_M1_M2_M3"
 
-      - name: Upload macOS .dmg Installer Artifact
+      - name: Upload Apple Silicon macOS .dmg Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ILBERTech_Platform_Mac_Setup_v2
-          path: ILBERTech_Platform_Mac_Setup_v2.dmg
+          name: ILBERTech_Mac_AppleSilicon_M1_M2_M3_DMG
+          path: ILBERTech_Platform_Mac_AppleSilicon_M1_M2_M3_Setup_v2.dmg
+          retention-days: 30
+
+  # 2) Intel Mac (x86_64) & Universal Rosetta Build — Works on ALL Intel Macs (Core i5/i7/i9) AND Apple Silicon Macs!
+  build-macos-intel-universal:
+    name: macOS (Intel x86_64 & Tüm Macler)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Rosetta 2 for x86_64 Emulation
+        run: |
+          /usr/sbin/softwareupdate --install-rosetta --agree-to-license || true
+
+      - name: Set up Python 3.11 (Intel x86_64 via osx-64 Conda)
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          architecture: x86_64
+          python-version: "3.11"
+          activate-environment: ilber_intel
+          channels: conda-forge
+
+      - name: Install FFmpeg, PortAudio & Python Dependencies (Intel x86_64)
+        shell: bash -el {0}
+        run: |
+          CONDA_SUBDIR=osx-64 conda install -y -c conda-forge python=3.11 ffmpeg portaudio tk
+          arch -x86_64 python -m pip install --upgrade pip
+          arch -x86_64 python -m pip install -r requirements_macos.txt
+
+      - name: Build Intel x86_64 .app & .dmg Installer
+        shell: bash -el {0}
+        run: |
+          chmod +x BUILD_MACOS_DMG.sh
+          arch -x86_64 ./BUILD_MACOS_DMG.sh "Intel_ve_Tum_Macler"
+
+      - name: Upload Intel / Universal macOS .dmg Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ILBERTech_Mac_Intel_ve_Tum_Macler_DMG
+          path: ILBERTech_Platform_Mac_Intel_ve_Tum_Macler_Setup_v2.dmg
           retention-days: 30
