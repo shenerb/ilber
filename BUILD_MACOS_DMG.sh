@@ -10,6 +10,18 @@ echo "==========================================================================
 
 cd "$(dirname "$0")"
 
+# 0. Pre-flight verification: ensure NumPy <-> PyTorch C bridge & M2M100 work 100% before bundling
+echo "🧪 NumPy <-> PyTorch köprüsü ve M2M100 motoru doğrulanıyor..."
+python -c "
+import numpy as np
+import torch
+import whisper
+from transformers import M2M100ForConditionalGeneration, M2M100Tokenizer
+t = torch.from_numpy(np.zeros(8, dtype=np.float32))
+assert t.shape[0] == 8, 'torch.from_numpy failed!'
+print('✅ Dogrulama Basarili -> NumPy:', np.__version__, '| PyTorch:', torch.__version__)
+"
+
 # 1. Generate macOS .icns icon from ilber_logo.jpg using macOS built-in sips + iconutil
 if [ -f "ilber_logo.jpg" ] && command -v sips >/dev/null 2>&1 && command -v iconutil >/dev/null 2>&1; then
     echo "🎨 macOS .icns ikonu oluşturuluyor..."
@@ -34,7 +46,7 @@ if [ -f "ilber_logo.icns" ]; then
     ICON_ARG="--icon=ilber_logo.icns"
 fi
 
-# 2. Bundle with PyInstaller into macOS .app bundle
+# 2. Bundle with PyInstaller into macOS .app bundle (including all package metadata & numpy/torch C extensions)
 echo "⚙️ PyInstaller ile ILBERTech_Platform.app derleniyor..."
 rm -rf build dist
 python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform" \
@@ -44,14 +56,32 @@ python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform
     --add-data "ilber_logo.jpg:." \
     --add-data "ilber_logo.ico:." \
     --collect-all "customtkinter" \
+    --collect-all "numpy" \
     --collect-data "whisper" \
     --collect-data "tiktoken_ext" \
     --collect-data "certifi" \
     --collect-data "pdfplumber" \
     --collect-data "rapidocr_onnxruntime" \
+    --copy-metadata "torch" \
+    --copy-metadata "torchaudio" \
+    --copy-metadata "numpy" \
+    --copy-metadata "transformers" \
+    --copy-metadata "tokenizers" \
+    --copy-metadata "huggingface-hub" \
+    --copy-metadata "safetensors" \
+    --copy-metadata "tqdm" \
+    --copy-metadata "regex" \
+    --copy-metadata "requests" \
+    --copy-metadata "packaging" \
+    --copy-metadata "filelock" \
+    --copy-metadata "pyyaml" \
+    --copy-metadata "sentencepiece" \
+    --copy-metadata "openai-whisper" \
     --hidden-import "ilber_core_utils" \
     --hidden-import "ilber_ui_dialogs" \
     --hidden-import "ilber_license" \
+    --hidden-import "numpy" \
+    --hidden-import "numpy.core._multiarray_umath" \
     --hidden-import "torch" \
     --hidden-import "torchaudio" \
     --hidden-import "whisper" \
@@ -93,7 +123,7 @@ fi
 
 chmod +x "dist/ILBERTech_Platform.app/Contents/MacOS/ILBERTech_Platform"
 
-# 5. Stage with `ditto` (CRITICAL: `cp -R` breaks PyInstaller 6 symlinks in .app/Contents/Frameworks and causes the 🚫 icon!)
+# 5. Stage with `ditto` (preserves PyInstaller 6 symlinks in .app/Contents/Frameworks)
 OUT_DMG="ILBERTech_Platform_Mac_${ARCH_LABEL}_Setup_v2.dmg"
 echo "💿 $OUT_DMG oluşturuluyor (ditto ile sembolik bağlar korunuyor)..."
 rm -rf dmg_staging "$OUT_DMG"

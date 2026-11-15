@@ -22,6 +22,36 @@ if getattr(sys, "frozen", False):
 os.environ["PATH"] = os.pathsep.join(_app_dirs) + os.pathsep + os.environ.get("PATH", "")
 
 try:
+    import importlib.metadata as _imeta
+    _orig_imeta_version = _imeta.version
+    _FALLBACK_PKG_VERSIONS = {
+        "torch": "2.6.0",
+        "torchaudio": "2.6.0",
+        "numpy": "1.26.4",
+        "transformers": "4.44.2",
+        "tokenizers": "0.19.1",
+        "huggingface-hub": "0.24.6",
+        "huggingface_hub": "0.24.6",
+        "safetensors": "0.4.4",
+        "tqdm": "4.66.5",
+        "regex": "2024.7.24",
+        "requests": "2.32.3",
+        "packaging": "24.1",
+        "filelock": "3.15.4",
+        "pyyaml": "6.0.2",
+        "sentencepiece": "0.2.0",
+    }
+    def _safe_imeta_version(pkg_name):
+        try:
+            return _orig_imeta_version(pkg_name)
+        except Exception:
+            key = str(pkg_name).lower().replace("_", "-")
+            return _FALLBACK_PKG_VERSIONS.get(key, _FALLBACK_PKG_VERSIONS.get(str(pkg_name).lower(), "1.0.0"))
+    _imeta.version = _safe_imeta_version
+except Exception:
+    pass
+
+try:
     import certifi
     if os.path.exists(certifi.where()):
         os.environ.setdefault("SSL_CERT_FILE", certifi.where())
@@ -2112,27 +2142,28 @@ class ILBERTechV2(ctk.CTk):
             ctrls["paste_img_fn"] = on_paste_clipboard_image
 
         if seg_type != "CHAT":
-            ctk.CTkLabel(file_row, text=self.t("src_lang_lbl"), font=ctk.CTkFont(size=12, weight="bold"), text_color="#334155").pack(side="left", padx=(4, 6))
+            src_lbl_txt = self.L("Kaynak:", "Source:", "Quelle:") if seg_type == "EDU" else self.t("src_lang_lbl")
+            ctk.CTkLabel(file_row, text=src_lbl_txt, font=ctk.CTkFont(size=12, weight="bold"), text_color="#334155").pack(side="left", padx=(4, 5))
             ctk.CTkOptionMenu(
                 file_row,
                 variable=src_var,
                 values=[k for k in LANG_MAP.keys() if k != "Sadece OCR (Metne Dönüştür)"],
-                width=110 if seg_type == "EDU" else 165,
+                width=95 if seg_type == "EDU" else 165,
                 height=34,
                 fg_color="#F1F5F9",
                 text_color="#0F172A",
                 button_color="#CBD5E1",
-            ).pack(side="left", padx=(0, 8), pady=10)
+            ).pack(side="left", padx=(0, 6), pady=10)
 
         if seg_type == "EDU":
-            ctk.CTkLabel(file_row, text=self.t("tgt_lang_lbl"), font=ctk.CTkFont(size=12, weight="bold"), text_color="#1E3A8A").pack(side="left", padx=(2, 6))
+            ctk.CTkLabel(file_row, text=self.L("Hedef:", "Target:", "Ziel:"), font=ctk.CTkFont(size=12, weight="bold"), text_color="#1E3A8A").pack(side="left", padx=(2, 5))
             edu_tgt_var = ctk.StringVar(value=self.user_settings.get("def_lang", "Turkish"))
             ctrls["edu_tgt_var"] = edu_tgt_var
             ctk.CTkOptionMenu(
                 file_row,
                 variable=edu_tgt_var,
                 values=EDU_TARGET_LANGS,
-                width=165,
+                width=145,
                 height=34,
                 fg_color="#DBEAFE",
                 text_color="#1E3A8A",
