@@ -25,9 +25,9 @@ jobs:
       - name: Install FFmpeg, PortAudio & Python Dependencies (arm64)
         shell: bash -el {0}
         run: |
-          conda install -y -c conda-forge ffmpeg portaudio tk
+          conda install -y -c conda-forge ffmpeg portaudio tk pymupdf
           python -m pip install --upgrade pip
-          python -m pip install -r requirements_macos.txt
+          python -m pip install --prefer-binary -r requirements_macos.txt
 
       - name: Build Apple Silicon .app & .dmg Installer
         shell: bash -el {0}
@@ -66,9 +66,9 @@ jobs:
       - name: Install FFmpeg, PortAudio & Python Dependencies (Intel x86_64)
         shell: bash -el {0}
         run: |
-          CONDA_SUBDIR=osx-64 conda install -y -c conda-forge python=3.11 ffmpeg portaudio tk
+          CONDA_SUBDIR=osx-64 conda install -y -c conda-forge python=3.11 ffmpeg portaudio tk pymupdf numpy scipy pillow lxml
           arch -x86_64 python -m pip install --upgrade pip
-          arch -x86_64 python -m pip install -r requirements_macos.txt
+          arch -x86_64 python -m pip install --prefer-binary -r requirements_macos.txt
 
       - name: Build Intel x86_64 .app & .dmg Installer
         shell: bash -el {0}
