@@ -52,7 +52,7 @@ echo "⚙️ PyInstaller ile ILBERTech_Platform.app derleniyor..."
 rm -rf build dist
 python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform" \
     $ICON_ARG \
-    --osx-bundle-identifier "com.ilbertech.platform.v2" \
+    --osx-bundle-identifier "com.ilbertech.platform.v23" \
     --add-data "icons:icons" \
     --add-data "ilber_logo.jpg:." \
     --add-data "ilber_logo.ico:." \
@@ -60,6 +60,8 @@ python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform
     --collect-all "numpy" \
     --collect-all "torch" \
     --collect-all "transformers" \
+    --collect-all "sounddevice" \
+    --collect-all "_sounddevice_data" \
     --collect-data "whisper" \
     --collect-data "tiktoken_ext" \
     --collect-data "certifi" \
@@ -105,13 +107,21 @@ python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform
     --hidden-import "onnxruntime" \
     ilber_v2.py
 
-# 3. Ensure Info.plist supports macOS 10.15+
+# 3. Ensure Info.plist supports macOS 10.15+ AND declares Microphone Permission (TCC)
 PLIST_PATH="dist/ILBERTech_Platform.app/Contents/Info.plist"
 if [ -f "$PLIST_PATH" ]; then
     /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion 10.15.0" "$PLIST_PATH" 2>/dev/null || \
     /usr/libexec/PlistBuddy -c "Add :LSMinimumSystemVersion string 10.15.0" "$PLIST_PATH" 2>/dev/null || true
     /usr/libexec/PlistBuddy -c "Set :NSHighResolutionCapable true" "$PLIST_PATH" 2>/dev/null || \
     /usr/libexec/PlistBuddy -c "Add :NSHighResolutionCapable bool true" "$PLIST_PATH" 2>/dev/null || true
+    /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName 'ILBERTech Platform'" "$PLIST_PATH" 2>/dev/null || \
+    /usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string 'ILBERTech Platform'" "$PLIST_PATH" 2>/dev/null || true
+    /usr/libexec/PlistBuddy -c "Set :NSMicrophoneUsageDescription 'ILBERTech Platform needs access to your microphone for live voice recording and transcription (MIC & FIELD).'" "$PLIST_PATH" 2>/dev/null || \
+    /usr/libexec/PlistBuddy -c "Add :NSMicrophoneUsageDescription string 'ILBERTech Platform needs access to your microphone for live voice recording and transcription (MIC & FIELD).'" "$PLIST_PATH" 2>/dev/null || true
+    /usr/libexec/PlistBuddy -c "Set :NSAudioCaptureUsageDescription 'ILBERTech Platform needs audio capture access for live voice transcription.'" "$PLIST_PATH" 2>/dev/null || \
+    /usr/libexec/PlistBuddy -c "Add :NSAudioCaptureUsageDescription string 'ILBERTech Platform needs audio capture access for live voice transcription.'" "$PLIST_PATH" 2>/dev/null || true
+    echo "✅ Info.plist NSMicrophoneUsageDescription:"
+    /usr/libexec/PlistBuddy -c "Print :NSMicrophoneUsageDescription" "$PLIST_PATH" || true
 fi
 
 # 4. Bundle 100% STATIC ffmpeg binary (from imageio-ffmpeg — zero external .dylib dependencies!)
@@ -131,14 +141,38 @@ echo "🚀 Derlenen .app paketi üzerinde uçtan uca SELFTEST çalıştırılıy
 # 6. Stage with `ditto` (preserves PyInstaller 6 symlinks in .app/Contents/Frameworks)
 OUT_DMG="ILBERTech_Platform_v2.1_Mac_${ARCH_LABEL}_Setup.dmg"
 echo "💿 $OUT_DMG oluşturuluyor (ditto ile sembolik bağlar korunuyor)..."
-rm -rf dmg_staging "$OUT_DMG"
+rm -rf dmg_staging "$OUT_DMG" entitlements.plist
 mkdir -p dmg_staging
 ditto "dist/ILBERTech_Platform.app" "dmg_staging/ILBERTech_Platform.app"
 ln -s /Applications dmg_staging/Applications
 
-# Clear quarantine attributes and ad-hoc sign inside staging right before creating DMG
+# Create macOS entitlements with Microphone / Audio Input access
+cat << 'EOF' > entitlements.plist
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.device.audio-input</key>
+    <true/>
+    <key>com.apple.security.device.microphone</key>
+    <true/>
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <key>com.apple.security.cs.disable-library-validation</key>
+    <true/>
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <true/>
+</dict>
+</plist>
+EOF
+
+# Clear quarantine attributes and ad-hoc sign with Microphone entitlements inside staging right before creating DMG
 xattr -cr "dmg_staging/ILBERTech_Platform.app" || true
-codesign --force --deep --sign - "dmg_staging/ILBERTech_Platform.app" || true
+codesign --force --deep --entitlements entitlements.plist --sign - "dmg_staging/ILBERTech_Platform.app" || true
+codesign --force --entitlements entitlements.plist --sign - "dmg_staging/ILBERTech_Platform.app/Contents/MacOS/ILBERTech_Platform" || true
+rm -f entitlements.plist
 
 hdiutil create -volname "ILBERTech Platform v2.1" \
     -srcfolder dmg_staging \

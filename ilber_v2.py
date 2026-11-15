@@ -2878,15 +2878,54 @@ class ILBERTechV2(ctk.CTk):
             if status_lbl:
                 status_lbl.configure(text=self.t("mic_hint_rec"), text_color="#DC2626")
             self.audio_frames = []
+            self._rec_samplerate = 16000
 
             def record_thread():
-                fs = 16000
                 try:
                     import sounddevice as sd
-                    with sd.InputStream(samplerate=fs, channels=1, dtype="int16", blocksize=2048) as stream:
-                        while self.is_recording:
-                            data, _ = stream.read(2048)
-                            self.audio_frames.append(data.copy().reshape(-1))
+                    try:
+                        sd._terminate()
+                        sd._initialize()
+                    except Exception:
+                        pass
+
+                    rec_fs = 16000
+                    try:
+                        dev_info = sd.query_devices(kind="input")
+                        if isinstance(dev_info, dict) and dev_info.get("default_samplerate"):
+                            rec_fs = int(float(dev_info["default_samplerate"]))
+                    except Exception:
+                        rec_fs = 16000
+                    self._rec_samplerate = rec_fs
+                    block_sz = max(1024, int(rec_fs * 0.1))
+
+                    zero_blocks = 0
+                    while self.is_recording:
+                        reopen_needed = False
+                        with sd.InputStream(samplerate=rec_fs, channels=1, dtype="int16", blocksize=block_sz) as stream:
+                            while self.is_recording:
+                                data, _ = stream.read(block_sz)
+                                flat = data.copy().reshape(-1)
+                                max_val = int(np.max(np.abs(flat))) if len(flat) else 0
+                                if max_val <= 1:
+                                    zero_blocks += 1
+                                    # On macOS, while the user clicks 'Allow' on the TCC Microphone popup,
+                                    # CoreAudio feeds zeros; reopen stream after ~1.5s of zeros to attach live mic
+                                    if sys.platform == "darwin" and zero_blocks >= 15 and not self.audio_frames:
+                                        zero_blocks = 0
+                                        reopen_needed = True
+                                        break
+                                else:
+                                    self.audio_frames.append(flat)
+                                # Also keep non-leading frames once speech has started so natural pauses are preserved
+                                if self.audio_frames and max_val <= 1:
+                                    self.audio_frames.append(flat)
+                        if reopen_needed and self.is_recording:
+                            try:
+                                sd._terminate()
+                                sd._initialize()
+                            except Exception:
+                                pass
                 except Exception as e:
                     self.after(0, lambda err=str(e): self._log(self.log_boxes[page_id], f"❌ {err}"))
 
@@ -2896,27 +2935,44 @@ class ILBERTechV2(ctk.CTk):
         else:
             self.is_recording = False
             if hasattr(self, "rec_thread_obj") and self.rec_thread_obj.is_alive():
-                self.rec_thread_obj.join(timeout=1.0)
+                self.rec_thread_obj.join(timeout=1.5)
             btn.configure(text=self.t("btn_record"), fg_color=RED)
             if status_lbl:
                 status_lbl.configure(text=self.t("mic_hint_done"), text_color="#059669")
 
             if not self.audio_frames:
-                self._log(self.log_boxes[page_id], "❌ Audio frame empty.")
+                self._log(self.log_boxes[page_id], self.L(
+                    "❌ Mikrofondan ses sinyali alınamadı (Kayıt boş/sessiz). Mac kullanıyorsanız Sistem Ayarları > Gizlilik ve Güvenlik > Mikrofon bölümünden ILBERTech Platform iznini etkinleştirin.",
+                    "❌ No audio signal received from microphone (recording is silent). On macOS, please enable ILBERTech Platform under System Settings > Privacy & Security > Microphone.",
+                    "❌ Kein Mikrofonsignal empfangen (Aufnahme ist stumm). Unter macOS aktivieren Sie bitte ILBERTech Platform unter Systemeinstellungen > Datenschutz & Sicherheit > Mikrofon."
+                ))
+                if sys.platform == "darwin":
+                    try:
+                        subprocess.Popen(["open", "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone"])
+                    except Exception:
+                        pass
                 return
 
             audio_data = np.concatenate(self.audio_frames).astype(np.float32)
-            # Normalize microphone gain so quiet laptop mics are heard clearly by Whisper
             peak = float(np.max(np.abs(audio_data))) if len(audio_data) else 0.0
-            if peak > 50.0:
-                audio_data = np.clip(audio_data * (26000.0 / peak), -32767.0, 32767.0)
+            if peak < 35.0:
+                self._log(self.log_boxes[page_id], self.L(
+                    "❌ Mikrofondan yeterli ses seviyesi algılanamadı. Lütfen mikrofonunuzun açık olduğundan ve izin verildiğinden emin olun.",
+                    "❌ Microphone signal is too quiet or muted. Please check your microphone input and permissions.",
+                    "❌ Mikrofonsignal zu leise oder stummgeschaltet. Bitte überprüfen Sie Mikrofoneingang und Berechtigungen."
+                ))
+                return
+
+            # Normalize microphone gain so quiet laptop mics are heard clearly by Whisper
+            audio_data = np.clip(audio_data * (26000.0 / peak), -32767.0, 32767.0)
             audio_int16 = audio_data.astype(np.int16)
 
             ws_up = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "Uploads")
             os.makedirs(ws_up, exist_ok=True)
             out_wav = os.path.join(ws_up, f"Mikrofon_Kaydi_{datetime.datetime.now().strftime('%H%M%S')}.wav")
             from scipy.io.wavfile import write as write_wav
-            write_wav(out_wav, 16000, audio_int16)
+            rec_fs = getattr(self, "_rec_samplerate", 16000)
+            write_wav(out_wav, rec_fs, audio_int16)
             if "file_var" in ctrls:
                 ctrls["file_var"].set(out_wav)
             start_btn = ctrls.get("start_btn", btn)
@@ -3216,9 +3272,9 @@ class ILBERTechV2(ctk.CTk):
         src_code = LANG_MAP.get(src_selection, "auto")
         whisper_kwargs = {
             "verbose": True,
-            "condition_on_previous_text": not verbatim,
-            "no_speech_threshold": 0.95,
-            "logprob_threshold": None,
+            "condition_on_previous_text": False,
+            "no_speech_threshold": 0.6,
+            "compression_ratio_threshold": 2.4,
         }
         if src_code != "auto":
             whisper_kwargs["language"] = src_code
