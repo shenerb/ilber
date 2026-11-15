@@ -1,0 +1,39 @@
+name: Build macOS DMG Installer (ILBERTech Platform v2.0)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build-macos-dmg:
+    runs-on: macos-14
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11 on macOS
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install FFmpeg & PortAudio via Homebrew
+        run: |
+          brew install ffmpeg portaudio python-tk@3.11
+
+      - name: Install Python Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install -r requirements_macos.txt
+
+      - name: Build ILBERTech_Platform.app & .dmg Installer
+        run: |
+          chmod +x BUILD_MACOS_DMG.sh
+          ./BUILD_MACOS_DMG.sh
+
+      - name: Upload macOS .dmg Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ILBERTech_Platform_Mac_Setup_v2
+          path: ILBERTech_Platform_Mac_Setup_v2.dmg
+          retention-days: 30

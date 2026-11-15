@@ -1,0 +1,12 @@
+# Ignore local build artifacts and heavy installers
+dist/
+build/
+__pycache__/
+*.pyc
+*.pyo
+*.exe
+*.dmg
+*.icns
+*.iconset/
+Temalar_5_Ornek/
+ilber_v2_backup.py
