@@ -986,6 +986,7 @@ def export_field_outputs(
     anon_candidates=None,
     translated_lines=None,
     tgt_lang_label=None,
+    output_dir=None,
 ):
     """
     Generate FIELD segment outputs preserving original text as-is (without anonymization tags):
@@ -994,7 +995,7 @@ def export_field_outputs(
     2. Okunabilir Metin (.docx) - Presentation/quote version with accepted AI word suggestions applied.
     3. Düz metin (.txt) & NVivo / MAXQDA / ATLAS.ti uyumlu çıktı (.txt).
     """
-    reports_dir = os.path.join(workspace_dir, "Transcripts")
+    reports_dir = output_dir if output_dir else os.path.join(workspace_dir, "Transcripts")
     os.makedirs(reports_dir, exist_ok=True)
 
     def apply_accepted_suggestions(text, seg_idx):
@@ -3533,10 +3534,26 @@ def detect_document_source_lang(sample_texts, src_code="auto", tgt_code="tr"):
     cleaned_words = re.sub(r"[^a-zA-ZçğıöşüÇĞİÖŞÜäöüßÄÖÜа-яА-ЯёЁ\u0600-\u06FF]+", " ", joined).lower()
     low = f" {cleaned_words} "
 
-    if re.findall(r"[А-Яа-яЁё]", joined) and len(re.findall(r"[А-Яа-яЁё]", joined)) > 15 and tgt_code != "ru":
-        return "ru"
-    if re.findall(r"[\u0600-\u06FF]", joined) and len(re.findall(r"[\u0600-\u06FF]", joined)) > 15 and tgt_code != "ar":
-        return "ar"
+    if re.findall(r"[А-Яа-яЁёІіЇїЄєҐґ]", joined) and len(re.findall(r"[А-Яа-яЁёІіЇїЄєҐґ]", joined)) > 15:
+        if len(re.findall(r"[ІіЇїЄєҐґ]", joined)) >= 2 and tgt_code != "uk":
+            return "uk"
+        if tgt_code != "ru":
+            return "ru"
+    if re.findall(r"[\u0600-\u06FF]", joined) and len(re.findall(r"[\u0600-\u06FF]", joined)) > 15:
+        if len(re.findall(r"[پچژگک]", joined)) >= 2 and tgt_code != "fa":
+            return "fa"
+        if tgt_code != "ar":
+            return "ar"
+    if len(re.findall(r"[\u0370-\u03FF]", joined)) > 10 and tgt_code != "el":
+        return "el"
+    if len(re.findall(r"[\u0900-\u097F]", joined)) > 10 and tgt_code != "hi":
+        return "hi"
+    if len(re.findall(r"[\uac00-\ud7af]", joined)) > 5 and tgt_code != "ko":
+        return "ko"
+    if len(re.findall(r"[\u3040-\u30ff]", joined)) > 5 and tgt_code != "ja":
+        return "ja"
+    if len(re.findall(r"[\u4e00-\u9fff]", joined)) > 5 and tgt_code != "zh":
+        return "zh"
 
     stopwords = {
         "en": (

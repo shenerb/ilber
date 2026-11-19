@@ -26,6 +26,7 @@ set CTK_PATH=%SITE_PKGS%\customtkinter
   --hidden-import="ilber_core_utils" ^
   --hidden-import="ilber_ui_dialogs" ^
   --hidden-import="ilber_license" ^
+  --hidden-import="ilber_field_project" ^
   --hidden-import="torch" ^
   --hidden-import="torchaudio" ^
   --hidden-import="whisper" ^
@@ -84,6 +85,7 @@ xcopy "%SITE_PKGS%\et_xmlfile\*" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_P
 copy /Y "C:\Users\lenovo\Desktop\ilber\ilber_core_utils.py" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\" >nul
 copy /Y "C:\Users\lenovo\Desktop\ilber\ilber_ui_dialogs.py" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\" >nul
 copy /Y "C:\Users\lenovo\Desktop\ilber\ilber_license.py" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\" >nul
+copy /Y "C:\Users\lenovo\Desktop\ilber\ilber_field_project.py" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\" >nul
 xcopy "C:\Users\lenovo\Desktop\ilber\icons\*" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\icons\" /Y /E /I >nul
 copy /Y "C:\Users\lenovo\Desktop\ilber\ilber_logo.jpg" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\ilber_logo.jpg" >nul
 copy /Y "C:\Users\lenovo\Desktop\ilber\ilber_logo.ico" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\ilber_logo.ico" >nul

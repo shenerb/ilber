@@ -367,13 +367,14 @@ class FieldResearchStudio(ctk.CTkToplevel):
         self._render_transcript_page()
 
     def _sync_current_page(self):
-        for idx, (spk_var, tb, note_entry) in self.row_widgets.items():
+        for idx, (spk_var, tb, note_entry, q_var) in self.row_widgets.items():
             if 0 <= idx < len(self.segments):
                 if tb.winfo_exists():
                     self.segments[idx]["text"] = tb.get("1.0", "end-1c").strip()
                 if note_entry.winfo_exists():
                     self.segments[idx]["note"] = note_entry.get().strip()
                 self.segments[idx]["speaker"] = spk_var.get().strip()
+                self.segments[idx]["is_quote"] = bool(q_var.get())
 
     def _apply_bulk_speaker_rename(self):
         self._sync_current_page()
@@ -468,21 +469,31 @@ class FieldResearchStudio(ctk.CTkToplevel):
             tb.pack(side="left", fill="x", expand=True, padx=(0, 6), pady=6)
             tb.insert("1.0", seg.get("text", ""))
 
+            q_var = ctk.BooleanVar(value=bool(seg.get("is_quote", False)))
+            ctk.CTkCheckBox(
+                row,
+                text="⭐ Alıntı",
+                variable=q_var,
+                width=82,
+                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+                text_color="#B45309",
+            ).pack(side="right", padx=(0, 8), pady=6)
+
             note_entry = ctk.CTkEntry(
                 row,
-                width=220,
+                width=190,
                 height=34,
-                placeholder_text="💬 Saha notu ekle...",
+                placeholder_text="💬 Saha yorumu...",
                 fg_color="#FFFBEB",
                 text_color="#92400E",
                 border_color="#FDE68A",
                 font=ctk.CTkFont(family="Segoe UI", size=12),
             )
-            note_entry.pack(side="right", padx=(0, 8), pady=6)
+            note_entry.pack(side="right", padx=(0, 6), pady=6)
             if seg.get("note"):
                 note_entry.insert(0, seg.get("note"))
 
-            self.row_widgets[idx] = (spk_var, tb, note_entry)
+            self.row_widgets[idx] = (spk_var, tb, note_entry, q_var)
 
     def _build_tab_suggestions(self):
         ctk.CTkLabel(

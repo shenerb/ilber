@@ -165,11 +165,9 @@ SUPPORTED_MEDIA_EXTS = (
 )
 
 SUPPORTED_DOC_EXTS = (
-    ("Belgeler & Görseller (.docx, .pdf, .xlsx, .txt, .jpg, .png)", "*.docx *.pdf *.xlsx *.txt *.png *.jpg *.jpeg *.bmp *.webp"),
+    ("Belgeler (.docx, .xlsx, .txt)", "*.docx *.xlsx *.txt"),
     ("Word Belgeleri (*.docx)", "*.docx"),
-    ("PDF Belgeleri (*.pdf)", "*.pdf"),
     ("Excel Tabloları (*.xlsx)", "*.xlsx"),
-    ("Görsel / Ekran Görüntüsü - OCR (*.png, *.jpg, *.webp)", "*.png *.jpg *.jpeg *.bmp *.webp"),
     ("Metin Dosyaları (*.txt)", "*.txt"),
     ("Tüm Dosyalar", "*.*"),
 )
@@ -206,18 +204,29 @@ LANG_MAP = {
     "Korean": "ko",
     "Portuguese": "pt",
     "Dutch": "nl",
+    "Polish": "pl",
+    "Ukrainian": "uk",
+    "Persian": "fa",
+    "Azerbaijani": "az",
+    "Greek": "el",
+    "Romanian": "ro",
+    "Swedish": "sv",
+    "Hindi": "hi",
+    "Indonesian": "id",
+    "Czech": "cs",
+    "Hungarian": "hu",
+    "Vietnamese": "vi",
 }
 
 TARGET_LANGS = [
-    "English", "Turkish", "German", "Spanish", "French",
-    "Italian", "Russian", "Arabic", "Portuguese", "Dutch",
+    "Turkish", "English", "German", "Spanish", "French",
+    "Italian", "Russian", "Arabic", "Chinese", "Japanese",
+    "Korean", "Portuguese", "Dutch", "Polish", "Ukrainian",
+    "Persian", "Azerbaijani", "Greek", "Romanian", "Swedish",
+    "Hindi", "Indonesian", "Czech", "Hungarian", "Vietnamese",
 ]
 
-EDU_TARGET_LANGS = [
-    "English", "Turkish", "German", "Spanish", "French",
-    "Italian", "Russian", "Arabic", "Portuguese", "Dutch",
-    "OCR Only (Extract Text)",
-]
+EDU_TARGET_LANGS = list(TARGET_LANGS)
 
 
 UI_DICT = {
@@ -234,7 +243,7 @@ UI_DICT = {
         "log_loaded": "✓ Yapay zeka paketi yüklendi.",
         "nav_home": "🏠 Ana Sayfa",
         "nav_chat": "🤖 AI Sohbet & PDF (Ekstra)",
-        "nav_files": "📁 Dosyalarım",
+        "nav_files": "📁 Projelerim",
         "nav_history": "⏱️ Geçmiş",
         "nav_settings": "⚙️ Ayarlar",
         "banner_title": "ILBER ile sınırları kaldırın.",
@@ -243,16 +252,16 @@ UI_DICT = {
         "c1_t": "MIC · Aynı Dilde Deşifre",
         "c1_d": "Ses ve videolarınızı kaynak dilde zaman damgalı metne dönüştürün. Word, TXT, SRT ve VTT olarak dışa aktarın.",
         "c1_b": "MIC  Word/TXT  SRT/VTT",
-        "c2_t": "EDU · Format Korumalı Belge & Doküman Çevirici",
-        "c2_d": "Word (.docx), PDF (.pdf), Excel (.xlsx) ve TXT belgelerinizi sayfa düzenini, tablolarını ve formatını birebir koruyarak çevirin. İsteğe bağlı Terim Sözlüğü destekler.",
-        "c2_b": "EDU  DOCX/PDF/XLSX  Terim Sözlüğü",
+        "c2_t": "DOC · Format Korumalı Belge & Doküman Çevirici",
+        "c2_d": "Word (.docx), Excel (.xlsx) ve TXT belgelerinizi sayfa düzenini, tablolarını ve formatını birebir koruyarak çevirin. İsteğe bağlı Terim Sözlüğü destekler.",
+        "c2_b": "DOC  DOCX/XLSX/TXT  Terim Sözlüğü",
         "c3_t": "GLOBE · Video Çeviri Stüdyosu",
         "c3_d": "Videolarınız için standartlara uygun (42 krk/2 satır) altyazı üretin, çoklu hedef dile çapraz çevirin ve videoya gömün.",
         "c3_b": "GLOBE  Çapraz Çeviri  MP4/SRT/VTT",
         "c4_t": "FIELD · Araştırmacı Araç Kutusu",
         "c4_d": "Nitel araştırmalar için ses üzerinden konuşmacı ayrımı, saha notları ve NVivo/MAXQDA çıktısı.",
         "c4_b": "FIELD  Diarization  NVivo/MAXQDA",
-        "c5_t": "EDU · Format Korumalı Belge & Doküman Çevirici",
+        "c5_t": "DOC · Format Korumalı Belge & Doküman Çevirici",
         "c5_d": "Word (.docx), PDF (.pdf), Excel (.xlsx) ve TXT belgelerinizi sayfa düzenini, tablolarını ve formatını birebir koruyarak çevirin. İsteğe bağlı Terim Sözlüğü destekler.",
         "mic_note": "ℹ️ Bilgi: Amatör araştırmacılar MIC modülünü kullanabilir; ancak konuşmacı ayrımı ve saha notları yalnızca FIELD segmentindedir.",
         "src_lang_lbl": "Kaynak Dil (Otomatik / Elle):",
@@ -260,7 +269,7 @@ UI_DICT = {
         "edu_trans_none": "Çeviri Yok (Yalnızca Kaynak Dil)",
         "edu_trans_bi": "Çift Dilli Word Tablosu (Kaynak + Çeviri Yan Yana)",
         "tgt_lang_lbl": "Hedef Dil:",
-        "globe_multi_lbl": "Hedef Diller (Çoklu Seçim & Doğrudan Çapraz Çeviri):",
+        "globe_multi_lbl": "Hedef Dil (Doğrudan Çapraz Çeviri):",
         "globe_burn_mp4": "Altyazıyı Videoya Göm (.mp4)",
         "field_meta_title": "Görüşme Bilgileri Formu (Saha Künyesi)",
         "field_date": "Tarih:",
@@ -272,14 +281,14 @@ UI_DICT = {
         "field_trans_chk": "Deşifreyi Başka Dile Çevir (Çevrimdışı Motor)",
         "field_ethics_title": "Çeviri ve Etik Kurul Onay Uyarısı (FIELD)",
         "field_ethics_msg": "Çeviri işlemi seçildi. Ses dosyası bilgisayarınızda kalır ve çeviri tamamen yerel olarak yapılır.\n\nEtik kurul onayınızın çeviri işlemine izin verdiğinden emin misiniz?",
-        "title_files": "Dosyalarım", "search_placeholder": "Dosya ara...", "btn_upload": "+ Dosya Yükle", "msg_uploaded": "✔ Yüklendi!",
+        "title_files": "Projelerim", "search_placeholder": "Proje veya dosya ara...", "btn_upload": "+ Dosya Yükle", "msg_uploaded": "✔ Yüklendi!",
         "quick_access": "Hızlı Erişim", "folder_trans": "Dökümler", "folder_ups": "Yüklemeler", "folder_subs": "Altyazılar", "files_count": "dosya",
         "recent_files": "Son Dosyalar", "no_files": "ILBER_Workspace içinde dosya bulunamadı.",
         "title_history": "İşlem Geçmişi", "stat_trans": "Toplam Deşifre", "stat_subs": "Altyazı & Çeviri", "stat_storage": "Kullanılan Alan",
         "timeline_title": "Son İşlemler", "no_history": "Henüz işlem yok. Geçmişi görmek için bir dosya işleyin.",
         "act_processed": "Dosya İşlendi", "act_transcribed": "Ses Metne Dönüştürüldü", "act_extracted": "Sesten MP3 Çıkarıldı",
         "act_srt": "Altyazı Üretildi (SRT/VTT)", "act_translated": "Video Çevrildi", "file_prefix": "Dosya:",
-        "title_settings": "Ayarlar", "pop_edit_title": "Düzenleme Ekranı", "pop_edit_msg": "Metni aşağıda kontrol edip düzenleyebilirsiniz (Ham Markdown işaretleri temizlenmiştir):", "pop_save": "✓ Kaydet ve Dışa Aktar", "pop_report_title": "EDU Ders Özeti ve Tekrar Soruları Kontrolü", "pop_qa_title": "Soru-Cevap / Röportaj Raporu:", "set_sub_pref": "Altyazı Tercihleri", "set_font_size": "Yazı Boyutu", "set_pos": "Ekran Konumu",
+        "title_settings": "Ayarlar", "pop_edit_title": "Düzenleme Ekranı", "pop_edit_msg": "Metni aşağıda kontrol edip düzenleyebilirsiniz (Ham Markdown işaretleri temizlenmiştir):", "pop_save": "✓ Kaydet ve Dışa Aktar", "pop_report_title": "DOC Ders Özeti ve Tekrar Soruları Kontrolü", "pop_qa_title": "Soru-Cevap / Röportaj Raporu:", "set_sub_pref": "Altyazı Tercihleri", "set_font_size": "Yazı Boyutu", "set_pos": "Ekran Konumu",
         "set_sub_style": "Altyazı Stili", "style_classic": "Klasik Beyaz", "style_yellow": "Sarı Kalın Çerçeveli", "style_black": "Siyah Kutu",
         "set_gen_pref": "Genel Tercihler", "set_def_lang": "Varsayılan Çeviri Dili",
         "set_data_mgmt": "Veri Yönetimi", "set_data_desc": "Çalışma alanındaki tüm dosyaları (Dökümler, Yüklemeler, Altyazılar) kalıcı olarak sil.",
@@ -312,8 +321,8 @@ UI_DICT = {
         "log_loading": "[1] Loading AI Package... (May take a few seconds)",
         "log_loaded": "✓ AI package loaded.",
         "nav_home": "🏠 Home",
-        "nav_chat": "🎓 EDU · AI Tutor & PDF",
-        "nav_files": "📁 My Files",
+        "nav_chat": "🎓 DOC · AI Tutor",
+        "nav_files": "📁 My Projects",
         "nav_history": "⏱️ History",
         "nav_settings": "⚙️ Settings",
         "banner_title": "Remove borders with ILBER.",
@@ -322,16 +331,16 @@ UI_DICT = {
         "c1_t": "MIC · Same-Language Transcription",
         "c1_d": "Transcribe audio or video in its source language with timestamps. Export as Word, TXT, SRT, and VTT.",
         "c1_b": "MIC  Word/TXT  SRT/VTT",
-        "c2_t": "EDU · Format-Preserving Document Translator",
-        "c2_d": "Translate Word (.docx), PDF (.pdf), Excel (.xlsx), and TXT documents while preserving exact layout, tables, and formatting. Optional Terminology Glossary support.",
-        "c2_b": "EDU  DOCX/PDF/XLSX  Glossary Support",
+        "c2_t": "DOC · Format-Preserving Document Translator",
+        "c2_d": "Translate Word (.docx), Excel (.xlsx), and TXT documents while preserving exact layout, tables, and formatting. Optional Terminology Glossary support.",
+        "c2_b": "DOC  DOCX/XLSX/TXT  Glossary Support",
         "c3_t": "GLOBE · Video Translation Studio",
         "c3_d": "Generate standard subtitles (42 chars/2 lines), cross-translate into multiple languages, and burn into MP4.",
         "c3_b": "GLOBE  Cross-Translate  MP4/SRT/VTT",
         "c4_t": "FIELD · Researcher Toolbox",
         "c4_d": "Audio-based speaker diarization, field notes, and NVivo/MAXQDA exports for qualitative researchers.",
         "c4_b": "FIELD  Diarization  NVivo/MAXQDA",
-        "c5_t": "EDU · Format-Preserving Document Translator",
+        "c5_t": "DOC · Format-Preserving Document Translator",
         "c5_d": "Translate Word (.docx), PDF (.pdf), Excel (.xlsx), and TXT documents while preserving exact layout, tables, and formatting. Optional Terminology Glossary support.",
         "mic_note": "ℹ️ Note: Amateur researchers can use MIC; however, speaker diarization and field notes are in the FIELD segment.",
         "src_lang_lbl": "Source Language (Auto / Manual):",
@@ -339,7 +348,7 @@ UI_DICT = {
         "edu_trans_none": "No Translation (Source Language Only)",
         "edu_trans_bi": "Bilingual Word Table (Source + Translation Side-by-Side)",
         "tgt_lang_lbl": "Target Language:",
-        "globe_multi_lbl": "Target Languages (Multi-Select & Direct Cross-Translation):",
+        "globe_multi_lbl": "Target Language (Direct Cross-Translation):",
         "globe_burn_mp4": "Burn Subtitles into Video (.mp4)",
         "field_meta_title": "Interview Metadata Form (Field Header)",
         "field_date": "Date:",
@@ -351,14 +360,14 @@ UI_DICT = {
         "field_trans_chk": "Translate Transcript (Offline Engine)",
         "field_ethics_title": "Translation & Ethics Board Warning (FIELD)",
         "field_ethics_msg": "Translation selected. The audio file never leaves your computer and translation is performed locally.\n\nPlease confirm that your ethics approval permits translation.",
-        "title_files": "My Files", "search_placeholder": "Search files...", "btn_upload": "+ Upload File", "msg_uploaded": "✔ Uploaded!",
+        "title_files": "My Projects", "search_placeholder": "Search projects or files...", "btn_upload": "+ Upload File", "msg_uploaded": "✔ Uploaded!",
         "quick_access": "Quick Access", "folder_trans": "Transcripts", "folder_ups": "Uploads", "folder_subs": "Subtitles", "files_count": "files",
         "recent_files": "Recent Files", "no_files": "No files found in ILBER_Workspace.",
         "title_history": "History & Activity", "stat_trans": "Total Transcriptions", "stat_subs": "Subtitles & Translations", "stat_storage": "Storage Used",
         "timeline_title": "Recent Activity Timeline", "no_history": "No activity yet. Process a file to see your history here.",
         "act_processed": "Processed File", "act_transcribed": "Audio Transcribed to Text", "act_extracted": "Audio Extracted from Video",
         "act_srt": "Generated Subtitles (SRT/VTT)", "act_translated": "Video Translated & Subbed", "file_prefix": "File:",
-        "title_settings": "Settings", "pop_edit_title": "Edit Screen", "pop_edit_msg": "Review and edit the text below (raw Markdown symbols have been cleaned):", "pop_save": "✓ Save and Export", "pop_report_title": "EDU Lecture Summary & Review Questions", "pop_qa_title": "Q&A / Interview Report:", "set_sub_pref": "Subtitle Preferences", "set_font_size": "Font Size", "set_pos": "Screen Position",
+        "title_settings": "Settings", "pop_edit_title": "Edit Screen", "pop_edit_msg": "Review and edit the text below (raw Markdown symbols have been cleaned):", "pop_save": "✓ Save and Export", "pop_report_title": "DOC Lecture Summary & Review Questions", "pop_qa_title": "Q&A / Interview Report:", "set_sub_pref": "Subtitle Preferences", "set_font_size": "Font Size", "set_pos": "Screen Position",
         "set_sub_style": "Subtitle Style", "style_classic": "Classic White", "style_yellow": "Yellow Outlined", "style_black": "Black Box",
         "set_gen_pref": "General Preferences", "set_def_lang": "Default Translation Language",
         "set_data_mgmt": "Data Management", "set_data_desc": "Permanently delete all workspace files (Transcripts, Uploads, Subtitles).",
@@ -391,8 +400,8 @@ UI_DICT = {
         "log_loading": "[1] KI-Paket wird geladen... (Kann einige Sekunden dauern)",
         "log_loaded": "✓ KI-Paket geladen.",
         "nav_home": "🏠 Startseite",
-        "nav_chat": "🎓 EDU · KI-Lehrer & PDF",
-        "nav_files": "📁 Meine Dateien",
+        "nav_chat": "🎓 DOC · KI-Lehrer",
+        "nav_files": "📁 Meine Projekte",
         "nav_history": "⏱️ Verlauf",
         "nav_settings": "⚙️ Einstellungen",
         "banner_title": "Grenzen überwinden mit ILBER.",
@@ -401,16 +410,16 @@ UI_DICT = {
         "c1_t": "MIC · Gleiche-Sprache-Transkription",
         "c1_d": "Transkribieren Sie Audio oder Video in der Ausgangssprache mit Zeitstempeln. Export als Word, TXT, SRT und VTT.",
         "c1_b": "MIC  Word/TXT  SRT/VTT",
-        "c2_t": "EDU · Formatgetreuer Dokumentübersetzer",
-        "c2_d": "Übersetzen Sie Word (.docx), PDF (.pdf), Excel (.xlsx) und TXT-Dokumente unter vollständiger Beibehaltung von Layout, Tabellen und Formatierung. Optional mit Fachglossar.",
-        "c2_b": "EDU  DOCX/PDF/XLSX  Glossar (Optional)",
+        "c2_t": "DOC · Formatgetreuer Dokumentübersetzer",
+        "c2_d": "Übersetzen Sie Word (.docx), Excel (.xlsx) und TXT-Dokumente unter vollständiger Beibehaltung von Layout, Tabellen und Formatierung. Optional mit Fachglossar.",
+        "c2_b": "DOC  DOCX/XLSX/TXT  Glossar (Optional)",
         "c3_t": "GLOBE · Video-Übersetzungsstudio",
         "c3_d": "Erstellen Sie Standard-Untertitel (42 Zeichen/2 Zeilen), Direktübersetzung in mehrere Sprachen & MP4-Export.",
         "c3_b": "GLOBE  Direktübersetzung  MP4/SRT/VTT",
         "c4_t": "FIELD · Forscher-Werkzeugkasten",
         "c4_d": "Audio-Sprechererkennung, Feldnotizen und NVivo/MAXQDA-Export für qualitative Forschung.",
         "c4_b": "FIELD  Diarisierung  NVivo/MAXQDA",
-        "c5_t": "EDU · Formatgetreuer Dokumentübersetzer",
+        "c5_t": "DOC · Formatgetreuer Dokumentübersetzer",
         "c5_d": "Übersetzen Sie Word (.docx), PDF (.pdf), Excel (.xlsx) und TXT-Dokumente unter vollständiger Beibehaltung von Layout, Tabellen und Formatierung. Optional mit Fachglossar.",
         "mic_note": "ℹ️ Hinweis: Amateurforscher können MIC nutzen; Sprechererkennung und Feldnotizen befinden sich jedoch im Segment FIELD.",
         "src_lang_lbl": "Ausgangssprache (Auto / Manuell):",
@@ -418,7 +427,7 @@ UI_DICT = {
         "edu_trans_none": "Keine Übersetzung (Nur Ausgangssprache)",
         "edu_trans_bi": "Zweisprachige Word-Tabelle (Quelle + Übersetzung)",
         "tgt_lang_lbl": "Zielsprache:",
-        "globe_multi_lbl": "Zielsprachen (Mehrfachauswahl & Direktübersetzung):",
+        "globe_multi_lbl": "Zielsprache (Direktübersetzung):",
         "globe_burn_mp4": "Untertitel in Video einbrennen (.mp4)",
         "field_meta_title": "Interview-Metadatenformular",
         "field_date": "Datum:",
@@ -430,14 +439,14 @@ UI_DICT = {
         "field_trans_chk": "Transkript übersetzen (Offline-Engine)",
         "field_ethics_title": "Ethikkommission-Hinweis zur Übersetzung (FIELD)",
         "field_ethics_msg": "Übersetzung ausgewählt. Die Audiodatei verbleibt auf Ihrem Computer und die Übersetzung erfolgt vollständig lokal.\n\nBitte bestätigen Sie, dass Ihr Ethikvotum dies erlaubt.",
-        "title_files": "Meine Dateien", "search_placeholder": "Dateien suchen...", "btn_upload": "+ Datei Hochladen", "msg_uploaded": "✔ Hochgeladen!",
+        "title_files": "Meine Projekte", "search_placeholder": "Projekte oder Dateien suchen...", "btn_upload": "+ Datei Hochladen", "msg_uploaded": "✔ Hochgeladen!",
         "quick_access": "Schnellzugriff", "folder_trans": "Transkripte", "folder_ups": "Uploads", "folder_subs": "Untertitel", "files_count": "dateien",
         "recent_files": "Letzte Dateien", "no_files": "Keine Dateien in ILBER_Workspace gefunden.",
         "title_history": "Verlauf & Aktivität", "stat_trans": "Gesamte Transkripte", "stat_subs": "Untertitel & Übersetzungen", "stat_storage": "Speicherplatz",
         "timeline_title": "Letzte Aktivitäten", "no_history": "Noch keine Aktivität. Verarbeiten Sie eine Datei.",
         "act_processed": "Datei Verarbeitet", "act_transcribed": "Audio zu Text transkribiert", "act_extracted": "Audio aus Video extrahiert",
         "act_srt": "Untertitel erstellt (SRT/VTT)", "act_translated": "Video übersetzt", "file_prefix": "Datei:",
-        "title_settings": "Einstellungen", "pop_edit_title": "Bearbeitungsbildschirm", "pop_edit_msg": "Bitte prüfen und bearbeiten Sie den Text unten (Markdown-Symbole wurden entfernt):", "pop_save": "✓ Speichern und Exportieren", "pop_report_title": "EDU Vorlesungszusammenfassung & Fragen", "pop_qa_title": "Q&A / Interviewbericht:", "set_sub_pref": "Untertitel Präferenzen", "set_font_size": "Schriftgröße", "set_pos": "Bildschirmposition",
+        "title_settings": "Einstellungen", "pop_edit_title": "Bearbeitungsbildschirm", "pop_edit_msg": "Bitte prüfen und bearbeiten Sie den Text unten (Markdown-Symbole wurden entfernt):", "pop_save": "✓ Speichern und Exportieren", "pop_report_title": "DOC Vorlesungszusammenfassung & Fragen", "pop_qa_title": "Q&A / Interviewbericht:", "set_sub_pref": "Untertitel Präferenzen", "set_font_size": "Schriftgröße", "set_pos": "Bildschirmposition",
         "set_sub_style": "Untertitel Stil", "style_classic": "Klassisch Weiß", "style_yellow": "Gelb Umrandet", "style_black": "Schwarze Box",
         "set_gen_pref": "Allgemeine Einstellungen", "set_def_lang": "Standard Übersetzungssprache",
         "set_data_mgmt": "Datenverwaltung", "set_data_desc": "Löschen Sie alle Arbeitsbereichsdateien dauerhaft.",
@@ -599,7 +608,7 @@ class ILBERTechV2(ctk.CTk):
 
         ctk.CTkLabel(
             brand_box,
-            text="MIC · EDU · GLOBE · FIELD",
+            text="MIC · DOC · GLOBE · FIELD",
             font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
             text_color="#38BDF8",
         ).pack(anchor="w", pady=(0, 14))
@@ -609,22 +618,22 @@ class ILBERTechV2(ctk.CTk):
             text=self.L(
                 "• %100 Offline & KVKK Uyumlu Yapay Zeka\n"
                 "• 🎙️ MIC ($9.99): Ses Kaydı & Deşifre\n"
-                "• 🎓 EDU ($19.99): MIC + Belge Çevirici & OCR\n"
-                "• 🌐 GLOBE ($39.99): MIC + EDU + Video Altyazı Stüdyosu\n"
+                "• 🎓 DOC ($19.99): MIC + Belge Çevirici\n"
+                "• 🌐 GLOBE ($39.99): MIC + DOC + Video Altyazı Stüdyosu\n"
                 "• 🔬 FIELD PRO ($79.99): Tüm 4 Modül + Saha Analizi\n\n"
                 "🎁 Yeni hesaplara tüm modüllerde geçerli\n"
                 "5 ÜCRETSİZ DENEME HAKKI tanımlanır!",
                 "• 100% Offline & Privacy-First Local AI\n"
                 "• 🎙️ MIC ($9.99): Audio Recording & Transcription\n"
-                "• 🎓 EDU ($19.99): MIC + Format-Preserving Document Translator & OCR\n"
-                "• 🌐 GLOBE ($39.99): MIC + EDU + Video Subtitle Studio\n"
+                "• 🎓 DOC ($19.99): MIC + Format-Preserving Document Translator\n"
+                "• 🌐 GLOBE ($39.99): MIC + DOC + Video Subtitle Studio\n"
                 "• 🔬 FIELD PRO ($79.99): All 4 Modules + Qualitative Research\n\n"
                 "🎁 New accounts automatically receive\n"
                 "5 FREE TRIAL CREDITS across all modules!",
                 "• 100% Offline & Datenschutz-KI\n"
                 "• 🎙️ MIC ($9.99): Aufnahme & Transkription\n"
-                "• 🎓 EDU ($19.99): MIC + Dokumentübersetzer & OCR\n"
-                "• 🌐 GLOBE ($39.99): MIC + EDU + Video-Untertitelstudio\n"
+                "• 🎓 DOC ($19.99): MIC + Dokumentübersetzer\n"
+                "• 🌐 GLOBE ($39.99): MIC + DOC + Video-Untertitelstudio\n"
                 "• 🔬 FIELD PRO ($79.99): Alle 4 Module + Feldforschung\n\n"
                 "🎁 Neue Konten erhalten 5 KOSTENLOSE TESTVORGÄNGE!",
             ),
@@ -771,7 +780,7 @@ class ILBERTechV2(ctk.CTk):
                 self.after(200, lambda: self.iconbitmap(ico_p))
         except Exception:
             pass
-        self.title("ILBERTech Platform v2.1 — MIC · EDU · GLOBE · FIELD")
+        self.title("ILBERTech Platform v2.1 — MIC · DOC · GLOBE · FIELD")
         self.geometry("1320x840")
         self.resizable(True, True)
         self.configure(fg_color=BG)
@@ -846,7 +855,7 @@ class ILBERTechV2(ctk.CTk):
         if locked_pid:
             req_map = {
                 "tool_ses_kaydet": ("Paket 1: MIC ($9.99)", "#9333EA"),
-                "tool_ai_ozet": ("Paket 2: EDU ($19.99)", "#2563EB"),
+                "tool_ai_ozet": ("Paket 2: DOC ($19.99)", "#2563EB"),
                 "tool_video_cevir": ("Paket 3: GLOBE ($39.99)", "#10B981"),
                 "tool_ai_rapor": ("Paket 4: FIELD PRO ($79.99)", "#EF4444"),
             }
@@ -881,21 +890,21 @@ class ILBERTechV2(ctk.CTk):
                 "#9333EA",
                 "#F4EBFF",
                 self.L(
-                    "✔ MIC (Ses Kaydı & Deşifre)\n🔒 EDU Kilitli\n🔒 GLOBE Kilitli\n🔒 FIELD Kilitli",
-                    "✔ MIC (Audio & Transcription)\n🔒 EDU Locked\n🔒 GLOBE Locked\n🔒 FIELD Locked",
-                    "✔ MIC (Aufnahme & Transkription)\n🔒 EDU Gesperrt\n🔒 GLOBE Gesperrt\n🔒 FIELD Gesperrt",
+                    "✔ MIC (Ses Kaydı & Deşifre)\n🔒 DOC Kilitli\n🔒 GLOBE Kilitli\n🔒 FIELD Kilitli",
+                    "✔ MIC (Audio & Transcription)\n🔒 DOC Locked\n🔒 GLOBE Locked\n🔒 FIELD Locked",
+                    "✔ MIC (Aufnahme & Transkription)\n🔒 DOC Gesperrt\n🔒 GLOBE Gesperrt\n🔒 FIELD Gesperrt",
                 ),
             ),
             (
                 "paket_2",
-                self.L("🎓 PAKET 2: EDU", "🎓 PACKAGE 2: EDU", "🎓 PAKET 2: EDU"),
+                self.L("🎓 PAKET 2: DOC", "🎓 PACKAGE 2: DOC", "🎓 PAKET 2: DOC"),
                 "$19.99",
                 "#2563EB",
                 "#EBF3FF",
                 self.L(
-                    "✔ MIC (Ses & Deşifre)\n✔ EDU (Belge Çevirici & OCR)\n🔒 GLOBE Kilitli\n🔒 FIELD Kilitli",
-                    "✔ MIC (Audio & Transcription)\n✔ EDU (Document Translator & OCR)\n🔒 GLOBE Locked\n🔒 FIELD Locked",
-                    "✔ MIC (Aufnahme & Transkription)\n✔ EDU (Dokumentübersetzer & OCR)\n🔒 GLOBE Gesperrt\n🔒 FIELD Gesperrt",
+                    "✔ MIC (Ses & Deşifre)\n✔ DOC (Belge Çevirici)\n🔒 GLOBE Kilitli\n🔒 FIELD Kilitli",
+                    "✔ MIC (Audio & Transcription)\n✔ DOC (Document Translator)\n🔒 GLOBE Locked\n🔒 FIELD Locked",
+                    "✔ MIC (Aufnahme & Transkription)\n✔ DOC (Dokumentübersetzer)\n🔒 GLOBE Gesperrt\n🔒 FIELD Gesperrt",
                 ),
             ),
             (
@@ -905,9 +914,9 @@ class ILBERTechV2(ctk.CTk):
                 "#10B981",
                 "#E6FBF2",
                 self.L(
-                    "✔ MIC (Ses & Deşifre)\n✔ EDU (Belge Çevirici & OCR)\n✔ GLOBE (Video & Altyazı)\n🔒 FIELD Kilitli",
-                    "✔ MIC (Audio & Transcription)\n✔ EDU (Document Translator & OCR)\n✔ GLOBE (Video & Subtitle Studio)\n🔒 FIELD Locked",
-                    "✔ MIC (Aufnahme & Transkription)\n✔ EDU (Dokumentübersetzer & OCR)\n✔ GLOBE (Video & Untertitel)\n🔒 FIELD Gesperrt",
+                    "✔ MIC (Ses & Deşifre)\n✔ DOC (Belge Çevirici)\n✔ GLOBE (Video & Altyazı)\n🔒 FIELD Kilitli",
+                    "✔ MIC (Audio & Transcription)\n✔ DOC (Document Translator)\n✔ GLOBE (Video & Subtitle Studio)\n🔒 FIELD Locked",
+                    "✔ MIC (Aufnahme & Transkription)\n✔ DOC (Dokumentübersetzer)\n✔ GLOBE (Video & Untertitel)\n🔒 FIELD Gesperrt",
                 ),
             ),
             (
@@ -917,9 +926,9 @@ class ILBERTechV2(ctk.CTk):
                 "#EF4444",
                 "#FEEBEB",
                 self.L(
-                    "✔ MIC (Ses & Deşifre)\n✔ EDU (Belge Çevirici & OCR)\n✔ GLOBE (Video & Altyazı)\n✔ FIELD (Saha & Mülakat)",
-                    "✔ MIC (Audio & Transcription)\n✔ EDU (Document Translator & OCR)\n✔ GLOBE (Video & Subtitle Studio)\n✔ FIELD (Qualitative Research)",
-                    "✔ MIC (Aufnahme & Transkription)\n✔ EDU (Dokumentübersetzer & OCR)\n✔ GLOBE (Video & Untertitel)\n✔ FIELD (Feldforschung)",
+                    "✔ MIC (Ses & Deşifre)\n✔ DOC (Belge Çevirici)\n✔ GLOBE (Video & Altyazı)\n✔ FIELD (Saha & Mülakat)",
+                    "✔ MIC (Audio & Transcription)\n✔ DOC (Document Translator)\n✔ GLOBE (Video & Subtitle Studio)\n✔ FIELD (Qualitative Research)",
+                    "✔ MIC (Aufnahme & Transkription)\n✔ DOC (Dokumentübersetzer)\n✔ GLOBE (Video & Untertitel)\n✔ FIELD (Feldforschung)",
                 ),
             ),
         ]
@@ -1061,7 +1070,7 @@ class ILBERTechV2(ctk.CTk):
                 "tag_border": "#E2E8F0",
                 "axes": {
                     "tool_ses_kaydet": ("MIC", "#4F46E5", "#EEF2FF", "#4338CA"),
-                    "tool_ai_ozet": ("EDU", "#0284C7", "#E0F2FE", "#0369A1"),
+                    "tool_ai_ozet": ("DOC", "#0284C7", "#E0F2FE", "#0369A1"),
                     "tool_video_cevir": ("GLOBE", "#059669", "#D1FAE5", "#047857"),
                     "tool_ai_rapor": ("FIELD", "#D97706", "#FEF3C7", "#B45309"),
                 },
@@ -1086,7 +1095,7 @@ class ILBERTechV2(ctk.CTk):
                 "tag_border": "#334155",
                 "axes": {
                     "tool_ses_kaydet": ("MIC", "#6366F1", "#1E1B4B", "#A5B4FC"),
-                    "tool_ai_ozet": ("EDU", "#0EA5E9", "#0C4A6E", "#7DD3FC"),
+                    "tool_ai_ozet": ("DOC", "#0EA5E9", "#0C4A6E", "#7DD3FC"),
                     "tool_video_cevir": ("GLOBE", "#10B981", "#064E3B", "#6EE7B7"),
                     "tool_ai_rapor": ("FIELD", "#F59E0B", "#451A03", "#FCD34D"),
                 },
@@ -1111,7 +1120,7 @@ class ILBERTechV2(ctk.CTk):
                 "tag_border": "#D4D4D8",
                 "axes": {
                     "tool_ses_kaydet": ("MIC", "#18181B", "#F4F4F5", "#18181B"),
-                    "tool_ai_ozet": ("EDU", "#27272A", "#F4F4F5", "#27272A"),
+                    "tool_ai_ozet": ("DOC", "#27272A", "#F4F4F5", "#27272A"),
                     "tool_video_cevir": ("GLOBE", "#18181B", "#F4F4F5", "#18181B"),
                     "tool_ai_rapor": ("FIELD", "#27272A", "#F4F4F5", "#27272A"),
                 },
@@ -1136,7 +1145,7 @@ class ILBERTechV2(ctk.CTk):
                 "tag_border": "#99F6E4",
                 "axes": {
                     "tool_ses_kaydet": ("MIC", "#0D9488", "#F0FDFA", "#0F766E"),
-                    "tool_ai_ozet": ("EDU", "#0284C7", "#F0F9FF", "#0369A1"),
+                    "tool_ai_ozet": ("DOC", "#0284C7", "#F0F9FF", "#0369A1"),
                     "tool_video_cevir": ("GLOBE", "#059669", "#ECFDF5", "#047857"),
                     "tool_ai_rapor": ("FIELD", "#4F46E5", "#EEF2FF", "#4338CA"),
                 },
@@ -1161,7 +1170,7 @@ class ILBERTechV2(ctk.CTk):
                 "tag_border": "#E2DDD5",
                 "axes": {
                     "tool_ses_kaydet": ("MIC", "#1E3A8A", "#EFF6FF", "#1E3A8A"),
-                    "tool_ai_ozet": ("EDU", "#B45309", "#FEF3C7", "#92400E"),
+                    "tool_ai_ozet": ("DOC", "#B45309", "#FEF3C7", "#92400E"),
                     "tool_video_cevir": ("GLOBE", "#0F766E", "#F0FDFA", "#0F766E"),
                     "tool_ai_rapor": ("FIELD", "#7C2D12", "#FFEDD5", "#7C2D12"),
                 },
@@ -1184,7 +1193,7 @@ class ILBERTechV2(ctk.CTk):
             d.arc([cx - 44, cy - 38, cx + 44, cy + 30], start=0, end=180, fill=fg_hex, width=w)
             d.line([cx, cy + 30, cx, cy + 54], fill=fg_hex, width=w)
             d.line([cx - 26, cy + 54, cx + 26, cy + 54], fill=fg_hex, width=w)
-        elif kind == "EDU":
+        elif kind in ("EDU", "DOC"):
             d.rounded_rectangle([cx - 46, cy - 50, cx + 20, cy + 34], radius=12, outline=fg_hex, width=w)
             d.line([cx - 30, cy - 26, cx + 4, cy - 26], fill=fg_hex, width=max(5, w - 3))
             d.line([cx - 30, cy - 8, cx + 4, cy - 8], fill=fg_hex, width=max(5, w - 3))
@@ -1235,7 +1244,37 @@ class ILBERTechV2(ctk.CTk):
             pass
 
         ctk.CTkLabel(logo_row, text="ILBER", font=ctk.CTkFont(family="Segoe UI", size=28, weight="bold"), text_color="#F8FAFC").pack(side="left")
-        ctk.CTkLabel(brand_frame, text="Enterprise AI Suite", font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"), text_color="#94A3B8").pack(anchor="w", padx=27, pady=(4, 0))
+
+        try:
+            from PIL import ImageDraw, ImageFont, ImageFilter
+            W, H = 540, 108
+            font_candidates = [
+                r"C:\Windows\Fonts\segoescb.ttf",
+                r"C:\Windows\Fonts\segoesc.ttf",
+                r"C:\Windows\Fonts\BRUSHSCI.TTF",
+                "/System/Library/Fonts/Supplemental/Brush Script.ttf",
+                "/System/Library/Fonts/Supplemental/Apple Chancery.ttf",
+            ]
+            fnt = None
+            for fp in font_candidates:
+                if os.path.exists(fp):
+                    fnt = ImageFont.truetype(fp, 52)
+                    break
+            if fnt is not None:
+                glow = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+                dg = ImageDraw.Draw(glow)
+                dg.text((14, 14), "Simple is Best", font=fnt, fill=(0, 229, 255, 255))
+                glow_outer = glow.filter(ImageFilter.GaussianBlur(radius=9))
+                glow_mid = glow.filter(ImageFilter.GaussianBlur(radius=3))
+                neon = Image.alpha_composite(glow_outer, glow_mid)
+                dc = ImageDraw.Draw(neon)
+                dc.text((14, 14), "Simple is Best", font=fnt, fill=(224, 249, 255, 255))
+                neon_img = ctk.CTkImage(light_image=neon, dark_image=neon, size=(180, 36))
+                ctk.CTkLabel(brand_frame, image=neon_img, text="").pack(anchor="w", padx=24, pady=(2, 0))
+            else:
+                raise RuntimeError("No script font")
+        except Exception:
+            ctk.CTkLabel(brand_frame, text="Simple is Best", font=ctk.CTkFont(family="Segoe Script", size=14, weight="bold", slant="italic"), text_color="#38BDF8").pack(anchor="w", padx=27, pady=(4, 0))
 
         self.nav_btns = {}
         nav_items = [
@@ -1478,15 +1517,266 @@ class ILBERTechV2(ctk.CTk):
         def clear_workspace():
             if messagebox.askyesno(self.t("warn_title"), self.t("warn_desc")):
                 ws = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace")
-                for s in ["Uploads", "Transcripts", "Subtitles", "Reports"]:
+                for s in ["Uploads", "Transcripts", "Subtitles", "Reports", "Projects"]:
                     try:
-                        shutil.rmtree(os.path.join(ws, s))
+                        shutil.rmtree(os.path.join(ws, s), ignore_errors=True)
                         os.makedirs(os.path.join(ws, s), exist_ok=True)
                     except Exception:
                         pass
+                for sec in ("MIC", "EDU", "GLOBE", "FIELD"):
+                    os.makedirs(os.path.join(ws, "Projects", sec), exist_ok=True)
+                self._proj_active_subfolder = {}
+                for m_id in self.page_controls:
+                    self._refresh_project_dropdown(m_id)
                 messagebox.showinfo(self.t("succ_title"), self.t("succ_desc"))
 
         ctk.CTkButton(row4, text=self.t("set_clear_btn"), fg_color="#FEF2F2", text_color="#EF4444", hover_color="#FEE2E2", border_color="#EF4444", border_width=1, font=ctk.CTkFont(family="Segoe UI", weight="bold"), command=clear_workspace).pack(anchor="e")
+
+    def _get_auto_project_label(self):
+        return self.L("Otomatik (Dosya Adı)", "Auto (File Name)", "Auto (Dateiname)")
+
+    def _get_section_project_names(self, section):
+        workspace_dir = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace")
+        sec_dir = os.path.join(workspace_dir, "Projects", section.upper())
+        os.makedirs(sec_dir, exist_ok=True)
+        names = []
+        try:
+            entries = [
+                (os.stat(os.path.join(sec_dir, d)).st_mtime, d)
+                for d in os.listdir(sec_dir)
+                if os.path.isdir(os.path.join(sec_dir, d))
+            ]
+            entries.sort(key=lambda x: x[0], reverse=True)
+            names = [d for _, d in entries]
+        except Exception:
+            pass
+        return [self._get_auto_project_label()] + names
+
+    def _refresh_project_dropdown(self, mode):
+        ctrls = self.page_controls.get(mode, {})
+        combo = ctrls.get("project_combo")
+        sec = ctrls.get("seg_type")
+        if combo and sec in ("MIC", "EDU", "GLOBE", "FIELD"):
+            try:
+                vals = self._get_section_project_names(sec)
+                self.after(0, lambda c=combo, v=vals: c.winfo_exists() and c.configure(values=v))
+            except Exception:
+                pass
+
+    def _create_project_dir(self, workspace_dir, section, base_name, source_file="", custom_project_name=""):
+        """Create or reuse a project folder under ILBER_Workspace/Projects/<SECTION>/<ProjectName>/."""
+        sec = section.upper() if section else "MIC"
+        raw_custom = str(custom_project_name or "").strip()
+        is_auto = (not raw_custom) or raw_custom.startswith(("Otomatik", "Auto"))
+        if not is_auto:
+            safe_proj = re.sub(r"[^A-Za-z0-9_\-çğıöşüÇĞİÖŞÜ ]+", "_", raw_custom).strip().replace(" ", "_")
+            safe_proj = safe_proj[:60].strip("_") or "Project"
+            folder_name = safe_proj
+            display_name = raw_custom
+        else:
+            safe_base = re.sub(r"[^A-Za-z0-9_\-çğıöşüÇĞİÖŞÜ ]+", "_", str(base_name or "Project")).strip().replace(" ", "_")
+            safe_base = safe_base[:48].strip("_") or "Project"
+            stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            folder_name = f"{safe_base}_{stamp}"
+            display_name = safe_base
+
+        proj_dir = os.path.join(workspace_dir, "Projects", sec, folder_name)
+        os.makedirs(proj_dir, exist_ok=True)
+        try:
+            meta_path = os.path.join(proj_dir, ".ilber_meta.json")
+            sources = []
+            if os.path.isfile(meta_path):
+                with open(meta_path, "r", encoding="utf-8") as mf:
+                    old_md = json.load(mf)
+                    sources = old_md.get("source_files", [])
+            src_bn = os.path.basename(source_file) if source_file else ""
+            if src_bn and src_bn not in sources:
+                sources.append(src_bn)
+            with open(meta_path, "w", encoding="utf-8") as mf:
+                json.dump({
+                    "section": sec,
+                    "project": display_name,
+                    "updated_at": datetime.datetime.now().isoformat(),
+                    "source_files": sources,
+                }, mf, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+        return proj_dir
+
+    def _scan_projects(self, workspace_dir):
+        """
+        Return a list of project dicts:
+        {section, name, folder, mtime, total_size, files: [(path, fname, size, mtime), ...], is_legacy}
+        """
+        projects_root = os.path.join(workspace_dir, "Projects")
+        for sec in ("MIC", "EDU", "GLOBE", "FIELD"):
+            os.makedirs(os.path.join(projects_root, sec), exist_ok=True)
+
+        projects = []
+        # 1. Structured Projects/<SECTION>/<ProjectFolder>/
+        for sec in ("MIC", "EDU", "GLOBE", "FIELD"):
+            sec_dir = os.path.join(projects_root, sec)
+            if not os.path.isdir(sec_dir):
+                continue
+            for entry in os.listdir(sec_dir):
+                p_dir = os.path.join(sec_dir, entry)
+                if not os.path.isdir(p_dir):
+                    continue
+                proj_name = entry
+                meta_file = os.path.join(p_dir, ".ilber_meta.json")
+                if os.path.isfile(meta_file):
+                    try:
+                        with open(meta_file, "r", encoding="utf-8") as mf:
+                            md = json.load(mf)
+                            if md.get("project"):
+                                proj_name = md["project"]
+                    except Exception:
+                        pass
+                p_files = []
+                subfolders = []
+                max_mtime = os.stat(p_dir).st_mtime
+                total_sz = 0
+                for fn in sorted(os.listdir(p_dir)):
+                    if fn.startswith("."):
+                        continue
+                    fp = os.path.join(p_dir, fn)
+                    if os.path.isfile(fp):
+                        if fn.endswith((".json", ".ilberkey")):
+                            continue
+                        st = os.stat(fp)
+                        p_files.append((fp, fn, st.st_size, st.st_mtime))
+                        total_sz += st.st_size
+                        if st.st_mtime > max_mtime:
+                            max_mtime = st.st_mtime
+                    elif os.path.isdir(fp) and not fn.startswith("."):
+                        sf_files = []
+                        sf_mtime = os.stat(fp).st_mtime
+                        for sub_root, _, sub_files in os.walk(fp):
+                            for sfn in sorted(sub_files):
+                                if sfn.startswith(".") or sfn.endswith((".json", ".ilberkey")):
+                                    continue
+                                sfp = os.path.join(sub_root, sfn)
+                                st = os.stat(sfp)
+                                sf_files.append((sfp, sfn, st.st_size, st.st_mtime))
+                                total_sz += st.st_size
+                                if st.st_mtime > sf_mtime:
+                                    sf_mtime = st.st_mtime
+                                if st.st_mtime > max_mtime:
+                                    max_mtime = st.st_mtime
+                        if sf_files:
+                            subfolders.append({
+                                "name": fn,
+                                "folder": fp,
+                                "files": sf_files,
+                                "mtime": sf_mtime,
+                            })
+                if p_files or subfolders:
+                    projects.append({
+                        "section": sec,
+                        "name": proj_name,
+                        "folder": p_dir,
+                        "mtime": max_mtime,
+                        "total_size": total_sz,
+                        "files": p_files,
+                        "subfolders": subfolders,
+                        "is_legacy": False,
+                    })
+
+        # 2. Legacy files in Transcripts / Subtitles / Reports (grouped by section + base name)
+        legacy_groups = {}
+        for sub in ("Transcripts", "Subtitles", "Reports"):
+            sub_dir = os.path.join(workspace_dir, sub)
+            if not os.path.isdir(sub_dir):
+                continue
+            for fn in os.listdir(sub_dir):
+                fp = os.path.join(sub_dir, fn)
+                if not os.path.isfile(fp) or fn.startswith("."):
+                    continue
+                sec = "MIC"
+                base_guess = fn.rsplit(".", 1)[0]
+                if "_GLOBE_" in fn:
+                    sec = "GLOBE"
+                    base_guess = fn.split("_GLOBE_")[0]
+                elif "_EDU_" in fn:
+                    sec = "EDU"
+                    base_guess = fn.split("_EDU_")[0]
+                elif "_FIELD_" in fn:
+                    sec = "FIELD"
+                    base_guess = fn.split("_FIELD_")[0]
+                elif "_MIC" in fn:
+                    sec = "MIC"
+                    base_guess = fn.split("_MIC")[0]
+                key = (sec, base_guess)
+                try:
+                    st = os.stat(fp)
+                except Exception:
+                    continue
+                if key not in legacy_groups:
+                    legacy_groups[key] = {
+                        "section": sec,
+                        "name": base_guess,
+                        "folder": sub_dir,
+                        "mtime": st.st_mtime,
+                        "total_size": 0,
+                        "files": [],
+                        "is_legacy": True,
+                    }
+                g = legacy_groups[key]
+                g["files"].append((fp, fn, st.st_size, st.st_mtime))
+                g["total_size"] += st.st_size
+                if st.st_mtime > g["mtime"]:
+                    g["mtime"] = st.st_mtime
+
+        projects.extend(legacy_groups.values())
+        projects.sort(key=lambda p: p["mtime"], reverse=True)
+        return projects
+
+    def _open_field_project_workbench(self, project_dir):
+        from ilber_field_project import FieldProjectWorkspaceWindow
+
+        if not hasattr(self, "_field_wb_windows"):
+            self._field_wb_windows = {}
+        key = os.path.normpath(os.path.abspath(project_dir))
+        existing = self._field_wb_windows.get(key)
+        if existing is not None:
+            try:
+                if existing.winfo_exists():
+                    existing.deiconify()
+                    existing.lift()
+                    existing.focus_force()
+                    return
+            except Exception:
+                pass
+
+        def _trans_wrapper(audio_path, src_lang):
+            lg = self.log_boxes.get("tool_ai_rapor")
+            return self._transcribe_media(audio_path, src_lang, lg, verbatim=True)
+
+        win = FieldProjectWorkspaceWindow(
+            self,
+            project_dir=project_dir,
+            transcribe_fn=_trans_wrapper,
+            diarize_fn=acoustic_diarize_segments,
+            lang_map=LANG_MAP,
+        )
+        self._field_wb_windows[key] = win
+
+    def _import_field_project_zip(self):
+        import zipfile
+        zip_fp = filedialog.askopenfilename(title="FIELD Proje Paketi Seç (.zip)", filetypes=[("ZIP Arşivi", "*.zip")])
+        if not zip_fp:
+            return
+        ws_dir = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "Projects", "FIELD")
+        os.makedirs(ws_dir, exist_ok=True)
+        try:
+            with zipfile.ZipFile(zip_fp, "r") as zf:
+                zf.extractall(ws_dir)
+            for m_id in self.page_controls:
+                self._refresh_project_dropdown(m_id)
+            self._build_files()
+            messagebox.showinfo("İçe Aktarıldı", "FIELD proje paketi tüm ses, deşifre ve şifreli etik anahtarıyla içe aktarıldı.")
+        except Exception as ex:
+            messagebox.showerror("Hata", str(ex))
 
     def _build_history(self):
         parent = self.pages["history"]
@@ -1495,117 +1785,133 @@ class ILBERTechV2(ctk.CTk):
 
         workspace_dir = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace")
         os.makedirs(workspace_dir, exist_ok=True)
+        projects = self._scan_projects(workspace_dir)
 
         header = ctk.CTkFrame(parent, fg_color="transparent")
-        header.pack(fill="x", padx=40, pady=(40, 20))
+        header.pack(fill="x", padx=40, pady=(30, 14))
         ctk.CTkLabel(header, text=self.t("title_history"), font=ctk.CTkFont(family="Segoe UI", size=28, weight="bold"), text_color="#111827").pack(side="left")
 
-        trans_count = 0
-        sub_count = 0
-        total_size = 0
-        history_items = []
-
-        for root, dirs, files in os.walk(workspace_dir):
-            if "Uploads" in root or "Models" in root:
-                continue
-            for name in files:
-                path = os.path.join(root, name)
-                try:
-                    stat = os.stat(path)
-                    total_size += stat.st_size
-                    action = self.t("act_processed")
-                    icon = "⚡"
-                    color = "#64748B"
-                    bg_color = "#F1F5F9"
-                    if name.endswith((".docx", ".txt", ".tsv")):
-                        trans_count += 1
-                        action = self.t("act_transcribed")
-                        icon = "📝"
-                        color = "#F59E0B"
-                        bg_color = "#FFF7E6"
-                    elif name.endswith((".srt", ".vtt")):
-                        sub_count += 1
-                        action = self.t("act_srt")
-                        icon = "🎬"
-                        color = "#2563EB"
-                        bg_color = "#EBF3FF"
-                    elif name.endswith(".mp4"):
-                        trans_count += 1
-                        action = self.t("act_translated")
-                        icon = "🌐"
-                        color = "#10B981"
-                        bg_color = "#E6FBF2"
-                    history_items.append((stat.st_mtime, action, name, path, icon, color, bg_color))
-                except Exception:
-                    pass
+        total_projects = len(projects)
+        total_files = sum(len(p["files"]) for p in projects)
+        total_size = sum(p["total_size"] for p in projects)
 
         stats_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        stats_frame.pack(fill="x", padx=40, pady=10)
+        stats_frame.pack(fill="x", padx=40, pady=(4, 14))
 
-        def make_stat_card(p_frame, title, val, icon_txt):
-            glass_map = {
-                self.t("stat_trans"): ("#FFF7E6", "#FDE68A", "#F59E0B"),
-                self.t("stat_subs"): ("#EBF3FF", "#BFDBFE", "#2563EB"),
-                self.t("stat_storage"): ("#E6FBF2", "#A7F3D0", "#10B981"),
-            }
-            bg_glass, shadow_color, icon_bg = glass_map.get(title, ("#FFFFFF", "#E2E8F0", "#64748B"))
-            container = ctk.CTkFrame(p_frame, fg_color="transparent", height=100)
-            container.pack(side="left", fill="x", expand=True, padx=(0, 20))
+        def make_stat_card(p_frame, title, val, icon_txt, bg_glass, shadow_color, icon_bg):
+            container = ctk.CTkFrame(p_frame, fg_color="transparent", height=90)
+            container.pack(side="left", fill="x", expand=True, padx=(0, 16))
             container.pack_propagate(False)
-            shadow = ctk.CTkFrame(container, fg_color=shadow_color, corner_radius=20)
-            shadow.place(relwidth=1, relheight=0.9, y=10)
-            c = ctk.CTkFrame(container, fg_color=bg_glass, border_width=1, border_color="#FFFFFF", corner_radius=20)
+            shadow = ctk.CTkFrame(container, fg_color=shadow_color, corner_radius=16)
+            shadow.place(relwidth=1, relheight=0.9, y=8)
+            c = ctk.CTkFrame(container, fg_color=bg_glass, border_width=1, border_color="#FFFFFF", corner_radius=16)
             c.place(relwidth=1, relheight=0.9, y=0)
             icon_box = ctk.CTkFrame(c, fg_color=icon_bg, width=40, height=40, corner_radius=12)
-            icon_box.pack(side="left", padx=20)
-            ctk.CTkLabel(icon_box, text=icon_txt, font=ctk.CTkFont(size=20), text_color="#FFFFFF").place(relx=0.5, rely=0.5, anchor="center")
+            icon_box.pack(side="left", padx=18)
+            ctk.CTkLabel(icon_box, text=icon_txt, font=ctk.CTkFont(size=18), text_color="#FFFFFF").place(relx=0.5, rely=0.5, anchor="center")
             tf = ctk.CTkFrame(c, fg_color="transparent")
-            tf.pack(side="left", pady=15, fill="both")
-            ctk.CTkLabel(tf, text=val, font=ctk.CTkFont(family="Segoe UI", size=22, weight="bold"), text_color="#1E293B").pack(anchor="w", pady=(0, 2))
-            ctk.CTkLabel(tf, text=title, font=ctk.CTkFont(family="Segoe UI", size=13), text_color="#64748B").pack(anchor="w")
+            tf.pack(side="left", pady=12, fill="both")
+            ctk.CTkLabel(tf, text=val, font=ctk.CTkFont(family="Segoe UI", size=20, weight="bold"), text_color="#1E293B").pack(anchor="w")
+            ctk.CTkLabel(tf, text=title, font=ctk.CTkFont(family="Segoe UI", size=12), text_color="#64748B").pack(anchor="w")
 
-        make_stat_card(stats_frame, self.t("stat_trans"), f"{trans_count}", "🎙️")
-        make_stat_card(stats_frame, self.t("stat_subs"), f"{sub_count}", "🌍")
-        make_stat_card(stats_frame, self.t("stat_storage"), f"{total_size / (1024*1024):.1f} MB", "💾")
+        make_stat_card(stats_frame, self.L("Toplam Proje", "Total Projects", "Projekte Gesamt"), f"{total_projects}", "📁", "#FFF7E6", "#FDE68A", "#F59E0B")
+        make_stat_card(stats_frame, self.L("Üretilen Dosya", "Generated Files", "Erstellte Dateien"), f"{total_files}", "📄", "#EBF3FF", "#BFDBFE", "#2563EB")
+        make_stat_card(stats_frame, self.t("stat_storage"), f"{total_size / (1024*1024):.1f} MB", "💾", "#E6FBF2", "#A7F3D0", "#10B981")
 
-        list_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        list_frame.pack(fill="both", expand=True, padx=40, pady=20)
-        ctk.CTkLabel(list_frame, text=self.t("timeline_title"), font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"), text_color="#475569").pack(anchor="w", pady=(0, 15))
+        filter_bar = ctk.CTkFrame(parent, fg_color="transparent")
+        filter_bar.pack(fill="x", padx=40, pady=(0, 10))
+        ctk.CTkLabel(filter_bar, text=self.t("timeline_title"), font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"), text_color="#475569").pack(side="left")
 
-        scroll = ctk.CTkScrollableFrame(list_frame, fg_color="#F8FAFC", corner_radius=0)
-        scroll.pack(fill="both", expand=True)
+        active_sec = getattr(self, "_hist_filter_sec", "ALL")
+        sec_colors = {
+            "ALL": ("#1E293B", "#E2E8F0"),
+            "MIC": ("#7C3AED", "#F3E8FF"),
+            "EDU": ("#0284C7", "#E0F2FE"),
+            "GLOBE": ("#059669", "#D1FAE5"),
+            "FIELD": ("#DC2626", "#FEE2E2"),
+        }
 
-        history_items.sort(key=lambda x: x[0], reverse=True)
-        if not history_items:
-            ctk.CTkLabel(scroll, text=self.t("no_history"), text_color="#94A3B8").pack(pady=40)
+        scroll = ctk.CTkScrollableFrame(parent, fg_color="#F8FAFC", corner_radius=0)
+        scroll.pack(fill="both", expand=True, padx=40, pady=(0, 20))
 
-        def open_path(p):
-            open_path_crossplatform(p)
+        def render_history_rows(sec_filter):
+            self._hist_filter_sec = sec_filter
+            for w in scroll.winfo_children():
+                w.destroy()
+            filtered = [p for p in projects if sec_filter == "ALL" or p["section"] == sec_filter]
+            if not filtered:
+                ctk.CTkLabel(scroll, text=self.t("no_history"), text_color="#94A3B8").pack(pady=40)
+                return
 
-        for mtime, action, name, path, icon, color, bg_color in history_items[:40]:
-            row = ctk.CTkFrame(scroll, fg_color="#FFFFFF", border_width=1, border_color="#E2E8F0", corner_radius=12, height=75)
-            row.pack(fill="x", pady=6, padx=5)
-            row.pack_propagate(False)
-            i_box = ctk.CTkFrame(row, fg_color=bg_color, width=45, height=45, corner_radius=12)
-            i_box.pack(side="left", padx=15)
-            i_box.pack_propagate(False)
-            l_i = ctk.CTkLabel(i_box, text=icon, font=ctk.CTkFont(size=20), text_color=color)
-            l_i.place(relx=0.5, rely=0.5, anchor="center")
-            tf = ctk.CTkFrame(row, fg_color="transparent")
-            tf.pack(side="left", padx=10, fill="y", pady=15)
-            l_a = ctk.CTkLabel(tf, text=action, font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"), text_color="#1E293B")
-            l_a.pack(anchor="w")
-            l_n = ctk.CTkLabel(tf, text=f"{self.t('file_prefix')} {name}", font=ctk.CTkFont(family="Segoe UI", size=12), text_color="#64748B")
-            l_n.pack(anchor="w")
-            date_str = datetime.datetime.fromtimestamp(mtime).strftime("%b %d, %H:%M")
-            l_d = ctk.CTkLabel(row, text=date_str, font=ctk.CTkFont(family="Segoe UI", size=13), text_color="#94A3B8")
-            l_d.pack(side="right", padx=20)
-            for w in [row, i_box, l_i, tf, l_a, l_n, l_d]:
-                try:
-                    w.bind("<Button-1>", lambda e, p=path: open_path(p))
-                    w.configure(cursor="hand2")
-                except Exception:
-                    pass
+            for proj in filtered[:50]:
+                sec = proj["section"]
+                fg_c, bg_c = sec_colors.get(sec, ("#475569", "#F1F5F9"))
+                row = ctk.CTkFrame(scroll, fg_color="#FFFFFF", border_width=1, border_color="#E2E8F0", corner_radius=12)
+                row.pack(fill="x", pady=5, padx=2)
+
+                top_r = ctk.CTkFrame(row, fg_color="transparent")
+                top_r.pack(fill="x", padx=14, pady=(10, 4))
+
+                badge = ctk.CTkLabel(top_r, text=f" {sec} ", fg_color=bg_c, text_color=fg_c, corner_radius=8, font=ctk.CTkFont(size=11, weight="bold"), height=24)
+                badge.pack(side="left", padx=(0, 10))
+                ctk.CTkLabel(top_r, text=proj["name"], font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"), text_color="#1E293B").pack(side="left")
+
+                date_str = datetime.datetime.fromtimestamp(proj["mtime"]).strftime("%b %d, %Y · %H:%M")
+                ctk.CTkLabel(top_r, text=date_str, font=ctk.CTkFont(family="Segoe UI", size=12), text_color="#94A3B8").pack(side="right")
+
+                chips_r = ctk.CTkFrame(row, fg_color="transparent")
+                chips_r.pack(fill="x", padx=14, pady=(2, 10))
+                for fp, fn, sz, _mt in proj["files"][:6]:
+                    ext = fn.rsplit(".", 1)[-1].upper() if "." in fn else "FILE"
+                    ico = "🎥" if ext in ("MP4", "MOV", "MKV", "WEBM") else "📝" if ext in ("DOCX", "XLSX", "TXT") else "🎬"
+                    ctk.CTkButton(
+                        chips_r,
+                        text=f"{ico} {fn[:26]}{'...' if len(fn) > 26 else ''}",
+                        height=26,
+                        fg_color="#F1F5F9",
+                        hover_color="#E2E8F0",
+                        text_color="#334155",
+                        font=ctk.CTkFont(size=11),
+                        corner_radius=8,
+                        command=lambda p=fp: open_path_crossplatform(p),
+                    ).pack(side="left", padx=(0, 6), pady=2)
+
+                ctk.CTkButton(
+                    chips_r,
+                    text=self.L("📂 Klasör", "📂 Folder", "📂 Ordner"),
+                    height=26,
+                    width=76,
+                    fg_color="#EFF6FF",
+                    hover_color="#DBEAFE",
+                    text_color="#1D4ED8",
+                    font=ctk.CTkFont(size=11, weight="bold"),
+                    corner_radius=8,
+                    command=lambda d=proj["folder"]: open_path_crossplatform(d),
+                ).pack(side="right", pady=2)
+
+        btn_refs = {}
+        def set_hist_sec(s):
+            for k, b in btn_refs.items():
+                fg_c, bg_c = sec_colors.get(k, ("#1E293B", "#E2E8F0"))
+                b.configure(fg_color=fg_c if k == s else "#FFFFFF", text_color="#FFFFFF" if k == s else "#475569")
+            render_history_rows(s)
+
+        for sec_k, sec_lbl in [("ALL", self.L("Tümü", "All", "Alle")), ("MIC", "MIC"), ("DOC", "DOC"), ("GLOBE", "GLOBE"), ("FIELD", "FIELD")]:
+            b = ctk.CTkButton(
+                filter_bar,
+                text=sec_lbl,
+                width=74,
+                height=28,
+                corner_radius=14,
+                border_width=1,
+                border_color="#CBD5E1",
+                font=ctk.CTkFont(size=11, weight="bold"),
+                command=lambda k=sec_k: set_hist_sec(k),
+            )
+            b.pack(side="right", padx=4)
+            btn_refs[sec_k] = b
+
+        set_hist_sec(active_sec)
 
     def _build_files(self):
         parent = self.pages["files"]
@@ -1614,18 +1920,20 @@ class ILBERTechV2(ctk.CTk):
 
         workspace_dir = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace")
         os.makedirs(workspace_dir, exist_ok=True)
-        for s in ["Uploads", "Transcripts", "Subtitles", "Reports"]:
+        for s in ["Uploads", "Transcripts", "Subtitles", "Reports", "Projects"]:
             os.makedirs(os.path.join(workspace_dir, s), exist_ok=True)
 
+        projects = self._scan_projects(workspace_dir)
+
         header = ctk.CTkFrame(parent, fg_color="transparent")
-        header.pack(fill="x", padx=40, pady=(40, 20))
+        header.pack(fill="x", padx=40, pady=(30, 14))
         ctk.CTkLabel(header, text=self.t("title_files"), font=ctk.CTkFont(family="Segoe UI", size=28, weight="bold"), text_color="#111827").pack(side="left")
 
-        search_box = ctk.CTkEntry(header, placeholder_text=self.t("search_placeholder"), width=250, height=40, corner_radius=20, border_color="#E2E8F0", fg_color="#FFFFFF")
+        search_box = ctk.CTkEntry(header, placeholder_text=self.t("search_placeholder"), width=260, height=38, corner_radius=18, border_color="#CBD5E1", fg_color="#FFFFFF")
         search_box.pack(side="right")
 
-        upload_status = ctk.CTkLabel(header, text="", text_color="#10B981", font=ctk.CTkFont(family="Segoe UI", size=13))
-        upload_status.pack(side="right", padx=15)
+        upload_status = ctk.CTkLabel(header, text="", text_color="#10B981", font=ctk.CTkFont(family="Segoe UI", size=12))
+        upload_status.pack(side="right", padx=12)
 
         def upload_action():
             filepath = filedialog.askopenfilename(filetypes=SUPPORTED_MEDIA_EXTS)
@@ -1634,119 +1942,331 @@ class ILBERTechV2(ctk.CTk):
                 shutil.copy2(filepath, dest)
                 upload_status.configure(text=self.t("msg_uploaded"))
                 self.after(3000, lambda: upload_status.configure(text=""))
-                refresh_file_list()
 
-        btn_upload = ctk.CTkButton(header, text=self.t("btn_upload"), font=ctk.CTkFont(family="Segoe UI", weight="bold"), fg_color="#2563EB", hover_color="#1D4ED8", height=40, corner_radius=20, command=upload_action)
-        btn_upload.pack(side="right", padx=10)
+        btn_upload = ctk.CTkButton(header, text=self.t("btn_upload"), font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"), fg_color="#2563EB", hover_color="#1D4ED8", height=38, corner_radius=18, command=upload_action)
+        btn_upload.pack(side="right", padx=8)
 
-        folder_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        folder_frame.pack(fill="x", padx=40, pady=10)
-        ctk.CTkLabel(folder_frame, text=self.t("quick_access"), font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"), text_color="#475569").pack(anchor="w", pady=(0, 15))
-        folder_grid = ctk.CTkFrame(folder_frame, fg_color="transparent")
-        folder_grid.pack(fill="x")
+        # 4 Section Cards: MIC Projects, EDU Projects, GLOBE Projects, FIELD Projects
+        sec_bar = ctk.CTkFrame(parent, fg_color="transparent")
+        sec_bar.pack(fill="x", padx=40, pady=(0, 12))
 
-        def open_folder(sub):
-            open_path_crossplatform(os.path.join(workspace_dir, sub))
-
-        folders = [
-            (self.t("folder_trans"), "Transcripts", "#F4EBFF", "#9333EA"),
-            (self.t("folder_ups"), "Uploads", "#E6FAFD", "#06B6D4"),
-            (self.t("folder_subs"), "Subtitles", "#EBF3FF", "#2563EB"),
+        sec_defs = [
+            ("MIC", "MIC Projects", "🎙️", "#7C3AED", "#F3E8FF"),
+            ("EDU", "DOC Projects", "🎓", "#0284C7", "#E0F2FE"),
+            ("GLOBE", "GLOBE Projects", "🎬", "#059669", "#D1FAE5"),
+            ("FIELD", "FIELD Projects", "🔬", "#DC2626", "#FEE2E2"),
         ]
-        folder_labels = {}
-        for title, sub, bg, color in folders:
-            glass_map = {
-                "Transcripts": ("#F4EBFF", "#E9D5FF"),
-                "Uploads": ("#E6FAFD", "#A5F3FC"),
-                "Subtitles": ("#EBF3FF", "#BFDBFE"),
-            }
-            bg_glass, shadow_color = glass_map.get(sub, ("#FFFFFF", "#E2E8F0"))
-            container = ctk.CTkFrame(folder_grid, fg_color="transparent", height=110)
-            container.pack(side="left", fill="x", expand=True, padx=(0, 20) if title != folders[-1][0] else 0)
-            container.pack_propagate(False)
-            shadow = ctk.CTkFrame(container, fg_color=shadow_color, corner_radius=20)
-            shadow.place(relwidth=1, relheight=0.9, y=10)
-            f_card = ctk.CTkFrame(container, fg_color=bg_glass, border_width=1, border_color="#FFFFFF", corner_radius=20)
-            f_card.place(relwidth=1, relheight=0.9, y=0)
-            icon = ctk.CTkFrame(f_card, fg_color=color, width=40, height=40, corner_radius=12)
-            icon.pack(side="left", padx=20)
-            ctk.CTkLabel(icon, text="📁", font=ctk.CTkFont(size=20), text_color="#FFFFFF").place(relx=0.5, rely=0.5, anchor="center")
-            text_frame = ctk.CTkFrame(f_card, fg_color="transparent")
-            text_frame.pack(side="left", padx=10, pady=25, fill="both")
-            l1 = ctk.CTkLabel(text_frame, text=title, font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"), text_color="#1E293B")
-            l1.pack(anchor="w")
-            l2 = ctk.CTkLabel(text_frame, text=f"0 {self.t('files_count')}", font=ctk.CTkFont(family="Segoe UI", size=12), text_color="#64748B")
-            l2.pack(anchor="w", pady=(2, 0))
-            folder_labels[sub] = l2
-            widgets = [container, shadow, f_card, icon, l1, l2, text_frame] + icon.winfo_children()
-            for w in widgets:
+        selected_sec = {"val": getattr(self, "_proj_selected_sec", "ALL")}
+        sec_cards = {}
+
+        sub_hdr = ctk.CTkFrame(parent, fg_color="transparent")
+        sub_hdr.pack(fill="x", padx=40, pady=(4, 8))
+        list_title_lbl = ctk.CTkLabel(sub_hdr, text="", font=ctk.CTkFont(family="Segoe UI", size=15, weight="bold"), text_color="#334155")
+        list_title_lbl.pack(side="left")
+
+        show_all_btn = ctk.CTkButton(
+            sub_hdr,
+            text=self.L("Tüm Bölümleri Göster", "Show All Sections", "Alle anzeigen"),
+            height=28,
+            width=140,
+            fg_color="#E2E8F0",
+            hover_color="#CBD5E1",
+            text_color="#1E293B",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            corner_radius=12,
+        )
+        show_all_btn.pack(side="right")
+
+        ctk.CTkButton(
+            sub_hdr,
+            text=self.L("📥 FIELD Proje (.zip) İçe Aktar", "📥 Import FIELD (.zip)", "📥 FIELD (.zip) importieren"),
+            height=28,
+            width=190,
+            fg_color="#0F766E",
+            hover_color="#115E59",
+            text_color="#FFFFFF",
+            font=ctk.CTkFont(size=11, weight="bold"),
+            corner_radius=12,
+            command=self._import_field_project_zip,
+        ).pack(side="right", padx=(0, 8))
+
+        scroll = ctk.CTkScrollableFrame(parent, fg_color="#F8FAFC", corner_radius=0)
+        scroll.pack(fill="both", expand=True, padx=40, pady=(0, 20))
+
+        def refresh_projects(*args):
+            cur_sec = selected_sec["val"]
+            self._proj_selected_sec = cur_sec
+            query = search_box.get().strip().lower()
+
+            for sk, card_info in sec_cards.items():
+                is_sel = (cur_sec == sk)
+                card_info["frame"].configure(
+                    border_width=2 if is_sel else 1,
+                    border_color=card_info["accent"] if is_sel else "#E2E8F0",
+                )
+
+            if cur_sec == "ALL":
+                list_title_lbl.configure(text=self.L("Tüm Projeler (4 Bölüm)", "All Projects (4 Sections)", "Alle Projekte (4 Bereiche)"))
+            else:
+                disp_sec = "DOC" if cur_sec == "EDU" else cur_sec
+                list_title_lbl.configure(text=f"{disp_sec} Projects")
+
+            for w in scroll.winfo_children():
+                w.destroy()
+
+            filtered = []
+            for p in projects:
+                if cur_sec != "ALL" and p["section"] != cur_sec:
+                    continue
+                if query:
+                    match_proj = query in p["name"].lower() or query in p["section"].lower()
+                    match_files = [f for f in p["files"] if query in f[1].lower()]
+                    if not match_proj and not match_files:
+                        continue
+                filtered.append(p)
+
+            if not filtered:
+                ctk.CTkLabel(
+                    scroll,
+                    text=self.L("Bu bölümde henüz proje bulunmuyor.", "No projects found in this section yet.", "Noch keine Projekte in diesem Bereich."),
+                    text_color="#94A3B8",
+                    font=ctk.CTkFont(size=13),
+                ).pack(pady=45)
+                return
+
+            sec_badge_map = {s[0]: (s[3], s[4]) for s in sec_defs}
+            for p in filtered[:40]:
+                sec = p["section"]
+                disp_badge = "DOC" if sec == "EDU" else sec
+                fg_c, bg_c = sec_badge_map.get(sec, ("#475569", "#F1F5F9"))
+                card = ctk.CTkFrame(scroll, fg_color="#FFFFFF", corner_radius=14, border_width=1, border_color="#E2E8F0")
+                card.pack(fill="x", pady=6, padx=2)
+
+                c_hdr = ctk.CTkFrame(card, fg_color="#F8FAFC", corner_radius=10)
+                c_hdr.pack(fill="x", padx=10, pady=(10, 6))
+
+                ctk.CTkLabel(c_hdr, text=f" {disp_badge} ", fg_color=bg_c, text_color=fg_c, corner_radius=8, font=ctk.CTkFont(size=11, weight="bold"), height=24).pack(side="left", padx=(8, 10), pady=6)
+                ctk.CTkLabel(c_hdr, text=f"📂 {p['name']}", font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"), text_color="#0F172A").pack(side="left", pady=6)
+
+                date_str = datetime.datetime.fromtimestamp(p["mtime"]).strftime("%b %d, %Y · %H:%M")
+                ctk.CTkButton(
+                    c_hdr,
+                    text=self.L("📂 Klasörü Aç", "📂 Open Folder", "📂 Ordner öffnen"),
+                    height=26,
+                    width=110,
+                    fg_color="#EFF6FF",
+                    hover_color="#DBEAFE",
+                    text_color="#1D4ED8",
+                    font=ctk.CTkFont(size=11, weight="bold"),
+                    corner_radius=8,
+                    command=lambda d=p["folder"]: open_path_crossplatform(d),
+                ).pack(side="right", padx=(4, 8), pady=6)
+
+                def _rename_proj(proj_item=p):
+                    dlg = ctk.CTkInputDialog(
+                        text=self.L(
+                            f"'{proj_item['name']}' için yeni proje adını yazın:",
+                            f"Enter new project name for '{proj_item['name']}':",
+                            f"Neuen Projektnamen für '{proj_item['name']}' eingeben:",
+                        ),
+                        title=self.L("Proje Adını Düzenle", "Rename Project", "Projekt umbenennen"),
+                    )
+                    new_n = dlg.get_input()
+                    if not new_n or not new_n.strip():
+                        return
+                    new_clean = new_n.strip()
+                    safe_new = re.sub(r"[^A-Za-z0-9_\-çğıöşüÇĞİÖŞÜ ]+", "_", new_clean).strip().replace(" ", "_")
+                    safe_new = safe_new[:60].strip("_") or "Project"
+                    dest_dir = os.path.join(workspace_dir, "Projects", proj_item["section"], safe_new)
+                    try:
+                        if not proj_item.get("is_legacy") and os.path.isdir(proj_item["folder"]):
+                            if os.path.normpath(proj_item["folder"]) != os.path.normpath(dest_dir):
+                                if not os.path.exists(dest_dir):
+                                    os.rename(proj_item["folder"], dest_dir)
+                                else:
+                                    for fp_old, fn_old, _, _ in proj_item["files"]:
+                                        shutil.move(fp_old, os.path.join(dest_dir, fn_old))
+                                    try:
+                                        shutil.rmtree(proj_item["folder"], ignore_errors=True)
+                                    except Exception:
+                                        pass
+                        else:
+                            os.makedirs(dest_dir, exist_ok=True)
+                            for fp_old, fn_old, _, _ in proj_item["files"]:
+                                if os.path.isfile(fp_old):
+                                    shutil.move(fp_old, os.path.join(dest_dir, fn_old))
+                        meta_p = os.path.join(dest_dir, ".ilber_meta.json")
+                        md = {"section": proj_item["section"], "project": new_clean, "updated_at": datetime.datetime.now().isoformat()}
+                        if os.path.isfile(meta_p):
+                            try:
+                                with open(meta_p, "r", encoding="utf-8") as mf:
+                                    old_md = json.load(mf)
+                                    old_md.update(md)
+                                    md = old_md
+                            except Exception:
+                                pass
+                        with open(meta_p, "w", encoding="utf-8") as mf:
+                            json.dump(md, mf, ensure_ascii=False, indent=2)
+                        for m_id in self.page_controls:
+                            self._refresh_project_dropdown(m_id)
+                        self._build_files()
+                    except Exception as ex:
+                        messagebox.showerror("Error", str(ex))
+
+                ctk.CTkButton(
+                    c_hdr,
+                    text=self.L("✏️ Adlandır", "✏️ Rename", "✏️ Umbenennen"),
+                    height=26,
+                    width=92,
+                    fg_color="#F1F5F9",
+                    hover_color="#E2E8F0",
+                    text_color="#334155",
+                    font=ctk.CTkFont(size=11, weight="bold"),
+                    corner_radius=8,
+                    command=_rename_proj,
+                ).pack(side="right", padx=4, pady=6)
+                total_cnt = len(p["files"]) + sum(len(sf["files"]) for sf in p.get("subfolders", []))
+                ctk.CTkLabel(c_hdr, text=f"{total_cnt} {self.t('files_count')} · {date_str}", font=ctk.CTkFont(size=11), text_color="#64748B").pack(side="right", padx=10)
+
+                active_sub_map = getattr(self, "_proj_active_subfolder", {})
+                opened_sub_name = active_sub_map.get(p["folder"])
+                opened_sub_obj = next((sf for sf in p.get("subfolders", []) if sf["name"] == opened_sub_name), None)
+
+                def _render_file_row(parent_card, fp, fn, sz):
+                    frow = ctk.CTkFrame(parent_card, fg_color="transparent", height=36)
+                    frow.pack(fill="x", padx=16, pady=2)
+                    frow.pack_propagate(False)
+                    ext = fn.rsplit(".", 1)[-1].lower() if "." in fn else ""
+                    typ = (
+                        "Video" if ext in ("mp4", "mkv", "mov", "webm")
+                        else "Audio" if ext in ("wav", "mp3", "m4a", "ogg", "flac")
+                        else "Subtitle" if ext in ("srt", "vtt")
+                        else "Document"
+                    )
+                    ico = "🎬" if typ == "Video" else "🎵" if typ == "Audio" else "💬" if typ == "Subtitle" else "📝"
+                    sz_str = f"{sz / (1024*1024):.1f} MB" if sz > 1024 * 1024 else f"{sz / 1024:.1f} KB"
+
+                    l_fn = ctk.CTkLabel(frow, text=f"{ico}  {fn}", font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"), text_color="#1E293B", anchor="w")
+                    l_fn.pack(side="left", fill="x", expand=True)
+                    ctk.CTkLabel(frow, text=typ, font=ctk.CTkFont(size=11), text_color="#64748B", width=80, anchor="w").pack(side="left")
+                    ctk.CTkLabel(frow, text=sz_str, font=ctk.CTkFont(size=11), text_color="#64748B", width=80, anchor="e").pack(side="left", padx=(0, 8))
+                    for w in (frow, l_fn):
+                        try:
+                            w.bind("<Button-1>", lambda e, path=fp: open_path_crossplatform(path))
+                            w.configure(cursor="hand2")
+                        except Exception:
+                            pass
+
+                if opened_sub_obj is not None:
+                    # Inside subfolder view with Back button
+                    sub_nav = ctk.CTkFrame(card, fg_color="#EFF6FF", corner_radius=8)
+                    sub_nav.pack(fill="x", padx=14, pady=(2, 6))
+
+                    def _go_back(pf=p["folder"]):
+                        m = getattr(self, "_proj_active_subfolder", {})
+                        m.pop(pf, None)
+                        self._proj_active_subfolder = m
+                        refresh_projects()
+
+                    ctk.CTkButton(
+                        sub_nav, text=f"← {p['name']}", height=26, width=110, fg_color="#FFFFFF",
+                        hover_color="#DBEAFE", text_color="#1E3A8A", font=ctk.CTkFont(size=11, weight="bold"),
+                        command=_go_back,
+                    ).pack(side="left", padx=8, pady=6)
+                    ctk.CTkLabel(
+                        sub_nav, text=f"📁 {opened_sub_obj['name']}  ({len(opened_sub_obj['files'])} {self.t('files_count')})",
+                        font=ctk.CTkFont(size=12, weight="bold"), text_color="#1E3A8A",
+                    ).pack(side="left", padx=6)
+                    ctk.CTkButton(
+                        sub_nav, text=self.L("📂 Klasörü Aç", "📂 Open Folder", "📂 Ordner öffnen"),
+                        height=24, width=105, fg_color="#DBEAFE", hover_color="#BFDBFE", text_color="#1D4ED8",
+                        font=ctk.CTkFont(size=11, weight="bold"),
+                        command=lambda d=opened_sub_obj["folder"]: open_path_crossplatform(d),
+                    ).pack(side="right", padx=8, pady=6)
+
+                    for fp, fn, sz, _mt in opened_sub_obj["files"]:
+                        _render_file_row(card, fp, fn, sz)
+                else:
+                    # Show clickable subfolders first, then project root files
+                    for sf in p.get("subfolders", []):
+                        srow = ctk.CTkFrame(card, fg_color="#F8FAFC", corner_radius=8, border_width=1, border_color="#E2E8F0", height=40)
+                        srow.pack(fill="x", padx=14, pady=3)
+                        srow.pack_propagate(False)
+
+                        def _enter_sub(e=None, pf=p["folder"], sname=sf["name"]):
+                            m = getattr(self, "_proj_active_subfolder", {})
+                            m[pf] = sname
+                            self._proj_active_subfolder = m
+                            refresh_projects()
+
+                        l_sf = ctk.CTkLabel(
+                            srow, text=f"📁  {sf['name']}", font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+                            text_color="#1D4ED8", anchor="w",
+                        )
+                        l_sf.pack(side="left", padx=12, fill="x", expand=True)
+                        l_cnt = ctk.CTkLabel(
+                            srow, text=f"{len(sf['files'])} {self.t('files_count')}",
+                            font=ctk.CTkFont(size=11), text_color="#64748B", width=80,
+                        )
+                        l_cnt.pack(side="left")
+                        l_go = ctk.CTkLabel(
+                            srow, text=self.L("İçine Gir →", "Open →", "Öffnen →"),
+                            font=ctk.CTkFont(size=11, weight="bold"), text_color="#2563EB", width=80,
+                        )
+                        l_go.pack(side="right", padx=10)
+                        for w in (srow, l_sf, l_cnt, l_go):
+                            try:
+                                w.bind("<Button-1>", _enter_sub)
+                                w.configure(cursor="hand2")
+                            except Exception:
+                                pass
+
+                    for fp, fn, sz, _mt in p["files"]:
+                        _render_file_row(card, fp, fn, sz)
+                ctk.CTkFrame(card, fg_color="transparent", height=6).pack()
+
+        for idx_s, (sk, title, ico, accent, bg_tint) in enumerate(sec_defs):
+            sec_projs = [p for p in projects if p["section"] == sk]
+            sec_file_cnt = sum(len(p["files"]) + sum(len(sf["files"]) for sf in p.get("subfolders", [])) for p in sec_projs)
+            card_f = ctk.CTkFrame(sec_bar, fg_color="#FFFFFF", corner_radius=14, border_width=1, border_color="#E2E8F0", height=88)
+            card_f.pack(side="left", fill="x", expand=True, padx=(0, 12 if idx_s < 3 else 0))
+            card_f.pack_propagate(False)
+
+            i_box = ctk.CTkFrame(card_f, fg_color=bg_tint, width=42, height=42, corner_radius=12)
+            i_box.pack(side="left", padx=(14, 10))
+            i_box.pack_propagate(False)
+            l_ico = ctk.CTkLabel(i_box, text=ico, font=ctk.CTkFont(size=19), text_color=accent)
+            l_ico.place(relx=0.5, rely=0.5, anchor="center")
+
+            tf = ctk.CTkFrame(card_f, fg_color="transparent")
+            tf.pack(side="left", fill="both", expand=True, pady=16)
+            l_t = ctk.CTkLabel(tf, text=title, font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"), text_color="#0F172A", anchor="w")
+            l_t.pack(anchor="w")
+            l_c = ctk.CTkLabel(
+                tf,
+                text=f"{len(sec_projs)} {self.L('proje', 'projects', 'Projekte')} · {sec_file_cnt} {self.t('files_count')}",
+                font=ctk.CTkFont(family="Segoe UI", size=11),
+                text_color="#64748B",
+                anchor="w",
+            )
+            l_c.pack(anchor="w")
+
+            sec_cards[sk] = {"frame": card_f, "accent": accent}
+
+            def _on_sec_click(event=None, key=sk):
+                selected_sec["val"] = "ALL" if selected_sec["val"] == key else key
+                refresh_projects()
+
+            for w in (card_f, i_box, l_ico, tf, l_t, l_c):
                 try:
-                    w.bind("<Button-1>", lambda e, s=sub: open_folder(s))
+                    w.bind("<Button-1>", _on_sec_click)
                     w.configure(cursor="hand2")
                 except Exception:
                     pass
 
-        list_frame = ctk.CTkFrame(parent, fg_color="transparent")
-        list_frame.pack(fill="both", expand=True, padx=40, pady=25)
-        ctk.CTkLabel(list_frame, text=self.t("recent_files"), font=ctk.CTkFont(family="Segoe UI", size=16, weight="bold"), text_color="#475569").pack(anchor="w", pady=(0, 12))
-
-        scroll = ctk.CTkScrollableFrame(list_frame, fg_color="#FFFFFF", corner_radius=16, border_width=1, border_color="#E2E8F0")
-        scroll.pack(fill="both", expand=True)
-
-        def open_file(fpath):
-            open_path_crossplatform(fpath)
-
-        def refresh_file_list(*args):
-            for sub, lbl in folder_labels.items():
-                try:
-                    lbl.configure(text=f"{len(os.listdir(os.path.join(workspace_dir, sub)))} {self.t('files_count')}")
-                except Exception:
-                    pass
-            for widget in scroll.winfo_children():
-                widget.destroy()
-            query = search_box.get().lower()
-            all_files = []
-            for root, dirs, files in os.walk(workspace_dir):
-                if "Models" in root:
-                    continue
-                for name in files:
-                    if query and query not in name.lower():
-                        continue
-                    path = os.path.join(root, name)
-                    try:
-                        stat = os.stat(path)
-                        all_files.append((path, name, stat.st_size, stat.st_mtime))
-                    except Exception:
-                        pass
-            all_files.sort(key=lambda x: x[3], reverse=True)
-            if not all_files:
-                ctk.CTkLabel(scroll, text=self.t("no_files"), text_color="#94A3B8").pack(pady=40)
-                return
-            for path, name, size, mtime in all_files[:25]:
-                row = ctk.CTkFrame(scroll, fg_color="transparent", height=55)
-                row.pack(fill="x", pady=4, padx=10)
-                row.pack_propagate(False)
-                ext = name.split(".")[-1].lower() if "." in name else ""
-                typ = "Video" if ext in ["mp4", "mkv", "mov", "webm"] else "Audio" if ext in ["mp3", "wav", "m4a", "ogg", "flac"] else "Subtitle" if ext in ["srt", "vtt"] else "Document"
-                icon_char = "🎬" if typ == "Video" else "🎵" if typ == "Audio" else "📝"
-                l_icon = ctk.CTkLabel(row, text=icon_char, font=ctk.CTkFont(size=20))
-                l_icon.pack(side="left", padx=15)
-                size_str = f"{size / (1024*1024):.1f} MB" if size > 1024*1024 else f"{size / 1024:.1f} KB"
-                date_str = datetime.datetime.fromtimestamp(mtime).strftime("%b %d, %Y")
-                l_name = ctk.CTkLabel(row, text=name, font=ctk.CTkFont(family="Segoe UI", size=14, weight="bold"), text_color="#1E293B", width=300, anchor="w")
-                l_name.pack(side="left")
-                ctk.CTkLabel(row, text=typ, font=ctk.CTkFont(family="Segoe UI", size=13), text_color="#64748B", width=100, anchor="w").pack(side="left")
-                ctk.CTkLabel(row, text=size_str, font=ctk.CTkFont(family="Segoe UI", size=13), text_color="#64748B", width=100, anchor="w").pack(side="left")
-                ctk.CTkLabel(row, text=date_str, font=ctk.CTkFont(family="Segoe UI", size=13), text_color="#64748B", width=120, anchor="w").pack(side="left")
-                for w in [row, l_icon, l_name]:
-                    try:
-                        w.bind("<Button-1>", lambda e, p=path: open_file(p))
-                        w.configure(cursor="hand2")
-                    except Exception:
-                        pass
-
-        search_box.bind("<KeyRelease>", refresh_file_list)
-        self.after(200, refresh_file_list)
+        show_all_btn.configure(command=lambda: (selected_sec.update({"val": "ALL"}), refresh_projects()))
+        search_box.bind("<KeyRelease>", refresh_projects)
+        self.after(150, refresh_projects)
 
     def _build_home(self):
         parent = self.pages["home"]
@@ -1806,7 +2326,7 @@ class ILBERTechV2(ctk.CTk):
             canvas.create_line(bx, center_y - bh // 2, bx, center_y + bh // 2, fill=col_b, width=5, capstyle="round")
 
         grid_container = ctk.CTkFrame(parent, fg_color="transparent")
-        grid_container.pack(fill="both", expand=True, pady=(8, 14))
+        grid_container.pack(fill="both", expand=True, pady=(4, 4))
 
         grid = ctk.CTkFrame(grid_container, fg_color="transparent")
         grid.pack(fill="both", expand=True, padx=32, pady=2)
@@ -1923,6 +2443,105 @@ class ILBERTechV2(ctk.CTk):
                 col = 0
                 row += 1
 
+        # Bottom "Son açılanlar" (Recent Projects Quick Access) + Offline Engine Footer
+        ws_dir = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace")
+        recent_projs = self._scan_projects(ws_dir)[:3]
+
+        rec_wrap = ctk.CTkFrame(parent, fg_color="transparent")
+        rec_wrap.pack(fill="x", padx=42, pady=(2, 10))
+
+        ctk.CTkLabel(
+            rec_wrap,
+            text=self.L("Son açılanlar", "Recent Projects", "Zuletzt geöffnet"),
+            font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"),
+            text_color=th["card_title"],
+        ).pack(anchor="w", pady=(0, 6))
+
+        rec_row = ctk.CTkFrame(rec_wrap, fg_color="transparent")
+        rec_row.pack(fill="x")
+
+        sec_labels = {
+            "MIC": (self.L("MIC · SES DEŞİFRE", "MIC · TRANSCRIPTION", "MIC · TRANSKRIPTION"), "#7C3AED"),
+            "EDU": (self.L("DOC · BELGE ÇEVİRİ", "DOC · DOCUMENT TRANSLATOR", "DOC · DOKUMENTE"), "#0284C7"),
+            "GLOBE": (self.L("GLOBE · VİDEO STÜDYO", "GLOBE · VIDEO STUDIO", "GLOBE · VIDEOSTUDIO"), "#059669"),
+            "FIELD": (self.L("FIELD · SAHA ÇALIŞMASI", "FIELD · QUALITATIVE RESEARCH", "FIELD · FELDFORSCHUNG"), "#EA580C"),
+        }
+
+        if not recent_projs:
+            empty_c = ctk.CTkFrame(rec_row, fg_color=th["card_bg"], border_width=1, border_color=th["card_border"], corner_radius=12, height=64)
+            empty_c.pack(fill="x")
+            empty_c.pack_propagate(False)
+            ctk.CTkLabel(
+                empty_c,
+                text=self.L("Henüz açılmış proje yok — Yukarıdaki modüllerden birini başlatın.", "No recent projects yet — Start any module above.", "Noch keine Projekte vorhanden."),
+                font=ctk.CTkFont(size=12),
+                text_color=th["card_desc"],
+            ).place(relx=0.5, rely=0.5, anchor="center")
+        else:
+            today_d = datetime.date.today()
+            for r_idx, rp in enumerate(recent_projs):
+                sec = rp["section"]
+                tag_txt, tag_col = sec_labels.get(sec, (sec, "#2563EB"))
+                rc = ctk.CTkFrame(
+                    rec_row,
+                    fg_color=th["card_bg"],
+                    border_width=1,
+                    border_color=th["card_border"],
+                    corner_radius=12,
+                    height=74,
+                )
+                rc.pack(side="left", fill="x", expand=True, padx=(0, 12 if r_idx < len(recent_projs) - 1 else 0))
+                rc.pack_propagate(False)
+
+                l_tag = ctk.CTkLabel(rc, text=tag_txt, font=ctk.CTkFont(family="Segoe UI", size=10, weight="bold"), text_color=tag_col, anchor="w")
+                l_tag.pack(anchor="w", padx=14, pady=(10, 1))
+
+                l_name = ctk.CTkLabel(rc, text=rp["name"], font=ctk.CTkFont(family="Segoe UI", size=13, weight="bold"), text_color=th["card_title"], anchor="w")
+                l_name.pack(anchor="w", padx=14)
+
+                dt = datetime.datetime.fromtimestamp(rp["mtime"])
+                if dt.date() == today_d:
+                    d_lbl = self.L(f"Bugün {dt.strftime('%H:%M')}", f"Today {dt.strftime('%H:%M')}", f"Heute {dt.strftime('%H:%M')}")
+                elif dt.date() == today_d - datetime.timedelta(days=1):
+                    d_lbl = self.L(f"Dün {dt.strftime('%H:%M')}", f"Yesterday {dt.strftime('%H:%M')}", f"Gestern {dt.strftime('%H:%M')}")
+                else:
+                    d_lbl = dt.strftime("%d.%m.%Y · %H:%M")
+
+                f_cnt = len(rp["files"]) + sum(len(sf["files"]) for sf in rp.get("subfolders", []))
+                l_sub = ctk.CTkLabel(
+                    rc,
+                    text=f"{d_lbl} · {f_cnt} {self.t('files_count')}",
+                    font=ctk.CTkFont(family="Segoe UI", size=11),
+                    text_color=th["card_desc"],
+                    anchor="w",
+                )
+                l_sub.pack(anchor="w", padx=14, pady=(0, 8))
+
+                def _open_recent(e=None, target_sec=sec):
+                    self._proj_selected_sec = target_sec
+                    self.show_page("files")
+
+                for w in (rc, l_tag, l_name, l_sub):
+                    try:
+                        w.bind("<Button-1>", _open_recent)
+                        w.configure(cursor="hand2")
+                    except Exception:
+                        pass
+
+        # Subtle Offline Engine Status Footer
+        foot = ctk.CTkFrame(rec_wrap, fg_color="transparent")
+        foot.pack(fill="x", pady=(8, 0))
+        ctk.CTkLabel(
+            foot,
+            text=self.L(
+                "🔒 ILBER tamamen bilgisayarınızda çalışır. Ses, video, deşifre ve çevirileriniz cihazınızdan asla dışarı çıkmaz.",
+                "🔒 ILBER runs entirely on your computer. Your audio, video, transcripts and translations never leave your device.",
+                "🔒 ILBER läuft vollständig auf Ihrem Computer. Ihre Audio-, Video-, Transkript- und Übersetzungsdaten verlassen niemals Ihr Gerät.",
+            ),
+            font=ctk.CTkFont(family="Segoe UI", size=11),
+            text_color=th["card_desc"],
+        ).pack(anchor="w")
+
     def create_tool_page(self, page_id, title, desc, seg_type="MIC"):
         self.pages[page_id] = ctk.CTkFrame(self.main_area, fg_color="transparent")
         f = self.pages[page_id]
@@ -1961,112 +2580,151 @@ class ILBERTechV2(ctk.CTk):
             rec_btn.pack(side="left", padx=14, pady=8)
             mic_status_lbl = ctk.CTkLabel(
                 mic_bar,
-                text=self.t("mic_hint_idle"),
-                font=ctk.CTkFont(family="Segoe UI", size=13),
+                text="",
+                font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
                 text_color="#475569",
             )
-            mic_status_lbl.pack(side="left", padx=10)
+            mic_status_lbl.pack(side="left", padx=8)
             ctrls["rec_btn"] = rec_btn
             ctrls["mic_status_lbl"] = mic_status_lbl
+
+        # Project Selector / Creator Bar (MIC, EDU, GLOBE, FIELD)
+        if seg_type in ("MIC", "EDU", "GLOBE", "FIELD"):
+            proj_row = ctk.CTkFrame(f, fg_color="#FFFFFF", corner_radius=12, border_width=1, border_color="#E2E8F0")
+            proj_row.pack(fill="x", padx=25, pady=(0, 6))
+
+            ctk.CTkLabel(
+                proj_row,
+                text=self.L("📁 Proje:", "📁 Project:", "📁 Projekt:"),
+                font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+                text_color="#1E293B",
+            ).pack(side="left", padx=(12, 8), pady=8)
+
+            project_var = ctk.StringVar(value=self._get_auto_project_label())
+            ctrls["project_var"] = project_var
+            proj_vals = self._get_section_project_names(seg_type)
+            project_combo = ctk.CTkComboBox(
+                proj_row,
+                variable=project_var,
+                values=proj_vals,
+                width=270,
+                height=32,
+                fg_color="#F8FAFC",
+                border_color="#CBD5E1",
+                button_color="#CBD5E1",
+                text_color="#0F172A",
+            )
+            project_combo.pack(side="left", padx=(0, 8), pady=8)
+            ctrls["project_combo"] = project_combo
+
+            def _on_new_project(sec=seg_type, p_var=project_var, p_cmb=project_combo):
+                dlg = ctk.CTkInputDialog(
+                    text=self.L(
+                        f"{sec} için yeni proje adını yazın (örn: Tez_Mulakatlari):",
+                        f"Enter new project name for {sec}:",
+                        f"Neuen Projektnamen für {sec} eingeben:",
+                    ),
+                    title=self.L("Yeni Proje Oluştur", "Create New Project", "Neues Projekt"),
+                )
+                new_name = dlg.get_input()
+                if new_name and new_name.strip():
+                    ws_dir = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace")
+                    self._create_project_dir(ws_dir, sec, new_name.strip(), custom_project_name=new_name.strip())
+                    p_var.set(new_name.strip())
+                    vals = self._get_section_project_names(sec)
+                    p_cmb.configure(values=vals)
+
+            ctk.CTkButton(
+                proj_row,
+                text=self.L("+ Yeni Proje", "+ New Project", "+ Neues Projekt"),
+                width=115,
+                height=32,
+                fg_color="#2563EB",
+                hover_color="#1D4ED8",
+                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
+                command=_on_new_project,
+            ).pack(side="left", padx=(0, 8), pady=8)
+
+            ctk.CTkLabel(
+                proj_row,
+                text=self.L(
+                    "İpucu: Birden fazla dosya/kayıt aynı proje klasöründe toplanır.",
+                    "Tip: Multiple files or recordings are grouped under the same project folder.",
+                    "Tipp: Mehrere Dateien werden im selben Projektordner gespeichert.",
+                ),
+                font=ctk.CTkFont(family="Segoe UI", size=11),
+                text_color="#64748B",
+            ).pack(side="left", padx=6)
 
         # File & Source Language Row
         file_var = ctk.StringVar()
         src_var = ctk.StringVar(value="Auto")
         ctrls["file_var"] = file_var
         ctrls["src_var"] = src_var
+        ctrls["selected_files"] = []
 
-        file_row = ctk.CTkFrame(f, fg_color="#FFFFFF", corner_radius=12, border_width=1, border_color="#E2E8F0")
-        file_row.pack(fill="x", padx=25, pady=6)
-
-        if seg_type == "CHAT":
-            ext_filter = SUPPORTED_CHAT_EXTS
-            entry_w = 210
-        elif seg_type == "EDU":
-            ext_filter = SUPPORTED_DOC_EXTS
-            entry_w = 215
+        if seg_type == "MIC":
+            # MIC uses live microphone recording directly into the Project folder (no Select File bar needed)
+            ctk.CTkOptionMenu(
+                mic_bar,
+                variable=src_var,
+                values=[k for k in LANG_MAP.keys() if k not in ("Sadece OCR (Metne Dönüştür)", "OCR Only (Extract Text)")],
+                width=150,
+                height=34,
+                fg_color="#F1F5F9",
+                text_color="#0F172A",
+                button_color="#CBD5E1",
+            ).pack(side="right", padx=(0, 14), pady=8)
+            ctk.CTkLabel(
+                mic_bar,
+                text=self.t("src_lang_lbl"),
+                font=ctk.CTkFont(size=12, weight="bold"),
+                text_color="#334155",
+            ).pack(side="right", padx=(8, 6), pady=8)
+            file_row = None
         else:
-            ext_filter = SUPPORTED_MEDIA_EXTS
-            entry_w = 440
-        ctk.CTkEntry(file_row, textvariable=file_var, state="disabled", width=entry_w, height=36, fg_color="#F8FAFC").pack(side="left", padx=(10, 6), pady=10)
-        ctk.CTkButton(
-            file_row,
-            text=self.L("📄 Belge / Görsel Seç", "📄 Select File / Image", "📄 Datei / Bild") if seg_type == "EDU" else self.t("btn_file"),
-            width=142 if seg_type == "EDU" else 100,
-            height=36,
-            fg_color=PURPLE_DARK,
-            hover_color=PURPLE,
-            font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
-            command=lambda ef=ext_filter: file_var.set(
-                filedialog.askopenfilename(
-                    initialdir=os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "Uploads"),
-                    filetypes=ef,
-                )
-            ),
-        ).pack(side="left", padx=(0, 6), pady=10)
+            file_row = ctk.CTkFrame(f, fg_color="#FFFFFF", corner_radius=12, border_width=1, border_color="#E2E8F0")
+            file_row.pack(fill="x", padx=25, pady=6)
 
-        if seg_type == "EDU":
-            def on_edu_snip_ocr():
-                ws_up = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "Uploads")
-                os.makedirs(ws_up, exist_ok=True)
-                def _after_edu_snip(saved_png):
-                    file_var.set(saved_png)
-                    start_btn = ctrls.get("start_btn")
-                    t_sel = ctrls.get("edu_tgt_var").get() if "edu_tgt_var" in ctrls else "Turkish"
-                    s_sel = src_var.get() if src_var else "Auto"
-                    self.start_pipeline(page_id, saved_png, s_sel, t_sel, start_btn)
-                ScreenSnipperOverlay(self, save_dir=ws_up, ui_lang=self.ui_lang, on_capture=_after_edu_snip)
+            if seg_type == "CHAT":
+                ext_filter = SUPPORTED_CHAT_EXTS
+                entry_w = 210
+            elif seg_type == "EDU":
+                ext_filter = SUPPORTED_DOC_EXTS
+                entry_w = 390
+            else:
+                ext_filter = SUPPORTED_MEDIA_EXTS
+                entry_w = 440
+            ctk.CTkEntry(file_row, textvariable=file_var, state="disabled", width=entry_w, height=36, fg_color="#F8FAFC").pack(side="left", padx=(10, 6), pady=10)
 
-            def on_edu_paste_ocr(*args):
-                from PIL import ImageGrab, Image
-                try:
-                    clip_data = ImageGrab.grabclipboard()
-                except Exception:
-                    clip_data = None
-                ws_up = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "Uploads")
-                os.makedirs(ws_up, exist_ok=True)
-                saved_png = None
-                if isinstance(clip_data, Image.Image):
-                    saved_png = os.path.join(ws_up, f"OCR_Pano_{datetime.datetime.now().strftime('%H%M%S')}.png")
-                    clip_data.save(saved_png)
-                elif isinstance(clip_data, list) and clip_data:
-                    first_f = str(clip_data[0])
-                    if os.path.exists(first_f):
-                        saved_png = first_f
-                if saved_png:
-                    file_var.set(saved_png)
-                    start_btn = ctrls.get("start_btn")
-                    t_sel = ctrls.get("edu_tgt_var").get() if "edu_tgt_var" in ctrls else "Turkish"
-                    s_sel = src_var.get() if src_var else "Auto"
-                    self.start_pipeline(page_id, saved_png, s_sel, t_sel, start_btn)
+            def _pick_files(ef=ext_filter, stype=seg_type):
+                init_d = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "Uploads")
+                if stype == "CHAT":
+                    picked = filedialog.askopenfilename(initialdir=init_d, filetypes=ef)
+                    if picked:
+                        ctrls["selected_files"] = [picked]
+                        file_var.set(picked)
                 else:
-                    lg = self.log_boxes.get(page_id)
-                    if lg:
-                        self._log(lg, self.L(
-                            "⚠️ Panoda kopyalanmış bir resim/ekran görüntüsü bulunamadı. (Win+Shift+S ile ekran görüntüsü alabilir veya '📸 Ekran Kırp (OCR)' butonunu kullanabilirsiniz.)",
-                            "⚠️ No screenshot or image found in clipboard.",
-                            "⚠️ Kein Bild in der Zwischenablage gefunden.",
-                        ))
+                    picked_list = filedialog.askopenfilenames(initialdir=init_d, filetypes=ef)
+                    if picked_list:
+                        files_arr = list(picked_list)
+                        ctrls["selected_files"] = files_arr
+                        if len(files_arr) == 1:
+                            file_var.set(files_arr[0])
+                        else:
+                            preview_names = ", ".join(os.path.basename(x) for x in files_arr[:2])
+                            extra = f" (+{len(files_arr) - 2})" if len(files_arr) > 2 else ""
+                            file_var.set(f"[{len(files_arr)} {self.L('dosya', 'files', 'Dateien')}] {preview_names}{extra}")
 
             ctk.CTkButton(
                 file_row,
-                text=self.L("📸 Ekran Kırp (OCR)", "📸 Snip (OCR)", "📸 OCR-Snip"),
+                text=self.t("btn_file") if seg_type == "CHAT" else self.L("📄 Dosya(lar) Seç", "📄 Select File(s)", "📄 Datei(en) wählen"),
+                width=125 if seg_type != "CHAT" else 100,
                 height=36,
-                width=130,
-                fg_color="#DC2626",
-                hover_color="#B91C1C",
-                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
-                command=on_edu_snip_ocr,
-            ).pack(side="left", padx=(0, 5), pady=10)
-
-            ctk.CTkButton(
-                file_row,
-                text=self.L("📋 Pano (OCR)", "📋 Paste OCR", "📋 Einfügen"),
-                height=36,
-                width=102,
-                fg_color="#0D9488",
-                hover_color="#0F766E",
-                font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
-                command=on_edu_paste_ocr,
+                fg_color=PURPLE_DARK,
+                hover_color=PURPLE,
+                font=ctk.CTkFont(family="Segoe UI", size=12, weight="bold"),
+                command=_pick_files,
             ).pack(side="left", padx=(0, 6), pady=10)
 
         if seg_type == "CHAT":
@@ -2157,13 +2815,13 @@ class ILBERTechV2(ctk.CTk):
             ).pack(side="left", padx=(0, 8), pady=10)
             ctrls["paste_img_fn"] = on_paste_clipboard_image
 
-        if seg_type != "CHAT":
+        if seg_type not in ("CHAT", "MIC") and file_row is not None:
             src_lbl_txt = self.L("Kaynak:", "Source:", "Quelle:") if seg_type == "EDU" else self.t("src_lang_lbl")
             ctk.CTkLabel(file_row, text=src_lbl_txt, font=ctk.CTkFont(size=12, weight="bold"), text_color="#334155").pack(side="left", padx=(4, 5))
             ctk.CTkOptionMenu(
                 file_row,
                 variable=src_var,
-                values=[k for k in LANG_MAP.keys() if k != "Sadece OCR (Metne Dönüştür)"],
+                values=[k for k in LANG_MAP.keys() if k not in ("Sadece OCR (Metne Dönüştür)", "OCR Only (Extract Text)")],
                 width=95 if seg_type == "EDU" else 165,
                 height=34,
                 fg_color="#F1F5F9",
@@ -2302,38 +2960,42 @@ class ILBERTechV2(ctk.CTk):
             ctk.CTkLabel(
                 g_row2,
                 text=self.L(
-                    "✔ Giriş Formatı = Çıkış Formatı (.docx➔.docx · .pdf➔.pdf · .xlsx➔.xlsx)",
-                    "✔ Input Format = Output Format (.docx➔.docx · .pdf➔.pdf · .xlsx➔.xlsx)",
-                    "✔ Eingabeformat = Ausgabeformat (.docx➔.docx · .pdf➔.pdf · .xlsx➔.xlsx)",
+                    "✔ Giriş Formatı = Çıkış Formatı (.docx➔.docx · .xlsx➔.xlsx · .txt➔.txt)",
+                    "✔ Input Format = Output Format (.docx➔.docx · .xlsx➔.xlsx · .txt➔.txt)",
+                    "✔ Eingabeformat = Ausgabeformat (.docx➔.docx · .xlsx➔.xlsx · .txt➔.txt)",
                 ),
                 font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
                 text_color="#059669",
             ).pack(side="right", padx=6)
 
-        # GLOBE Options Row (Multi-Target Language Checkboxes + MP4 Burn toggle)
+        # GLOBE Options Row (Single Target Language Dropdown + MP4 Burn toggle)
         if seg_type == "GLOBE":
             globe_box = ctk.CTkFrame(f, fg_color="#FFFFFF", corner_radius=12, border_width=1, border_color="#E2E8F0")
             globe_box.pack(fill="x", padx=25, pady=4)
 
             g_top = ctk.CTkFrame(globe_box, fg_color="transparent")
-            g_top.pack(fill="x", padx=12, pady=(8, 4))
-            ctk.CTkLabel(g_top, text=self.t("globe_multi_lbl"), font=ctk.CTkFont(size=12, weight="bold"), text_color="#065F46").pack(side="left")
+            g_top.pack(fill="x", padx=12, pady=8)
+            ctk.CTkLabel(g_top, text=self.t("globe_multi_lbl"), font=ctk.CTkFont(size=12, weight="bold"), text_color="#065F46").pack(side="left", padx=(0, 8))
+
+            globe_tgt_var = ctk.StringVar(value=self.user_settings.get("def_lang", "Turkish"))
+            ctrls["globe_tgt_var"] = globe_tgt_var
+            ctk.CTkOptionMenu(
+                g_top,
+                variable=globe_tgt_var,
+                values=TARGET_LANGS,
+                width=180,
+                height=34,
+                fg_color="#D1FAE5",
+                text_color="#065F46",
+                button_color="#6EE7B7",
+                button_hover_color="#34D399",
+            ).pack(side="left", padx=(0, 12))
 
             burn_mp4_var = ctk.BooleanVar(value=True)
             ctrls["burn_mp4_var"] = burn_mp4_var
             ctk.CTkCheckBox(g_top, text=self.t("globe_burn_mp4"), variable=burn_mp4_var, font=ctk.CTkFont(size=12, weight="bold"), text_color="#1E293B").pack(side="right", padx=10)
 
-            g_langs = ctk.CTkFrame(globe_box, fg_color="transparent")
-            g_langs.pack(fill="x", padx=12, pady=(2, 10))
-            multi_lang_vars = {}
-            def_t = self.user_settings.get("def_lang", "Turkish")
-            for t_lang in TARGET_LANGS:
-                v = ctk.BooleanVar(value=(t_lang == def_t))
-                multi_lang_vars[t_lang] = v
-                ctk.CTkCheckBox(g_langs, text=t_lang, variable=v, width=90, font=ctk.CTkFont(size=12)).pack(side="left", padx=4)
-            ctrls["multi_lang_vars"] = multi_lang_vars
-
-        # FIELD Metadata Form (Date, Location, Participant Code, Interviewer, Speaker Count, Context, Ethics Translation)
+        # FIELD Metadata Form (Date, Location, Participant Code, Consent, Manual Profile Fields, Context, Translation)
         if seg_type == "FIELD":
             field_box = ctk.CTkFrame(f, fg_color="#FFFFFF", corner_radius=12, border_width=1, border_color="#FECACA")
             field_box.pack(fill="x", padx=25, pady=4)
@@ -2342,31 +3004,62 @@ class ILBERTechV2(ctk.CTk):
             r1.pack(fill="x", padx=12, pady=(8, 4))
 
             ctk.CTkLabel(r1, text=self.t("field_date"), font=ctk.CTkFont(size=12, weight="bold")).pack(side="left", padx=(0, 4))
-            f_date = ctk.CTkEntry(r1, width=105, height=28, fg_color="#F8FAFC")
+            f_date = ctk.CTkEntry(r1, width=95, height=28, fg_color="#F8FAFC")
             f_date.insert(0, datetime.date.today().strftime("%Y-%m-%d"))
-            f_date.pack(side="left", padx=(0, 12))
+            f_date.pack(side="left", padx=(0, 10))
 
             ctk.CTkLabel(r1, text=self.t("field_loc"), font=ctk.CTkFont(size=12, weight="bold")).pack(side="left", padx=(0, 4))
-            f_loc = ctk.CTkEntry(r1, width=130, height=28, placeholder_text="İstanbul / Saha", fg_color="#F8FAFC")
-            f_loc.pack(side="left", padx=(0, 12))
+            f_loc = ctk.CTkEntry(r1, width=115, height=28, placeholder_text="İstanbul / Saha", fg_color="#F8FAFC")
+            f_loc.pack(side="left", padx=(0, 10))
 
             ctk.CTkLabel(r1, text=self.t("field_pcode"), font=ctk.CTkFont(size=12, weight="bold")).pack(side="left", padx=(0, 4))
-            f_pcode = ctk.CTkEntry(r1, width=75, height=28, fg_color="#F8FAFC")
-            f_pcode.insert(0, "P01")
-            f_pcode.pack(side="left", padx=(0, 12))
+            f_pcode = ctk.CTkEntry(r1, width=65, height=28, fg_color="#F8FAFC")
+            f_pcode.insert(0, "K01")
+            f_pcode.pack(side="left", padx=(0, 10))
 
             ctk.CTkLabel(r1, text=self.t("field_interviewer"), font=ctk.CTkFont(size=12, weight="bold")).pack(side="left", padx=(0, 4))
-            f_inter = ctk.CTkEntry(r1, width=110, height=28, fg_color="#F8FAFC")
+            f_inter = ctk.CTkEntry(r1, width=95, height=28, fg_color="#F8FAFC")
             f_inter.insert(0, "Görüşmeci")
-            f_inter.pack(side="left", padx=(0, 12))
+            f_inter.pack(side="left", padx=(0, 10))
 
             ctk.CTkLabel(r1, text=self.t("field_spk_count"), font=ctk.CTkFont(size=12, weight="bold")).pack(side="left", padx=(0, 4))
-            f_spks = ctk.CTkOptionMenu(r1, values=["2", "3", "4", "5"], width=70, height=28, fg_color="#FEE2E2", text_color="#991B1B")
+            f_spks = ctk.CTkOptionMenu(r1, values=["2", "3", "4", "5", "6"], width=60, height=28, fg_color="#FEE2E2", text_color="#991B1B")
             f_spks.set("2")
-            f_spks.pack(side="left")
+            f_spks.pack(side="left", padx=(0, 10))
+
+            ctk.CTkLabel(r1, text=self.L("Etik Onam:", "Consent:", "Einwilligung:"), font=ctk.CTkFont(size=12, weight="bold"), text_color="#065F46").pack(side="left", padx=(0, 4))
+            f_consent = ctk.CTkOptionMenu(
+                r1,
+                values=[
+                    self.L("Onam Alındı", "Consent Obtained", "Einwilligung erteilt"),
+                    self.L("Sözlü Onam", "Verbal Consent", "Mündliche Einwilligung"),
+                    self.L("Bekliyor", "Pending", "Ausstehend"),
+                ],
+                width=125,
+                height=28,
+                fg_color="#D1FAE5",
+                text_color="#065F46",
+            )
+            f_consent.pack(side="left")
+
+            # Row 2: Manual Participant Profile Fields
+            r_prof = ctk.CTkFrame(field_box, fg_color="transparent")
+            r_prof.pack(fill="x", padx=12, pady=(2, 4))
+            ctk.CTkLabel(r_prof, text=self.L("Katılımcı Profili:", "Participant Profile:", "Teilnehmerprofil:"), font=ctk.CTkFont(size=12, weight="bold"), text_color="#1E3A8A").pack(side="left", padx=(0, 8))
+
+            f_age = ctk.CTkEntry(r_prof, width=75, height=28, placeholder_text=self.L("Yaş", "Age", "Alter"), fg_color="#F8FAFC")
+            f_age.pack(side="left", padx=(0, 6))
+            f_gender = ctk.CTkEntry(r_prof, width=90, height=28, placeholder_text=self.L("Cinsiyet", "Gender", "Geschlecht"), fg_color="#F8FAFC")
+            f_gender.pack(side="left", padx=(0, 6))
+            f_job = ctk.CTkEntry(r_prof, width=130, height=28, placeholder_text=self.L("Meslek / Rol", "Occupation", "Beruf"), fg_color="#F8FAFC")
+            f_job.pack(side="left", padx=(0, 6))
+            f_edu = ctk.CTkEntry(r_prof, width=115, height=28, placeholder_text=self.L("Eğitim", "Education", "Bildung"), fg_color="#F8FAFC")
+            f_edu.pack(side="left", padx=(0, 6))
+            f_extra_prof = ctk.CTkEntry(r_prof, width=210, height=28, placeholder_text=self.L("Manuel Profil Notu (Özel Alan)", "Manual Profile Info", "Zusatzinfo"), fg_color="#F8FAFC")
+            f_extra_prof.pack(side="left", fill="x", expand=True)
 
             r2 = ctk.CTkFrame(field_box, fg_color="transparent")
-            r2.pack(fill="x", padx=12, pady=(4, 8))
+            r2.pack(fill="x", padx=12, pady=(2, 8))
             ctk.CTkLabel(r2, text=self.t("field_ctx"), font=ctk.CTkFont(size=12, weight="bold")).pack(side="left", padx=(0, 6))
             f_ctx = ctk.CTkEntry(r2, width=360, height=28, placeholder_text="Görüşme ortamı, gözlemler...", fg_color="#F8FAFC")
             f_ctx.pack(side="left", padx=(0, 16))
@@ -2382,6 +3075,12 @@ class ILBERTechV2(ctk.CTk):
                 "f_pcode": f_pcode,
                 "f_inter": f_inter,
                 "f_spks": f_spks,
+                "f_consent": f_consent,
+                "f_age": f_age,
+                "f_gender": f_gender,
+                "f_job": f_job,
+                "f_edu": f_edu,
+                "f_extra_prof": f_extra_prof,
                 "f_ctx": f_ctx,
                 "f_tr_chk": f_tr_chk,
                 "f_tr_tgt": f_tr_tgt,
@@ -2967,14 +3666,19 @@ class ILBERTechV2(ctk.CTk):
             audio_data = np.clip(audio_data * (26000.0 / peak), -32767.0, 32767.0)
             audio_int16 = audio_data.astype(np.int16)
 
-            ws_up = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "Uploads")
-            os.makedirs(ws_up, exist_ok=True)
-            out_wav = os.path.join(ws_up, f"Mikrofon_Kaydi_{datetime.datetime.now().strftime('%H%M%S')}.wav")
+            ws_root = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace")
+            rec_base = f"Mikrofon_Kaydi_{datetime.datetime.now().strftime('%H%M%S')}"
+            custom_proj = ctrls.get("project_var").get().strip() if "project_var" in ctrls else ""
+            proj_dir = self._create_project_dir(ws_root, "MIC", rec_base, custom_project_name=custom_proj)
+            out_wav = os.path.join(proj_dir, f"{rec_base}.wav")
             from scipy.io.wavfile import write as write_wav
             rec_fs = getattr(self, "_rec_samplerate", 16000)
             write_wav(out_wav, rec_fs, audio_int16)
+            self._log(self.log_boxes[page_id], f"🎙️ {self.L('Ses kaydı proje klasörüne kaydedildi', 'Audio saved to project folder', 'Audio im Projektordner gespeichert')}: {out_wav}")
+            self._refresh_project_dropdown(page_id)
             if "file_var" in ctrls:
                 ctrls["file_var"].set(out_wav)
+            ctrls["selected_files"] = [out_wav]
             start_btn = ctrls.get("start_btn", btn)
             src_val = ctrls.get("src_var").get() if "src_var" in ctrls else "Auto (Otomatik)"
             self.start_pipeline(page_id, out_wav, src_val, "Turkish", start_btn)
@@ -3046,9 +3750,9 @@ class ILBERTechV2(ctk.CTk):
         if not filepath:
             if mode == "tool_ai_ozet":
                 self.after(0, lambda: self._log(logbox, self.L(
-                    "❌ Lütfen önce çevrilecek bir belge (.docx, .pdf, .xlsx veya .txt) seçin!",
-                    "❌ Please select a document (.docx, .pdf, .xlsx, or .txt) to translate first!",
-                    "❌ Bitte wählen Sie zuerst ein Dokument (.docx, .pdf, .xlsx oder .txt) aus!",
+                    "❌ Lütfen önce çevrilecek bir belge (.docx, .xlsx veya .txt) seçin!",
+                    "❌ Please select a document (.docx, .xlsx, or .txt) to translate first!",
+                    "❌ Bitte wählen Sie zuerst ein Dokument (.docx, .xlsx oder .txt) aus!",
                 )))
             else:
                 self.after(0, lambda: self._log(logbox, self.t("log_err_file")))
@@ -3270,11 +3974,33 @@ class ILBERTechV2(ctk.CTk):
             self.after(0, lambda: self._log(logbox, self.t("log_loaded")))
 
         src_code = LANG_MAP.get(src_selection, "auto")
+        audio_arr = whisper.load_audio(filepath)
+        peak = float(np.max(np.abs(audio_arr))) if len(audio_arr) else 0.0
+        if peak < 1e-4:
+            raise RuntimeError(self.L(
+                "Ses dosyasında konuşma/ses sinyali algılanamadı (dosya tamamen sessiz veya ses kanalı boş).",
+                "No audio signal detected in the file (the audio track is completely silent).",
+                "In der Datei wurde kein Audiosignal erkannt (die Audiospur ist stumm)."
+            ))
+        if peak < 0.15:
+            audio_arr = np.clip(audio_arr * (0.6 / peak), -1.0, 1.0).astype(np.float32)
+
+        use_fp16 = False
+        try:
+            import torch as _th
+            use_fp16 = bool(_th.cuda.is_available())
+        except Exception:
+            use_fp16 = False
+
         whisper_kwargs = {
             "verbose": True,
+            "fp16": use_fp16,
             "condition_on_previous_text": False,
-            "no_speech_threshold": 0.6,
+            "no_speech_threshold": 0.5,
+            "logprob_threshold": -0.8,
             "compression_ratio_threshold": 2.4,
+            "word_timestamps": True,
+            "hallucination_silence_threshold": 1.5,
         }
         if src_code != "auto":
             whisper_kwargs["language"] = src_code
@@ -3282,26 +4008,33 @@ class ILBERTechV2(ctk.CTk):
         old_stdout = sys.stdout
         sys.stdout = OutputRedirector(self, logbox)
         try:
-            result = self.model.transcribe(filepath, **whisper_kwargs)
+            result = self.model.transcribe(audio_arr, **whisper_kwargs)
             if not result.get("segments") and src_code == "auto":
                 # Fallback for very short microphone clips where auto-lang detection needs a hint
                 whisper_kwargs["language"] = self.ui_lang if self.ui_lang in ("tr", "en", "de") else "tr"
-                result = self.model.transcribe(filepath, **whisper_kwargs)
+                result = self.model.transcribe(audio_arr, **whisper_kwargs)
         finally:
             sys.stdout = old_stdout
 
         detected_lang = result.get("language", src_code if src_code != "auto" else "tr").lower()
-        raw_segments = [
-            {
+        raw_segments = []
+        for s in result.get("segments", []):
+            txt_s = str(s.get("text", "")).strip()
+            if not txt_s:
+                continue
+            low_words = [
+                str(w.get("word", "")).strip()
+                for w in (s.get("words") or [])
+                if float(w.get("probability", 1.0)) < 0.55 and str(w.get("word", "")).strip()
+            ]
+            raw_segments.append({
                 "start": float(s["start"]),
                 "end": float(s["end"]),
-                "text": str(s["text"]).strip(),
+                "text": txt_s,
                 "speaker": "",
                 "note": "",
-            }
-            for s in result.get("segments", [])
-            if str(s.get("text", "")).strip()
-        ]
+                "low_conf_words": low_words,
+            })
         if not raw_segments and str(result.get("text", "")).strip():
             raw_segments = [{
                 "start": 0.0,
@@ -3317,10 +4050,48 @@ class ILBERTechV2(ctk.CTk):
             if getattr(self, "cancel_requested", False):
                 raise RuntimeError("__USER_CANCELLED__")
             workspace_dir = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace")
-            for sub in ["Uploads", "Transcripts", "Subtitles", "Reports"]:
+            for sub in ["Uploads", "Transcripts", "Subtitles", "Reports", "Projects"]:
                 os.makedirs(os.path.join(workspace_dir, sub), exist_ok=True)
-            base_name = os.path.basename(filepath).rsplit(".", 1)[0]
             ctrls = self.page_controls.get(mode, {})
+            custom_proj = ctrls.get("project_var").get().strip() if "project_var" in ctrls else ""
+            sel_files = ctrls.get("selected_files") or []
+            if mode != "tool_ai_chat" and sel_files and (not os.path.isfile(str(filepath)) or len(sel_files) > 1):
+                file_queue = [f for f in sel_files if os.path.isfile(f)]
+            else:
+                file_queue = [filepath]
+
+            for q_idx, cur_fp in enumerate(file_queue, 1):
+                if getattr(self, "cancel_requested", False):
+                    raise RuntimeError("__USER_CANCELLED__")
+                if len(file_queue) > 1:
+                    self.after(0, lambda i=q_idx, n=len(file_queue), fn=os.path.basename(cur_fp): self._log(logbox, self.L(
+                        f"\n📦 [Proje Dosyası {i}/{n}] İşleniyor: {fn}",
+                        f"\n📦 [Project File {i}/{n}] Processing: {fn}",
+                        f"\n📦 [Projektdatei {i}/{n}] Verarbeitung: {fn}",
+                    )))
+                self._run_engine_single(mode, cur_fp, src, tgt, logbox, workspace_dir, ctrls, custom_proj)
+            self._refresh_project_dropdown(mode)
+
+        except Exception as e:
+            if "__USER_CANCELLED__" not in str(e) and not getattr(self, "cancel_requested", False):
+                err = f"❌ Error: {str(e)}"
+                self.after(0, lambda msg=err: self._log(logbox, msg))
+        finally:
+            if run_id == getattr(self, "_current_run_id", 0):
+                self.is_processing = False
+                self._stop_busy_indicator(mode)
+                ctrls_fin = self.page_controls.get(mode, {})
+                st_btn = ctrls_fin.get("stop_btn")
+                if st_btn:
+                    self.after(0, lambda b=st_btn: b.winfo_exists() and b.configure(state="disabled", fg_color="#94A3B8"))
+                if mode == "tool_ai_chat":
+                    self.after(0, lambda: btn.configure(state="normal", text=self.t("chat_memorize")))
+                else:
+                    self.after(0, lambda: btn.configure(state="normal", text=self.t("btn_start_proc")))
+
+    def _run_engine_single(self, mode, filepath, src, tgt, logbox, workspace_dir, ctrls, custom_proj=""):
+        if True:
+            base_name = os.path.basename(filepath).rsplit(".", 1)[0]
 
             # =========================================================================
             # 1. SEGMENT: MIC (Aynı Dilde Deşifre — Word, TXT, SRT, VTT)
@@ -3360,10 +4131,16 @@ class ILBERTechV2(ctk.CTk):
                     "[4] Generating output files (Word, TXT, SRT, VTT)...",
                     "[4] Ausgabedateien (Word, TXT, SRT, VTT) werden erstellt..."
                 )))
-                srt_path = os.path.join(workspace_dir, "Subtitles", f"{base_name}_MIC.srt")
-                vtt_path = os.path.join(workspace_dir, "Subtitles", f"{base_name}_MIC.vtt")
-                txt_path = os.path.join(workspace_dir, "Transcripts", f"{base_name}_MIC_Metin.txt")
-                docx_path = os.path.join(workspace_dir, "Transcripts", f"{base_name}_MIC_Desifre.docx")
+                mic_projects_root = os.path.normpath(os.path.join(workspace_dir, "Projects", "MIC"))
+                fp_dir = os.path.normpath(os.path.dirname(filepath))
+                if fp_dir.startswith(mic_projects_root + os.sep):
+                    proj_dir = fp_dir
+                else:
+                    proj_dir = self._create_project_dir(workspace_dir, "MIC", base_name, filepath, custom_project_name=custom_proj)
+                srt_path = os.path.join(proj_dir, f"{base_name}_MIC.srt")
+                vtt_path = os.path.join(proj_dir, f"{base_name}_MIC.vtt")
+                txt_path = os.path.join(proj_dir, f"{base_name}_MIC_Metin.txt")
+                docx_path = os.path.join(proj_dir, f"{base_name}_MIC_Desifre.docx")
 
                 write_srt_file(edited_segments, srt_path)
                 write_vtt_file(edited_segments, vtt_path)
@@ -3430,17 +4207,16 @@ class ILBERTechV2(ctk.CTk):
                     ),
                 )
 
-                # Save source SRT and VTT
-                src_srt_path = os.path.join(workspace_dir, "Subtitles", f"{base_name}_GLOBE_Kaynak_{src_code}.srt")
-                src_vtt_path = os.path.join(workspace_dir, "Subtitles", f"{base_name}_GLOBE_Kaynak_{src_code}.vtt")
+                # Save source SRT and VTT inside this GLOBE project folder
+                proj_dir = self._create_project_dir(workspace_dir, "GLOBE", base_name, filepath, custom_project_name=custom_proj)
+                src_srt_path = os.path.join(proj_dir, f"{base_name}_GLOBE_Kaynak_{src_code}.srt")
+                src_vtt_path = os.path.join(proj_dir, f"{base_name}_GLOBE_Kaynak_{src_code}.vtt")
                 write_srt_file(edited_src_segments, src_srt_path)
                 write_vtt_file(edited_src_segments, src_vtt_path)
 
-                # Determine selected target languages
-                multi_vars = ctrls.get("multi_lang_vars", {})
-                selected_tgt_names = [lname for lname, var in multi_vars.items() if var.get()]
-                if not selected_tgt_names:
-                    selected_tgt_names = [self.user_settings.get("def_lang", "Turkish")]
+                # Determine selected single target language
+                tgt_sel = ctrls.get("globe_tgt_var").get() if "globe_tgt_var" in ctrls else self.user_settings.get("def_lang", "Turkish")
+                selected_tgt_names = [tgt_sel] if tgt_sel else [self.user_settings.get("def_lang", "Turkish")]
 
                 burn_mp4 = bool(ctrls.get("burn_mp4_var").get()) if "burn_mp4_var" in ctrls else True
                 src_lines = [s["text"].replace("\n", " ").strip() for s in edited_src_segments]
@@ -3480,9 +4256,9 @@ class ILBERTechV2(ctk.CTk):
                         ),
                     )
 
-                    out_srt = os.path.join(workspace_dir, "Subtitles", f"{base_name}_GLOBE_{t_code}.srt")
-                    out_vtt = os.path.join(workspace_dir, "Subtitles", f"{base_name}_GLOBE_{t_code}.vtt")
-                    out_bi_docx = os.path.join(workspace_dir, "Transcripts", f"{base_name}_GLOBE_Cift_Dilli_{src_code}_{t_code}.docx")
+                    out_srt = os.path.join(proj_dir, f"{base_name}_GLOBE_{t_code}.srt")
+                    out_vtt = os.path.join(proj_dir, f"{base_name}_GLOBE_{t_code}.vtt")
+                    out_bi_docx = os.path.join(proj_dir, f"{base_name}_GLOBE_Cift_Dilli_{src_code}_{t_code}.docx")
 
                     write_srt_file(edited_tgt_segs, out_srt)
                     write_vtt_file(edited_tgt_segs, out_vtt)
@@ -3506,7 +4282,7 @@ class ILBERTechV2(ctk.CTk):
                             f"[5] Burning {tn} subtitles into video (.mp4)...",
                             f"[5] {tn}-Untertitel werden in das Video eingebrannt (.mp4)..."
                         )))
-                        out_vid = os.path.join(workspace_dir, "Transcripts", f"{base_name}_GLOBE_{t_code}.mp4")
+                        out_vid = os.path.join(proj_dir, f"{base_name}_GLOBE_{t_code}.mp4")
                         srt_esc = out_srt.replace("\\", "/").replace(":", "\\:")
 
                         f_size = self.user_settings.get("sub_size", "20")
@@ -3520,12 +4296,70 @@ class ILBERTechV2(ctk.CTk):
 
                         vf_arg = f"subtitles='{srt_esc}':force_style='{style_str}'"
                         creationflags = 0x08000000 if os.name == "nt" else 0
-                        subprocess.run(
-                            ["ffmpeg", "-y", "-i", filepath, "-vf", vf_arg, "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "copy", out_vid],
-                            capture_output=True,
+                        ff_cmd = ["ffmpeg", "-y", "-i", filepath, "-vf", vf_arg, "-c:v", "libx264", "-preset", "ultrafast", "-c:a", "aac", "-b:a", "192k", out_vid]
+                        proc = subprocess.Popen(
+                            ff_cmd,
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.PIPE,
+                            universal_newlines=True,
+                            encoding="utf-8",
+                            errors="replace",
                             creationflags=creationflags,
                         )
-                        self.after(0, lambda p=out_vid: self._log(logbox, f"   🎥 MP4 Video: {p}"))
+                        total_dur = max(1.0, float(edited_tgt_segs[-1]["end"])) if edited_tgt_segs else 1.0
+                        last_pct_logged = -1
+                        buf = ""
+                        while True:
+                            if getattr(self, "cancel_requested", False):
+                                try:
+                                    proc.terminate()
+                                except Exception:
+                                    pass
+                                raise RuntimeError("__USER_CANCELLED__")
+                            ch = proc.stderr.read(1) if proc.stderr else ""
+                            if not ch:
+                                if proc.poll() is not None:
+                                    break
+                                continue
+                            if ch in ("\r", "\n"):
+                                line = buf.strip()
+                                buf = ""
+                                if line:
+                                    m_dur = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", line)
+                                    if m_dur:
+                                        total_dur = max(1.0, int(m_dur.group(1)) * 3600 + int(m_dur.group(2)) * 60 + float(m_dur.group(3)))
+                                    m_tm = re.search(r"time=(\d+):(\d+):(\d+(?:\.\d+)?)", line)
+                                    if m_tm:
+                                        cur_s = int(m_tm.group(1)) * 3600 + int(m_tm.group(2)) * 60 + float(m_tm.group(3))
+                                        pct = min(99, max(0, int((cur_s / total_dur) * 100)))
+                                        ctrls["busy_base_msg"] = self.L(
+                                            f"🎥 {tgt_name} altyazı gömülüyor... %{pct}",
+                                            f"🎥 Burning {tgt_name} subtitles... {pct}%",
+                                            f"🎥 {tgt_name}-Untertitel werden eingebrannt... {pct}%",
+                                        )
+                                        if pct >= last_pct_logged + 10:
+                                            last_pct_logged = (pct // 10) * 10
+                                            self.after(0, lambda p=pct: self._log(logbox, self.L(
+                                                f"   -> 🎥 Video Altyazı Gömme (MP4 Burn): %{p}",
+                                                f"   -> 🎥 Video Subtitle Burning (MP4): {p}%",
+                                                f"   -> 🎥 Video-Untertitel einbrennen (MP4): {p}%",
+                                            )))
+                            else:
+                                buf += ch
+                        rc = proc.wait()
+                        if rc == 0 and os.path.exists(out_vid):
+                            self.after(0, lambda: self._log(logbox, self.L(
+                                "   -> 🎥 Video Altyazı Gömme (MP4 Burn): %100",
+                                "   -> 🎥 Video Subtitle Burning (MP4): 100%",
+                                "   -> 🎥 Video-Untertitel einbrennen (MP4): 100%",
+                            )))
+                            self.after(0, lambda p=out_vid: self._log(logbox, f"   🎥 MP4 Video: {p}"))
+                        else:
+                            self.after(0, lambda code=rc: self._log(logbox, self.L(
+                                f"   ⚠️ MP4 video oluşturulamadı (FFmpeg hata kodu: {code}). SRT/VTT/Word dosyaları kaydedildi.",
+                                f"   ⚠️ MP4 video export failed (FFmpeg exit {code}). SRT/VTT/Word files were saved.",
+                                f"   ⚠️ MP4-Export fehlgeschlagen (FFmpeg-Code {code}). SRT/VTT/Word wurden gespeichert.",
+                            )))
 
                 self.after(0, lambda: self._log(logbox, self.L(
                     "✔ GLOBE İşlemi Başarıyla Tamamlandı!",
@@ -3606,6 +4440,56 @@ class ILBERTechV2(ctk.CTk):
                     "[6] Generating FIELD Outputs (Verbatim Word, Readable Word, NVivo/MAXQDA/ATLAS.ti)...",
                     "[6] FIELD-Ausgaben (Wortgetreu Word, Lesbar Word, NVivo/MAXQDA/ATLAS.ti) werden erstellt..."
                 )))
+                proj_dir = self._create_project_dir(workspace_dir, "FIELD", f"{p_code}_{base_name}" if p_code else base_name, filepath, custom_project_name=custom_proj)
+                iv_out_dir = proj_dir
+                quote_docx_p = ""
+                prof_docx_p = ""
+                prof_xlsx_p = ""
+                try:
+                    from ilber_field_project import FieldProjectManager
+                    fmgr = FieldProjectManager(proj_dir)
+                    fmgr.data["language"] = src if src else "Auto"
+                    fmgr.data["speaker_count"] = num_spks
+                    actual_code = p_code.strip().upper() if p_code and p_code.strip() else fmgr.next_participant_code()
+                    if actual_code in fmgr.data.get("participants", {}) and any(actual_code in iv.get("participant_codes", []) for iv in fmgr.data.get("interviews", [])):
+                        actual_code = fmgr.next_participant_code()
+                    iv_rec = fmgr.add_interview_record(filepath, [actual_code], num_spks)
+                    iv_out_dir = fmgr.abs_path(iv_rec["folder_rel"])
+                    if "Manuel Profil Notu" not in fmgr.data.get("profile_fields", []):
+                        fmgr.data.setdefault("profile_fields", []).append("Manuel Profil Notu")
+                    fmgr.ensure_participant(actual_code)
+                    fmgr.data["participants"][actual_code]["consent"] = ctrls.get("f_consent").get() if "f_consent" in ctrls else "Onam Alındı"
+                    fmgr.data["participants"][actual_code]["fields"] = {
+                        "Yaş": ctrls.get("f_age").get().strip() if "f_age" in ctrls else "",
+                        "Cinsiyet": ctrls.get("f_gender").get().strip() if "f_gender" in ctrls else "",
+                        "Meslek / Rol": ctrls.get("f_job").get().strip() if "f_job" in ctrls else "",
+                        "Eğitim": ctrls.get("f_edu").get().strip() if "f_edu" in ctrls else "",
+                        "Bölge / Mahalle": metadata.get("location", ""),
+                        "Manuel Profil Notu": ctrls.get("f_extra_prof").get().strip() if "f_extra_prof" in ctrls else "",
+                    }
+                    iv_blocks = [
+                        {
+                            "start": float(s.get("start", 0.0)),
+                            "end": float(s.get("end", 0.0)),
+                            "speaker": str(s.get("speaker", "")),
+                            "text": str(s.get("text", "")).strip(),
+                            "low_conf_words": list(s.get("low_conf_words", [])),
+                            "is_quote": bool(s.get("is_quote", False)),
+                            "quote_theme": str(s.get("quote_theme", "")).strip(),
+                            "note": str(s.get("note", "")).strip(),
+                        }
+                        for s in ed_segments
+                    ]
+                    iv_rec["status"] = "reviewed"
+                    fmgr.save_interview_transcript(iv_rec, iv_blocks, general_note=metadata.get("context", ""))
+                    quote_docx_p = fmgr.export_interview_quotes_docx(iv_rec, iv_blocks)
+                    prof_docx_p, prof_xlsx_p = fmgr.export_participant_profiles()
+                    # Advance participant code box for the next recording
+                    next_c = fmgr.next_participant_code()
+                    if "f_pcode" in ctrls:
+                        self.after(0, lambda nc=next_c: (ctrls["f_pcode"].delete(0, "end"), ctrls["f_pcode"].insert(0, nc)))
+                except Exception:
+                    pass
                 paths = export_field_outputs(
                     workspace_dir=workspace_dir,
                     base_name=base_name,
@@ -3615,16 +4499,21 @@ class ILBERTechV2(ctk.CTk):
                     anon_candidates=ed_anons,
                     translated_lines=translated_lines,
                     tgt_lang_label=tgt_lang_label,
+                    output_dir=iv_out_dir,
                 )
 
                 self.after(0, lambda: self._log(logbox, self.L(
-                    "✔ FIELD Araştırma Paketi Hazır! Üretilen Dosyalar:",
-                    "✔ FIELD Research Package Ready! Generated Files:",
-                    "✔ FIELD Forschungspaket bereit! Erstellte Dateien:"
+                    "✔ FIELD Araştırma Paketi Hazır! Proje Klasörüne Kaydedilen Dosyalar:",
+                    "✔ FIELD Research Package Ready! Saved to Project Folder:",
+                    "✔ FIELD Forschungspaket bereit! Im Projektordner gespeichert:"
                 )))
-                self.after(0, lambda: self._log(logbox, f"   📘 1. Verbatim (.docx): {paths['verbatim_docx']}"))
-                self.after(0, lambda: self._log(logbox, f"   📗 2. Readable (.docx): {paths['readable_docx']}"))
-                self.after(0, lambda: self._log(logbox, f"   📊 3. NVivo / MAXQDA / ATLAS.ti (.txt): {paths['qda_txt']}"))
+                self.after(0, lambda: self._log(logbox, f"   📘 1. Deşifre (.docx): {paths['verbatim_docx']}"))
+                self.after(0, lambda: self._log(logbox, f"   📗 2. Okunabilir (.docx): {paths['readable_docx']}"))
+                self.after(0, lambda: self._log(logbox, f"   📊 3. NVivo / MAXQDA (.txt): {paths['qda_txt']}"))
+                if quote_docx_p:
+                    self.after(0, lambda p=quote_docx_p: self._log(logbox, f"   ⭐ 4. Alıntılar (.docx): {p}"))
+                if prof_docx_p:
+                    self.after(0, lambda p=prof_docx_p, x=prof_xlsx_p: self._log(logbox, f"   👥 5. Katılımcı Profilleri: {p} | {x}"))
                 open_path_crossplatform(paths["verbatim_docx"])
 
             # =========================================================================
@@ -3635,18 +4524,18 @@ class ILBERTechV2(ctk.CTk):
                 import ilber_core_utils as _icu
                 importlib.reload(_icu)
                 ext = filepath.lower().rsplit(".", 1)[-1] if "." in filepath else ""
-                is_image_input = ext in ("png", "jpg", "jpeg", "bmp", "webp")
-                if ext not in ("docx", "pdf", "xlsx", "txt", "png", "jpg", "jpeg", "bmp", "webp"):
+                if ext not in ("docx", "xlsx", "txt"):
                     self.after(0, lambda e=ext: self._log(logbox, self.L(
-                        f"❌ Desteklenmeyen dosya formatı (.{e}). Lütfen Word (.docx), PDF (.pdf), Excel (.xlsx), Görsel (.jpg/.png/.webp) veya Metin (.txt) dosyası seçin.",
-                        f"❌ Unsupported format (.{e}). Please select .docx, .pdf, .xlsx, .jpg/.png/.webp, or .txt.",
-                        f"❌ Nicht unterstütztes Format (.{e}). Bitte wählen Sie .docx, .pdf, .xlsx, .jpg/.png oder .txt."
+                        f"❌ Desteklenmeyen dosya formatı (.{e}). DOC modülünde şu an sadece Word (.docx), Excel (.xlsx) ve Metin (.txt) belgeleri desteklenmektedir.",
+                        f"❌ Unsupported format (.{e}). Currently DOC supports Word (.docx), Excel (.xlsx), and Text (.txt) documents.",
+                        f"❌ Nicht unterstütztes Format (.{e}). Derzeit unterstützt DOC nur .docx, .xlsx und .txt."
                     )))
                     return
 
                 tgt_name = ctrls.get("edu_tgt_var").get() if "edu_tgt_var" in ctrls else self.user_settings.get("def_lang", "Turkish")
                 tgt_code = LANG_MAP.get(tgt_name, "tr")
-                is_ocr_only = (tgt_code == "ocr_only")
+                if tgt_code == "ocr_only":
+                    tgt_code = "tr"
                 src_code = LANG_MAP.get(src, "auto")
 
                 # Load optional glossary (from file and/or inline entry)
@@ -3669,59 +4558,43 @@ class ILBERTechV2(ctk.CTk):
                         "ℹ️ [1] Kein Glossar geladen — Direkte Verarbeitung ohne Glossar."
                     )))
 
-                if is_image_input:
-                    self.after(0, lambda e=ext.upper(), tn=tgt_name: self._log(logbox, self.L(
-                        f"🔍 [2] {e} görseli / ekran görüntüsü üzerindeki yazılar OCR (Optik Karakter Tanıma) ile düzenlenebilir metne dönüştürülüyor ({tn})...",
-                        f"🔍 [2] Extracting editable text from {e} image / screenshot via OCR ({tn})...",
-                        f"🔍 [2] Text aus {e}-Bild wird per OCR extrahiert ({tn})..."
-                    )))
-                else:
-                    self.after(0, lambda e=ext.upper(), tn=tgt_name: self._log(logbox, self.L(
-                        f"📄 [2] {e} belgesi okunuyor ve orijinal sayfa/tablo/stil yapısı korunarak {tn} diline çevriliyor...",
-                        f"📄 [2] Reading {e} document and translating into {tn} while preserving original layout, tables, and styles...",
-                        f"📄 [2] {e}-Dokument wird gelesen und unter Beibehaltung des Originalformats in {tn} übersetzt..."
-                    )))
+                self.after(0, lambda e=ext.upper(), tn=tgt_name: self._log(logbox, self.L(
+                    f"📄 [2] {e} belgesi okunuyor ve orijinal sayfa/tablo/stil yapısı korunarak {tn} diline çevriliyor...",
+                    f"📄 [2] Reading {e} document and translating into {tn} while preserving original layout, tables, and styles...",
+                    f"📄 [2] {e}-Dokument wird gelesen und unter Beibehaltung des Originalformats in {tn} übersetzt..."
+                )))
 
                 def _detect_source_lang_from_texts(sample_texts):
-                    effective_tgt = "tr" if is_ocr_only else tgt_code
-                    return _icu.detect_document_source_lang(sample_texts, src_code=src_code, tgt_code=effective_tgt)
+                    return _icu.detect_document_source_lang(sample_texts, src_code=src_code, tgt_code=tgt_code)
 
                 def _batch_translate_doc(texts_list):
-                    if is_ocr_only:
-                        draft_translations = list(texts_list)
-                        self.after(0, lambda n_seg=len(texts_list): self._log(logbox, self.L(
-                            f"      ✓ OCR Metin Tanıma Tamamlandı: Toplam {n_seg} satır/bölüm düzenlenebilir metne dönüştürüldü",
-                            f"      ✓ OCR Text Recognition Completed: {n_seg} lines converted to editable text",
-                            f"      ✓ OCR-Texterkennung abgeschlossen: {n_seg} Zeilen in bearbeitbaren Text umgewandelt"
+                    actual_src = _detect_source_lang_from_texts(texts_list)
+                    self.after(0, lambda s_c=actual_src, t_c=tgt_code, n_seg=len(texts_list): self._log(logbox, self.L(
+                        f"      ✓ Algılanan Kaynak Dil: {s_c.upper()} ➔ Hedef Dil: {t_c.upper()} (Toplam {n_seg} metin bloğu)",
+                        f"      ✓ Detected Source Language: {s_c.upper()} ➔ Target: {t_c.upper()} ({n_seg} text blocks)",
+                        f"      ✓ Erkannte Ausgangssprache: {s_c.upper()} ➔ Ziel: {t_c.upper()} ({n_seg} Textblöcke)"
+                    )))
+
+                    def _m2m_runner(arr, sc, tc):
+                        return self._translate_lines_m2m100(arr, sc, tc, logbox, label_prefix="DOC")
+
+                    def _polish_log(pct):
+                        self.after(0, lambda p=pct: self._log(logbox, self.L(
+                            f"      -> ✨ AI Cümle Akıcılığı & Terim Sözlüğü Redaksiyonu: %{p}",
+                            f"      -> ✨ AI Fluency & Terminology Polishing: {p}%",
+                            f"      -> ✨ KI-Stil- & Glossar-Feinschliff: {p}%"
                         )))
-                    else:
-                        actual_src = _detect_source_lang_from_texts(texts_list)
-                        self.after(0, lambda s_c=actual_src, t_c=tgt_code, n_seg=len(texts_list): self._log(logbox, self.L(
-                            f"      ✓ Algılanan Kaynak Dil: {s_c.upper()} ➔ Hedef Dil: {t_c.upper()} (Toplam {n_seg} metin bloğu)",
-                            f"      ✓ Detected Source Language: {s_c.upper()} ➔ Target: {t_c.upper()} ({n_seg} text blocks)",
-                            f"      ✓ Erkannte Ausgangssprache: {s_c.upper()} ➔ Ziel: {t_c.upper()} ({n_seg} Textblöcke)"
-                        )))
 
-                        def _m2m_runner(arr, sc, tc):
-                            return self._translate_lines_m2m100(arr, sc, tc, logbox, label_prefix="EDU")
-
-                        def _polish_log(pct):
-                            self.after(0, lambda p=pct: self._log(logbox, self.L(
-                                f"      -> ✨ AI Cümle Akıcılığı & Terim Sözlüğü Redaksiyonu: %{p}",
-                                f"      -> ✨ AI Fluency & Terminology Polishing: {p}%",
-                                f"      -> ✨ KI-Stil- & Glossar-Feinschliff: {p}%"
-                            )))
-
-                        draft_translations = _icu.translate_texts_high_quality(
-                            texts=texts_list,
-                            src_code=actual_src,
-                            tgt_code=tgt_code,
-                            glossary_dict=glossary_dict,
-                            m2m_translate_fn=_m2m_runner,
-                            llm_fn=self._run_llm if use_hq_ai else None,
-                            use_llm_polish=use_hq_ai,
-                            log_fn=_polish_log,
-                        )
+                    draft_translations = _icu.translate_texts_high_quality(
+                        texts=texts_list,
+                        src_code=actual_src,
+                        tgt_code=tgt_code,
+                        glossary_dict=glossary_dict,
+                        m2m_translate_fn=_m2m_runner,
+                        llm_fn=self._run_llm if use_hq_ai else None,
+                        use_llm_polish=use_hq_ai,
+                        log_fn=_polish_log,
+                    )
 
                     open_editor = bool(ctrls.get("edu_edit_var").get()) if "edu_edit_var" in ctrls else True
                     if open_editor and texts_list:
@@ -3737,33 +4610,16 @@ class ILBERTechV2(ctk.CTk):
                         )
                     return draft_translations
 
-                if is_image_input:
-                    tag_suf = "OCR_Metin" if is_ocr_only else f"OCR_Ceviri_{tgt_code.upper()}"
-                    out_docx_path = os.path.join(workspace_dir, "Transcripts", f"{base_name}_EDU_{tag_suf}.docx")
-                    out_txt_path = os.path.join(workspace_dir, "Transcripts", f"{base_name}_EDU_{tag_suf}.txt")
-                    out_img_path = os.path.join(workspace_dir, "Transcripts", f"{base_name}_EDU_{tag_suf}.{ext}")
-                    count_seg, preview_pairs = _icu.process_image_ocr_and_translate(
-                        filepath,
-                        out_docx_path=out_docx_path,
-                        out_txt_path=out_txt_path,
-                        out_img_path=out_img_path,
-                        translate_batch_fn=_batch_translate_doc,
-                        ocr_only=is_ocr_only,
-                    )
-                    out_path = out_docx_path
-                else:
-                    tag_suf = "OCR_Metin" if is_ocr_only else f"Ceviri_{tgt_code.upper()}"
-                    out_filename = f"{base_name}_EDU_{tag_suf}.{ext}"
-                    out_path = os.path.join(workspace_dir, "Transcripts", out_filename)
+                proj_dir = self._create_project_dir(workspace_dir, "EDU", base_name, filepath, custom_project_name=custom_proj)
+                out_filename = f"{base_name}_EDU_Ceviri_{tgt_code.upper()}.{ext}"
+                out_path = os.path.join(proj_dir, out_filename)
 
-                    if ext == "docx":
-                        count_seg, preview_pairs = _icu.translate_docx_preserve_format(filepath, out_path, _batch_translate_doc)
-                    elif ext == "pdf":
-                        count_seg, preview_pairs = _icu.translate_pdf_preserve_format(filepath, out_path, _batch_translate_doc)
-                    elif ext == "xlsx":
-                        count_seg, preview_pairs = _icu.translate_xlsx_preserve_format(filepath, out_path, _batch_translate_doc)
-                    else:
-                        count_seg, preview_pairs = _icu.translate_txt_preserve_format(filepath, out_path, _batch_translate_doc)
+                if ext == "docx":
+                    count_seg, preview_pairs = _icu.translate_docx_preserve_format(filepath, out_path, _batch_translate_doc)
+                elif ext == "xlsx":
+                    count_seg, preview_pairs = _icu.translate_xlsx_preserve_format(filepath, out_path, _batch_translate_doc)
+                else:
+                    count_seg, preview_pairs = _icu.translate_txt_preserve_format(filepath, out_path, _batch_translate_doc)
 
                 if preview_pairs:
                     preview_lines = []
@@ -3781,23 +4637,12 @@ class ILBERTechV2(ctk.CTk):
                         f"\n📄 ERGEBNISVORSCHAU:\n--------------------------------------------------\n{jp}\n--------------------------------------------------"
                     )))
 
-                if is_image_input:
-                    self.after(0, lambda c=count_seg: self._log(logbox, self.L(
-                        f"\n✔ EDU Görsel OCR & Düzenlenebilir Belge Dönüşümü Tamamlandı! ({c} satır işlendi)",
-                        f"\n✔ EDU Image OCR & Editable Document Conversion Completed! ({c} lines processed)",
-                        f"\n✔ EDU Bild-OCR & Dokumentkonvertierung abgeschlossen! ({c} Zeilen)"
-                    )))
-                    self.after(0, lambda p=out_docx_path: self._log(logbox, f"   📘 Düzenlenebilir Word (.docx): {p}"))
-                    self.after(0, lambda p=out_txt_path: self._log(logbox, f"   📄 Düz Metin (.txt): {p}"))
-                    if not is_ocr_only and os.path.exists(out_img_path):
-                        self.after(0, lambda p=out_img_path, e=ext.upper(): self._log(logbox, f"   🖼️ Çevrilmiş Görsel (.{ext}): {p}"))
-                else:
-                    self.after(0, lambda c=count_seg, e=ext.upper(): self._log(logbox, self.L(
-                        f"\n✔ EDU Format Korumalı Belge Çevirisi Tamamlandı! ({c} bölüm çevrildi · Giriş: .{ext} ➔ Çıkış: .{ext})",
-                        f"\n✔ EDU Format-Preserving Document Translation Completed! ({c} segments translated · Input: .{ext} ➔ Output: .{ext})",
-                        f"\n✔ EDU Formatgetreue Dokumentübersetzung abgeschlossen! ({c} Abschnitte · .{ext} ➔ .{ext})"
-                    )))
-                    self.after(0, lambda p=out_path, e=ext.upper(): self._log(logbox, f"   📁 {e} Çıktı Dosyası: {p}"))
+                self.after(0, lambda c=count_seg, e=ext.upper(): self._log(logbox, self.L(
+                    f"\n✔ DOC Format Korumalı Belge Çevirisi Tamamlandı! ({c} bölüm çevrildi · Giriş: .{ext} ➔ Çıkış: .{ext})",
+                    f"\n✔ DOC Format-Preserving Document Translation Completed! ({c} segments translated · Input: .{ext} ➔ Output: .{ext})",
+                    f"\n✔ DOC Formatgetreue Dokumentübersetzung abgeschlossen! ({c} Abschnitte · .{ext} ➔ .{ext})"
+                )))
+                self.after(0, lambda p=out_path, e=ext.upper(): self._log(logbox, f"   📁 {e} Çıktı Dosyası: {p}"))
                 open_path_crossplatform(out_path)
 
             elif mode == "tool_ai_chat":
@@ -3870,23 +4715,6 @@ class ILBERTechV2(ctk.CTk):
                         "\n⚠️ WARNING: No readable text was found in the selected image. Please snip the full question area again or use '📋 Paste Image'.\n",
                         "\n⚠️ WARNUNG: Im ausgewählten Bild wurde kein lesbarer Text gefunden.\n"
                     )))
-
-        except Exception as e:
-            if "__USER_CANCELLED__" not in str(e) and not getattr(self, "cancel_requested", False):
-                err = f"❌ Error: {str(e)}"
-                self.after(0, lambda msg=err: self._log(logbox, msg))
-        finally:
-            if run_id == getattr(self, "_current_run_id", 0):
-                self.is_processing = False
-                self._stop_busy_indicator(mode)
-                ctrls_fin = self.page_controls.get(mode, {})
-                st_btn = ctrls_fin.get("stop_btn")
-                if st_btn:
-                    self.after(0, lambda b=st_btn: b.winfo_exists() and b.configure(state="disabled", fg_color="#94A3B8"))
-                if mode == "tool_ai_chat":
-                    self.after(0, lambda: btn.configure(state="normal", text=self.t("chat_memorize")))
-                else:
-                    self.after(0, lambda: btn.configure(state="normal", text=self.t("btn_start_proc")))
 
 
 if __name__ == "__main__":

@@ -85,6 +85,7 @@ python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform
     --hidden-import "ilber_core_utils" \
     --hidden-import "ilber_ui_dialogs" \
     --hidden-import "ilber_license" \
+    --hidden-import "ilber_field_project" \
     --hidden-import "numpy" \
     --hidden-import "numpy.core._multiarray_umath" \
     --hidden-import "torch" \
