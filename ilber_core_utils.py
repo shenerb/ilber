@@ -4159,7 +4159,7 @@ def translate_pdf_preserve_format(in_pdf_path, out_pdf_path, translate_batch_fn)
     - Automatically applies Offline OCR fallback on scanned / image-only PDF pages!
     Returns (total_translated_lines, preview_pairs).
     """
-    import fitz
+    raise NotImplementedError("PDF support has been removed for AGPL-free commercial distribution.")
     import tempfile
 
     pdf_doc = fitz.open(in_pdf_path)
@@ -4406,6 +4406,90 @@ def translate_xlsx_preserve_format(in_xlsx_path, out_xlsx_path, translate_batch_
             preview_pairs.append((src_t.strip(), tgt_t.strip()))
 
     wb.save(out_xlsx_path)
+    return len(source_texts), preview_pairs
+
+
+def translate_pptx_preserve_format(in_pptx_path, out_pptx_path, translate_batch_fn):
+    """
+    Translate a PowerPoint (.pptx) presentation in-place into `out_pptx_path`, preserving
+    all slides, themes, images, animations, grouped shapes, tables, speaker notes, and fonts.
+    Returns (total_translated_paragraphs, preview_pairs).
+    """
+    from pptx import Presentation
+    from pptx.enum.text import MSO_AUTO_SIZE
+
+    prs = Presentation(in_pptx_path)
+
+    def _iter_shapes(shapes):
+        for shp in shapes:
+            yield shp
+            if shp.shape_type == 6:  # GROUP
+                try:
+                    yield from _iter_shapes(shp.shapes)
+                except Exception:
+                    pass
+
+    targets = []  # (paragraph, text_frame_or_None, orig_text)
+    source_texts = []
+
+    for slide in prs.slides:
+        for shp in _iter_shapes(slide.shapes):
+            if shp.has_text_frame:
+                tf = shp.text_frame
+                for p in tf.paragraphs:
+                    t = p.text
+                    if _is_translatable_string(t):
+                        targets.append((p, tf, t))
+                        source_texts.append(t)
+            if shp.has_table:
+                for row in shp.table.rows:
+                    for cell in row.cells:
+                        tf = cell.text_frame
+                        for p in tf.paragraphs:
+                            t = p.text
+                            if _is_translatable_string(t):
+                                targets.append((p, tf, t))
+                                source_texts.append(t)
+        if slide.has_notes_slide:
+            try:
+                ntf = slide.notes_slide.notes_text_frame
+                if ntf is not None:
+                    for p in ntf.paragraphs:
+                        t = p.text
+                        if _is_translatable_string(t):
+                            targets.append((p, ntf, t))
+                            source_texts.append(t)
+            except Exception:
+                pass
+
+    if not source_texts:
+        prs.save(out_pptx_path)
+        return 0, []
+
+    translated_texts = translate_batch_fn(source_texts)
+    preview_pairs = []
+    for (p, tf, src_t), tgt_t in zip(targets, translated_texts):
+        runs = list(p.runs)
+        if runs:
+            # Preserve formatting of the first non-empty run
+            primary_idx = next((i for i, r in enumerate(runs) if r.text.strip()), 0)
+            for i, r in enumerate(runs):
+                r.text = tgt_t if i == primary_idx else ""
+        else:
+            p.text = tgt_t
+
+        # Prevent text overflow when translation is longer than source
+        if tf is not None and len(tgt_t) > max(12, int(len(src_t) * 1.18)):
+            try:
+                tf.word_wrap = True
+                tf.auto_size = MSO_AUTO_SIZE.TEXT_TO_FIT_SHAPE
+            except Exception:
+                pass
+
+        if len(preview_pairs) < 25 and src_t.strip() != tgt_t.strip():
+            preview_pairs.append((src_t.strip(), tgt_t.strip()))
+
+    prs.save(out_pptx_path)
     return len(source_texts), preview_pairs
 
 

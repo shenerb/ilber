@@ -699,32 +699,6 @@ class FieldProjectManager:
     def export_custom_report(self, selected_quotes: list, selected_notes: list, title: str, fmt: str = "docx") -> str:
         stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         safe_title = title.strip() or f"FIELD Rapor — {self.data.get('project_name')}"
-        if fmt == "pdf":
-            import fitz
-            out_path = os.path.join(self.project_dir, f"FIELD_Rapor_{stamp}.pdf")
-            doc_pdf = fitz.open()
-            html_parts = [
-                f"<h2>{safe_title}</h2>",
-                f"<p><i>Proje: {self.data.get('project_name')} | Tarih: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}</i></p>",
-            ]
-            if selected_quotes:
-                html_parts.append("<h3>Seçilen Alıntılar</h3><ul>")
-                for q in selected_quotes:
-                    html_parts.append(
-                        f"<li><b>[{q['participant']} · {format_ts_hms(q['start'])} · {q['theme']}]</b> {q['text']}</li>"
-                    )
-                html_parts.append("</ul>")
-            if selected_notes:
-                html_parts.append("<h3>Seçilen Saha Notları</h3><ul>")
-                for n in selected_notes:
-                    html_parts.append(f"<li><b>[{n['label']}]</b> {n['note']}</li>")
-                html_parts.append("</ul>")
-            html_str = "\n".join(html_parts)
-            page = doc_pdf.new_page(width=595, height=842)
-            page.insert_htmlbox(fitz.Rect(42, 42, 553, 800), html_str)
-            doc_pdf.save(out_path)
-            return out_path
-
         out_path = os.path.join(self.project_dir, f"FIELD_Rapor_{stamp}.docx")
         doc = docx.Document()
         doc.add_heading(safe_title, 0)

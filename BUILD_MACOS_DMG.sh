@@ -97,9 +97,8 @@ python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform
     --hidden-import "transformers" \
     --hidden-import "sentencepiece" \
     --hidden-import "docx" \
+    --hidden-import "pptx" \
     --hidden-import "openpyxl" \
-    --hidden-import "fitz" \
-    --hidden-import "pymupdf" \
     --hidden-import "srt" \
     --hidden-import "pdfplumber" \
     --hidden-import "sounddevice" \

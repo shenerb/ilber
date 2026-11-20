@@ -37,6 +37,7 @@ set CTK_PATH=%SITE_PKGS%\customtkinter
   --hidden-import="sentencepiece" ^
   --hidden-import="llama_cpp" ^
   --hidden-import="docx" ^
+  --hidden-import="pptx" ^
   --hidden-import="srt" ^
   --hidden-import="pdfplumber" ^
   --hidden-import="sounddevice" ^
@@ -78,8 +79,6 @@ xcopy "%SITE_PKGS%\shapely.libs\*" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech
 xcopy "%SITE_PKGS%\winocr\*" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\winocr\" /Y /E /I >nul
 xcopy "%SITE_PKGS%\winrt\*" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\winrt\" /Y /E /I >nul
 xcopy "%SITE_PKGS%\yaml\*" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\yaml\" /Y /E /I >nul
-xcopy "%SITE_PKGS%\fitz\*" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\fitz\" /Y /E /I >nul
-xcopy "%SITE_PKGS%\pymupdf\*" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\pymupdf\" /Y /E /I >nul
 xcopy "%SITE_PKGS%\openpyxl\*" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\openpyxl\" /Y /E /I >nul
 xcopy "%SITE_PKGS%\et_xmlfile\*" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\et_xmlfile\" /Y /E /I >nul
 copy /Y "C:\Users\lenovo\Desktop\ilber\ilber_core_utils.py" "C:\Users\lenovo\Desktop\ilber\dist\ILBERTech_Platform\_internal\" >nul

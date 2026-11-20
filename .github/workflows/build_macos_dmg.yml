@@ -25,7 +25,7 @@ jobs:
       - name: Install PortAudio & Python Dependencies (arm64)
         shell: bash -el {0}
         run: |
-          conda install -y -c conda-forge portaudio tk pymupdf "numpy=1.26.4"
+          conda install -y -c conda-forge portaudio tk "numpy=1.26.4"
           python -m pip install --upgrade pip
           python -m pip install --prefer-binary -r requirements_macos.txt
           python -m pip install --force-reinstall --no-deps "numpy==1.26.4"
@@ -67,7 +67,7 @@ jobs:
       - name: Install PortAudio & Python Dependencies (Intel x86_64)
         shell: bash -el {0}
         run: |
-          CONDA_SUBDIR=osx-64 conda install -y -c conda-forge python=3.11 portaudio tk pymupdf "numpy=1.26.4" scipy pillow lxml
+          CONDA_SUBDIR=osx-64 conda install -y -c conda-forge python=3.11 portaudio tk "numpy=1.26.4" scipy pillow lxml
           arch -x86_64 python -m pip install --upgrade pip
           arch -x86_64 python -m pip install --prefer-binary -r requirements_macos.txt
           arch -x86_64 python -m pip install --force-reinstall --no-deps "numpy==1.26.4"

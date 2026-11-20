@@ -3,6 +3,13 @@ import sys
 import io
 import subprocess
 
+# Prevent OpenMP / MKL / HuggingFace Tokenizers threadpool SIGSEGV on macOS & Windows
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+os.environ.setdefault("OMP_NUM_THREADS", "2")
+os.environ.setdefault("MKL_NUM_THREADS", "2")
+os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+
 # 1. Ensure sys.stdout and sys.stderr are never None in PyInstaller --noconsole builds
 #    (prevents tqdm / huggingface / model loaders from crashing on a clean PC)
 if sys.stdout is None:
@@ -165,8 +172,9 @@ SUPPORTED_MEDIA_EXTS = (
 )
 
 SUPPORTED_DOC_EXTS = (
-    ("Belgeler (.docx, .xlsx, .txt)", "*.docx *.xlsx *.txt"),
+    ("Belgeler (.docx, .pptx, .xlsx, .txt)", "*.docx *.pptx *.xlsx *.txt"),
     ("Word Belgeleri (*.docx)", "*.docx"),
+    ("PowerPoint Sunumları (*.pptx)", "*.pptx"),
     ("Excel Tabloları (*.xlsx)", "*.xlsx"),
     ("Metin Dosyaları (*.txt)", "*.txt"),
     ("Tüm Dosyalar", "*.*"),
@@ -253,8 +261,8 @@ UI_DICT = {
         "c1_d": "Ses ve videolarınızı kaynak dilde zaman damgalı metne dönüştürün. Word, TXT, SRT ve VTT olarak dışa aktarın.",
         "c1_b": "MIC  Word/TXT  SRT/VTT",
         "c2_t": "DOC · Format Korumalı Belge & Doküman Çevirici",
-        "c2_d": "Word (.docx), Excel (.xlsx) ve TXT belgelerinizi sayfa düzenini, tablolarını ve formatını birebir koruyarak çevirin. İsteğe bağlı Terim Sözlüğü destekler.",
-        "c2_b": "DOC  DOCX/XLSX/TXT  Terim Sözlüğü",
+        "c2_d": "Word (.docx), PowerPoint (.pptx), Excel (.xlsx) ve TXT belgelerinizi sayfa düzenini, tablolarını ve formatını birebir koruyarak çevirin. İsteğe bağlı Terim Sözlüğü destekler.",
+        "c2_b": "DOC  DOCX/PPTX/XLSX  Terim Sözlüğü",
         "c3_t": "GLOBE · Video Çeviri Stüdyosu",
         "c3_d": "Videolarınız için standartlara uygun (42 krk/2 satır) altyazı üretin, çoklu hedef dile çapraz çevirin ve videoya gömün.",
         "c3_b": "GLOBE  Çapraz Çeviri  MP4/SRT/VTT",
@@ -332,8 +340,8 @@ UI_DICT = {
         "c1_d": "Transcribe audio or video in its source language with timestamps. Export as Word, TXT, SRT, and VTT.",
         "c1_b": "MIC  Word/TXT  SRT/VTT",
         "c2_t": "DOC · Format-Preserving Document Translator",
-        "c2_d": "Translate Word (.docx), Excel (.xlsx), and TXT documents while preserving exact layout, tables, and formatting. Optional Terminology Glossary support.",
-        "c2_b": "DOC  DOCX/XLSX/TXT  Glossary Support",
+        "c2_d": "Translate Word (.docx), PowerPoint (.pptx), Excel (.xlsx), and TXT documents while preserving exact layout, tables, and formatting. Optional Terminology Glossary support.",
+        "c2_b": "DOC  DOCX/PPTX/XLSX  Glossary Support",
         "c3_t": "GLOBE · Video Translation Studio",
         "c3_d": "Generate standard subtitles (42 chars/2 lines), cross-translate into multiple languages, and burn into MP4.",
         "c3_b": "GLOBE  Cross-Translate  MP4/SRT/VTT",
@@ -411,8 +419,8 @@ UI_DICT = {
         "c1_d": "Transkribieren Sie Audio oder Video in der Ausgangssprache mit Zeitstempeln. Export als Word, TXT, SRT und VTT.",
         "c1_b": "MIC  Word/TXT  SRT/VTT",
         "c2_t": "DOC · Formatgetreuer Dokumentübersetzer",
-        "c2_d": "Übersetzen Sie Word (.docx), Excel (.xlsx) und TXT-Dokumente unter vollständiger Beibehaltung von Layout, Tabellen und Formatierung. Optional mit Fachglossar.",
-        "c2_b": "DOC  DOCX/XLSX/TXT  Glossar (Optional)",
+        "c2_d": "Übersetzen Sie Word (.docx), PowerPoint (.pptx), Excel (.xlsx) und TXT-Dokumente unter vollständiger Beibehaltung von Layout, Tabellen und Formatierung. Optional mit Fachglossar.",
+        "c2_b": "DOC  DOCX/PPTX/XLSX  Glossar (Optional)",
         "c3_t": "GLOBE · Video-Übersetzungsstudio",
         "c3_d": "Erstellen Sie Standard-Untertitel (42 Zeichen/2 Zeilen), Direktübersetzung in mehrere Sprachen & MP4-Export.",
         "c3_b": "GLOBE  Direktübersetzung  MP4/SRT/VTT",
@@ -2960,9 +2968,9 @@ class ILBERTechV2(ctk.CTk):
             ctk.CTkLabel(
                 g_row2,
                 text=self.L(
-                    "✔ Giriş Formatı = Çıkış Formatı (.docx➔.docx · .xlsx➔.xlsx · .txt➔.txt)",
-                    "✔ Input Format = Output Format (.docx➔.docx · .xlsx➔.xlsx · .txt➔.txt)",
-                    "✔ Eingabeformat = Ausgabeformat (.docx➔.docx · .xlsx➔.xlsx · .txt➔.txt)",
+                    "✔ Giriş Formatı = Çıkış Formatı (.docx➔.docx · .pptx➔.pptx · .xlsx➔.xlsx)",
+                    "✔ Input Format = Output Format (.docx➔.docx · .pptx➔.pptx · .xlsx➔.xlsx)",
+                    "✔ Eingabeformat = Ausgabeformat (.docx➔.docx · .pptx➔.pptx · .xlsx➔.xlsx)",
                 ),
                 font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
                 text_color="#059669",
@@ -3582,11 +3590,6 @@ class ILBERTechV2(ctk.CTk):
             def record_thread():
                 try:
                     import sounddevice as sd
-                    try:
-                        sd._terminate()
-                        sd._initialize()
-                    except Exception:
-                        pass
 
                     rec_fs = 16000
                     try:
@@ -3600,7 +3603,6 @@ class ILBERTechV2(ctk.CTk):
 
                     zero_blocks = 0
                     while self.is_recording:
-                        reopen_needed = False
                         with sd.InputStream(samplerate=rec_fs, channels=1, dtype="int16", blocksize=block_sz) as stream:
                             while self.is_recording:
                                 data, _ = stream.read(block_sz)
@@ -3609,22 +3611,15 @@ class ILBERTechV2(ctk.CTk):
                                 if max_val <= 1:
                                     zero_blocks += 1
                                     # On macOS, while the user clicks 'Allow' on the TCC Microphone popup,
-                                    # CoreAudio feeds zeros; reopen stream after ~1.5s of zeros to attach live mic
+                                    # CoreAudio feeds zeros; break and re-enter InputStream safely without _terminate()
                                     if sys.platform == "darwin" and zero_blocks >= 15 and not self.audio_frames:
                                         zero_blocks = 0
-                                        reopen_needed = True
                                         break
                                 else:
                                     self.audio_frames.append(flat)
                                 # Also keep non-leading frames once speech has started so natural pauses are preserved
                                 if self.audio_frames and max_val <= 1:
                                     self.audio_frames.append(flat)
-                        if reopen_needed and self.is_recording:
-                            try:
-                                sd._terminate()
-                                sd._initialize()
-                            except Exception:
-                                pass
                 except Exception as e:
                     self.after(0, lambda err=str(e): self._log(self.log_boxes[page_id], f"❌ {err}"))
 
@@ -4524,11 +4519,11 @@ class ILBERTechV2(ctk.CTk):
                 import ilber_core_utils as _icu
                 importlib.reload(_icu)
                 ext = filepath.lower().rsplit(".", 1)[-1] if "." in filepath else ""
-                if ext not in ("docx", "xlsx", "txt"):
+                if ext not in ("docx", "pptx", "xlsx", "txt"):
                     self.after(0, lambda e=ext: self._log(logbox, self.L(
-                        f"❌ Desteklenmeyen dosya formatı (.{e}). DOC modülünde şu an sadece Word (.docx), Excel (.xlsx) ve Metin (.txt) belgeleri desteklenmektedir.",
-                        f"❌ Unsupported format (.{e}). Currently DOC supports Word (.docx), Excel (.xlsx), and Text (.txt) documents.",
-                        f"❌ Nicht unterstütztes Format (.{e}). Derzeit unterstützt DOC nur .docx, .xlsx und .txt."
+                        f"❌ Desteklenmeyen dosya formatı (.{e}). DOC modülünde Word (.docx), PowerPoint (.pptx), Excel (.xlsx) ve Metin (.txt) belgeleri desteklenmektedir.",
+                        f"❌ Unsupported format (.{e}). Currently DOC supports Word (.docx), PowerPoint (.pptx), Excel (.xlsx), and Text (.txt) documents.",
+                        f"❌ Nicht unterstütztes Format (.{e}). Derzeit unterstützt DOC .docx, .pptx, .xlsx und .txt."
                     )))
                     return
 
@@ -4616,6 +4611,8 @@ class ILBERTechV2(ctk.CTk):
 
                 if ext == "docx":
                     count_seg, preview_pairs = _icu.translate_docx_preserve_format(filepath, out_path, _batch_translate_doc)
+                elif ext == "pptx":
+                    count_seg, preview_pairs = _icu.translate_pptx_preserve_format(filepath, out_path, _batch_translate_doc)
                 elif ext == "xlsx":
                     count_seg, preview_pairs = _icu.translate_xlsx_preserve_format(filepath, out_path, _batch_translate_doc)
                 else:
