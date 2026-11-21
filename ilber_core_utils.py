@@ -4159,9 +4159,14 @@ def _load_external_term_bank_csv():
     # Track existing lowercase keys per pair so no case-insensitive duplicates are added
     seen_lower = {pair: {k.lower() for k in bucket} for pair, bucket in _BUILTIN_DOMAIN_GLOSSARY.items()}
 
+    _meipass = getattr(sys, "_MEIPASS", base_dir)
+    _mac_res = os.path.join(os.path.dirname(os.path.abspath(sys.executable)), "..", "Resources")
     for fname in csv_files:
-        csv_path = _resolve_app_resource_path(fname) or os.path.join(base_dir, fname)
-        if not os.path.isfile(csv_path):
+        csv_path = next(
+            (os.path.join(d, fname) for d in (base_dir, _meipass, _mac_res) if d and os.path.isfile(os.path.join(d, fname))),
+            None,
+        )
+        if not csv_path:
             continue
         try:
             with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
