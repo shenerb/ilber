@@ -5,8 +5,15 @@ import subprocess
 
 # Prevent OpenMP / MKL / HuggingFace Tokenizers threadpool SIGSEGV on macOS & Windows
 os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
-os.environ.setdefault("OMP_NUM_THREADS", "2")
-os.environ.setdefault("MKL_NUM_THREADS", "2")
+if sys.platform == "darwin":
+    os.environ.setdefault("OMP_NUM_THREADS", "1")
+    os.environ.setdefault("MKL_NUM_THREADS", "1")
+    os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+    os.environ.setdefault("NUMBA_THREADING_LAYER", "workqueue")
+    os.environ.setdefault("NUMBA_NUM_THREADS", "1")
+else:
+    os.environ.setdefault("OMP_NUM_THREADS", "2")
+    os.environ.setdefault("MKL_NUM_THREADS", "2")
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
 
@@ -94,6 +101,7 @@ from PIL import Image
 from tkinter import filedialog, messagebox
 import srt
 os.environ.setdefault("translators_default_region", "EN")
+os.environ.setdefault("CT2_USE_MKL", "0")
 
 
 def _lazy_import_whisper():
@@ -2872,8 +2880,34 @@ class ILBERTechV2(ctk.CTk):
                 text_color="#1E3A8A",
             ).pack(side="left", padx=(0, 6))
 
-            glossary_file_var = ctk.StringVar(value="")
+            _glossary_prefs_file = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "user_glossary_prefs.json")
+            _saved_glossary_path = ""
+            try:
+                if os.path.isfile(_glossary_prefs_file):
+                    with open(_glossary_prefs_file, "r", encoding="utf-8") as _gf:
+                        _gdata = json.load(_gf)
+                    _cand_gp = str(_gdata.get("glossary_path", "")).strip()
+                    if _cand_gp and os.path.isfile(_cand_gp):
+                        _saved_glossary_path = _cand_gp
+            except Exception:
+                _saved_glossary_path = ""
+
+            glossary_file_var = ctk.StringVar(value=_saved_glossary_path)
             ctrls["glossary_file_var"] = glossary_file_var
+
+            def _pick_and_save_glossary():
+                chosen = filedialog.askopenfilename(
+                    initialdir=os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "Uploads"),
+                    filetypes=SUPPORTED_GLOSSARY_EXTS,
+                )
+                if chosen and os.path.isfile(chosen):
+                    glossary_file_var.set(chosen)
+                    try:
+                        os.makedirs(os.path.dirname(_glossary_prefs_file), exist_ok=True)
+                        with open(_glossary_prefs_file, "w", encoding="utf-8") as _gf:
+                            json.dump({"glossary_path": chosen}, _gf, ensure_ascii=False, indent=2)
+                    except Exception:
+                        pass
 
             ctk.CTkEntry(
                 g_row1,
@@ -2893,12 +2927,7 @@ class ILBERTechV2(ctk.CTk):
                 fg_color="#2563EB",
                 hover_color="#1D4ED8",
                 font=ctk.CTkFont(family="Segoe UI", size=11, weight="bold"),
-                command=lambda: glossary_file_var.set(
-                    filedialog.askopenfilename(
-                        initialdir=os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "Uploads"),
-                        filetypes=SUPPORTED_GLOSSARY_EXTS,
-                    )
-                ),
+                command=_pick_and_save_glossary,
             ).pack(side="left", padx=(0, 4))
 
             ctk.CTkButton(
@@ -3069,13 +3098,28 @@ class ILBERTechV2(ctk.CTk):
             r2 = ctk.CTkFrame(field_box, fg_color="transparent")
             r2.pack(fill="x", padx=12, pady=(2, 8))
             ctk.CTkLabel(r2, text=self.t("field_ctx"), font=ctk.CTkFont(size=12, weight="bold")).pack(side="left", padx=(0, 6))
-            f_ctx = ctk.CTkEntry(r2, width=360, height=28, placeholder_text="Görüşme ortamı, gözlemler...", fg_color="#F8FAFC")
-            f_ctx.pack(side="left", padx=(0, 16))
+            f_ctx = ctk.CTkEntry(r2, width=240, height=28, placeholder_text="Görüşme ortamı, gözlemler...", fg_color="#F8FAFC")
+            f_ctx.pack(side="left", padx=(0, 10))
+
+            ctk.CTkLabel(r2, text=self.L("Model:", "Model:", "Modell:"), font=ctk.CTkFont(size=12, weight="bold"), text_color="#1E3A8A").pack(side="left", padx=(0, 4))
+            f_model = ctk.CTkOptionMenu(
+                r2,
+                values=["Hassas (large-v3-turbo)", "Hızlı (medium)"],
+                width=175,
+                height=28,
+                fg_color="#E0E7FF",
+                text_color="#1E3A8A",
+            )
+            f_model.set("Hassas (large-v3-turbo)")
+            f_model.pack(side="left", padx=(0, 10))
+
+            f_pause_chk = ctk.BooleanVar(value=False)
+            ctk.CTkCheckBox(r2, text=self.L("Duraksama (.)", "Pauses (.)", "Pausen (.)"), variable=f_pause_chk, font=ctk.CTkFont(size=12, weight="bold"), text_color="#475569").pack(side="left", padx=(0, 10))
 
             f_tr_chk = ctk.BooleanVar(value=False)
             f_tr_tgt = ctk.StringVar(value="English")
-            ctk.CTkCheckBox(r2, text=self.t("field_trans_chk"), variable=f_tr_chk, font=ctk.CTkFont(size=12, weight="bold"), text_color="#991B1B").pack(side="left", padx=(4, 8))
-            ctk.CTkOptionMenu(r2, variable=f_tr_tgt, values=TARGET_LANGS, width=120, height=28, fg_color="#F1F5F9", text_color="#0F172A").pack(side="left")
+            ctk.CTkCheckBox(r2, text=self.t("field_trans_chk"), variable=f_tr_chk, font=ctk.CTkFont(size=12, weight="bold"), text_color="#991B1B").pack(side="left", padx=(4, 6))
+            ctk.CTkOptionMenu(r2, variable=f_tr_tgt, values=TARGET_LANGS, width=115, height=28, fg_color="#F1F5F9", text_color="#0F172A").pack(side="left")
 
             ctrls.update({
                 "f_date": f_date,
@@ -3090,6 +3134,8 @@ class ILBERTechV2(ctk.CTk):
                 "f_edu": f_edu,
                 "f_extra_prof": f_extra_prof,
                 "f_ctx": f_ctx,
+                "f_model": f_model,
+                "f_pause_chk": f_pause_chk,
                 "f_tr_chk": f_tr_chk,
                 "f_tr_tgt": f_tr_tgt,
             })
@@ -3871,6 +3917,228 @@ class ILBERTechV2(ctk.CTk):
         except Exception as e:
             return f"AI Hatasi: {str(e)}"
 
+    def _translate_segments_contextual(self, segments, src_code, tgt_code, tgt_lang_label, logbox, label_prefix="FIELD"):
+        """
+        Context-aware offline translation using local Qwen2.5-3B-Instruct (Apache-2.0).
+        Translates dialogue in batches so idioms and academic/domain terms (e.g. department,
+        lateral transfer) are translated in context, falling back to M2M100 per missing line.
+        """
+        if not segments:
+            return []
+        src_lines = [str(s.get("text", "")).strip() for s in segments]
+        if src_code == tgt_code:
+            return src_lines
+
+        total = len(segments)
+        out_lines = [None] * total
+        batch_size = 6
+        sys_prompt = (
+            f"You are an expert professional translator. "
+            f"Translate each numbered line accurately, faithfully, and naturally into {tgt_lang_label}. "
+            f"CRITICAL RULES:\n"
+            f"1. Translate ALL non-{tgt_lang_label} words into {tgt_lang_label}. Even if a line is a short technical label "
+            f"or contains mixed languages (e.g. {tgt_lang_label} with Turkish explanations in parentheses), "
+            f"you MUST translate every source-language word into {tgt_lang_label} — NEVER leave source words untranslated.\n"
+            f"2. NEVER alter, substitute, or guess facts, proper nouns, cities, university names, numbers, or academic/technical terms "
+            f"(for example, 'Fizik' must stay 'Physics', NEVER change it to 'Mechanical' or another field).\n"
+            f"3. Translate domain terms accurately in context (e.g., in Turkish-to-English: "
+            f"'bölüm' in university context = 'department' not 'section'; 'okumak' = 'study/major'; "
+            f"'yatay geçiş' = 'lateral transfer' / 'transfer').\n"
+            f"4. Return ONLY the translated numbered lines in the exact format:\n"
+            f"[1] <translation>\n[2] <translation>\n"
+            f"Do NOT include speaker names, explanations, or extra text. Preserve every line number."
+        )
+
+        llm_failed_completely = False
+        for start in range(0, total, batch_size):
+            if getattr(self, "cancel_requested", False):
+                raise RuntimeError("__USER_CANCELLED__")
+            chunk = segments[start : start + batch_size]
+            prompt_lines = []
+            for idx, seg in enumerate(chunk, start=1):
+                spk = str(seg.get("speaker", "")).strip()
+                txt = str(seg.get("text", "")).strip()
+                if spk:
+                    prompt_lines.append(f"[{idx}] ({spk}): {txt}")
+                else:
+                    prompt_lines.append(f"[{idx}] {txt}")
+            user_prompt = "\n".join(prompt_lines)
+
+            resp = self._run_llm(sys_prompt, user_prompt, max_tokens=2048, temperature=0.0)
+            if not resp or str(resp).startswith("AI Hatasi:"):
+                llm_failed_completely = True
+                break
+
+            parsed = {}
+            for line in str(resp).splitlines():
+                m = re.match(r"^\s*\[?(\d+)\]?[\.\):\-]?\s*(.+)$", line.strip())
+                if m:
+                    num = int(m.group(1))
+                    val = m.group(2).strip()
+                    # Strip accidental echoed speaker prefix like "(Konuşmacı 1):"
+                    val = re.sub(r"^\([^)]{1,30}\)\s*:\s*", "", val).strip()
+                    if 1 <= num <= len(chunk) and val:
+                        parsed[num] = val
+
+            for idx in range(1, len(chunk) + 1):
+                if idx in parsed:
+                    cand = parsed[idx]
+                    orig = str(chunk[idx - 1].get("text", "")).strip()
+                    # If target is not Turkish and output still has Turkish-only chars or echoed long source, retry single line
+                    needs_retry = False
+                    cand_low = cand.lower()
+                    _meta_phrases = (
+                        "this translation is",
+                        "a more accurate translation",
+                        "the original text",
+                        "here is the translation",
+                        "translated text:",
+                        "cannot be translated",
+                    )
+                    if any(mp in cand_low for mp in _meta_phrases):
+                        needs_retry = True
+                    elif tgt_code not in ("zh", "ja", "ko") and re.search(r"[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]", cand):
+                        needs_retry = True
+                    elif tgt_code != "tr" and any(ch in cand for ch in "şŞğĞıİçÇöÖüÜ"):
+                        needs_retry = True
+                    elif len(orig) > 12 and cand.lower() == orig.lower() and any(c.isalpha() for c in orig):
+                        needs_retry = True
+                    if needs_retry:
+                        single_resp = self._run_llm(
+                            f"Translate the following text completely into {tgt_lang_label}. "
+                            f"Do NOT include any commentary, notes, explanations, or source-language words. Output ONLY the translation.",
+                            orig,
+                            max_tokens=512,
+                            temperature=0.0,
+                        )
+                        if single_resp and not str(single_resp).startswith("AI Hatasi:"):
+                            s_cand = str(single_resp).strip()
+                            s_low = s_cand.lower()
+                            if any(mp in s_low for mp in _meta_phrases) or (
+                                tgt_code not in ("zh", "ja", "ko")
+                                and re.search(r"[\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]", s_cand)
+                            ):
+                                cand = ""  # Force M2M100 fallback
+                            else:
+                                cand = s_cand
+                        else:
+                            cand = ""
+                    if cand:
+                        out_lines[start + idx - 1] = cand
+
+            pct = min(100, int((start + len(chunk)) / total * 100))
+            self.after(0, lambda p=pct, lp=label_prefix: self._log(
+                logbox,
+                f"      -> {lp} {self.t('log_trans_prog')} (AI Contextual ➔ {tgt_lang_label}): %{p}",
+            ))
+
+        # Fallback to M2M100 for any lines that were not parsed or if LLM is unavailable
+        missing_indices = [i for i, v in enumerate(out_lines) if not v]
+        if missing_indices:
+            if llm_failed_completely:
+                self.after(0, lambda: self._log(logbox, self.L(
+                    "[BİLGİ] Yerel LLM çevirisi kullanılamadı, M2M100 çevirisine geçiliyor...",
+                    "[INFO] Local LLM translation unavailable, falling back to M2M100...",
+                    "[INFO] Lokales LLM nicht verfügbar, wechsle zu M2M100..."
+                )))
+            missing_src = [src_lines[i] for i in missing_indices]
+            fb_trans = self._translate_lines_m2m100(missing_src, src_code, tgt_code, logbox, label_prefix=label_prefix)
+            for idx_m, tr_val in zip(missing_indices, fb_trans):
+                out_lines[idx_m] = tr_val
+
+        # Apply built-in domain glossary + persistent user glossary across all modules
+        try:
+            import ilber_core_utils as _icu_gl
+            _combined_gl = dict(_icu_gl._BUILTIN_DOMAIN_GLOSSARY.get((src_code, tgt_code), {}))
+            _g_prefs = os.path.join(os.path.expanduser("~"), "Documents", "ILBER_Workspace", "user_glossary_prefs.json")
+            if os.path.isfile(_g_prefs):
+                with open(_g_prefs, "r", encoding="utf-8") as _gf:
+                    _gp = str(json.load(_gf).get("glossary_path", "")).strip()
+                if _gp and os.path.isfile(_gp):
+                    _combined_gl.update(_icu_gl.load_glossary_terms(glossary_path=_gp))
+            if _combined_gl:
+                _sorted_gl = dict(sorted(_combined_gl.items(), key=lambda kv: len(kv[0]), reverse=True))
+                out_lines = [
+                    _icu_gl._apply_glossary_direct(src_lines[i], (v if v is not None else ""), _sorted_gl)
+                    for i, v in enumerate(out_lines)
+                ]
+        except Exception:
+            pass
+
+        return [v if v is not None else "" for v in out_lines]
+
+    def _translate_lines_opus_mt(self, lines_arr, src_code, tgt_code, logbox, label_prefix=""):
+        """
+        Fast, commercial-safe (CC-BY-4.0), 100% offline dedicated NMT for EN<->TR
+        using Helsinki-NLP/opus-mt-tc-big-en-tr and opus-mt-tc-big-tr-en.
+        Eliminates CJK hallucinations and runs ~10x faster than 3B LLMs on CPU.
+        """
+        if not lines_arr:
+            return []
+        if src_code == tgt_code:
+            return list(lines_arr)
+        pair_map = {
+            ("en", "tr"): "Helsinki-NLP/opus-mt-tc-big-en-tr",
+            ("tr", "en"): "Helsinki-NLP/opus-mt-tc-big-tr-en",
+        }
+        model_id = pair_map.get((src_code, tgt_code))
+        if not model_id:
+            return self._translate_lines_m2m100(lines_arr, src_code, tgt_code, logbox, label_prefix=label_prefix)
+
+        try:
+            from transformers import MarianMTModel, MarianTokenizer
+            if getattr(self, "_opus_cache_id", None) != model_id:
+                self.after(0, lambda m=model_id: self._log(logbox, self.L(
+                    f"[AI] Hızlı teknik çeviri motoru yükleniyor ({m.split('/')[-1]})...",
+                    f"[AI] Loading fast technical translation engine ({m.split('/')[-1]})...",
+                    f"[AI] Schnelle technische Übersetzung wird geladen ({m.split('/')[-1]})..."
+                )))
+                self._opus_tokenizer = MarianTokenizer.from_pretrained(model_id)
+                self._opus_model = MarianMTModel.from_pretrained(model_id)
+                self._opus_cache_id = model_id
+
+            flat_sentences = []
+            line_sentence_ranges = []
+            for raw_line in lines_arr:
+                clean_line = str(raw_line or "").replace("\n", " ").strip()
+                if not clean_line:
+                    line_sentence_ranges.append((0, 0))
+                    continue
+                if len(clean_line) > 220:
+                    sents = [s.strip() for s in re.split(r"(?<=[.!?])\s+", clean_line) if s.strip()]
+                else:
+                    sents = [clean_line]
+                start_idx = len(flat_sentences)
+                flat_sentences.extend(sents)
+                line_sentence_ranges.append((start_idx, len(flat_sentences)))
+
+            translated_flat = []
+            chunk_size = 8
+            total_sents = max(1, len(flat_sentences))
+            for i in range(0, len(flat_sentences), chunk_size):
+                if getattr(self, "cancel_requested", False):
+                    raise RuntimeError("__USER_CANCELLED__")
+                batch = [s if s else " " for s in flat_sentences[i : i + chunk_size]]
+                encoded = self._opus_tokenizer(batch, return_tensors="pt", padding=True, truncation=True, max_length=384)
+                gen_tokens = self._opus_model.generate(**encoded, max_new_tokens=384)
+                t_chunks = self._opus_tokenizer.batch_decode(gen_tokens, skip_special_tokens=True)
+                translated_flat.extend([c.strip() for c in t_chunks])
+                pct = min(100, int((i + chunk_size) / total_sents * 100))
+                self.after(0, lambda p=pct, lp=label_prefix, sc=src_code, tc=tgt_code: self._log(
+                    logbox, f"      -> {lp} {self.t('log_trans_prog')} (OPUS-MT {sc.upper()} ➔ {tc.upper()}): %{p}"
+                ))
+
+            t_lines_arr = []
+            for start_idx, end_idx in line_sentence_ranges:
+                if start_idx == end_idx:
+                    t_lines_arr.append("")
+                else:
+                    t_lines_arr.append(" ".join(translated_flat[start_idx:end_idx]))
+            return t_lines_arr
+        except Exception as e_op:
+            self.after(0, lambda err=str(e_op): self._log(logbox, f"[WARN] OPUS-MT fallback ({err})..."))
+            return self._translate_lines_m2m100(lines_arr, src_code, tgt_code, logbox, label_prefix=label_prefix)
+
     def _ensure_m2m100_loaded(self, logbox):
         if self.trans_model is None:
             self.after(0, lambda: self._log(logbox, self.t("log_trans_loading")))
@@ -3938,14 +4206,141 @@ class ILBERTechV2(ctk.CTk):
                 t_lines_arr.append(" ".join(translated_flat[start_idx:end_idx]))
         return t_lines_arr
 
-    def _transcribe_media(self, filepath, src_selection, logbox, verbatim=False):
+    def _transcribe_media(self, filepath, src_selection, logbox, verbatim=False, model_size=None):
+        src_code = LANG_MAP.get(src_selection, "auto")
+        target_model = model_size or ("large-v3-turbo" if verbatim else "medium")
+
+        # Decode 16kHz mono float32 audio via FFmpeg (no PyTorch dependency required for faster-whisper)
+        from ilber_core_utils import _decode_audio_16k_mono
+        audio_arr = _decode_audio_16k_mono(filepath)
+        if audio_arr is None or len(audio_arr) == 0:
+            whisper = _lazy_import_whisper()
+            audio_arr = whisper.load_audio(filepath)
+
+        peak = float(np.max(np.abs(audio_arr))) if len(audio_arr) else 0.0
+        if peak < 1e-4:
+            raise RuntimeError(self.L(
+                "Ses dosyasında konuşma/ses sinyali algılanamadı (dosya tamamen sessiz veya ses kanalı boş).",
+                "No audio signal detected in the file (the audio track is completely silent).",
+                "In der Datei wurde kein Audiosignal erkannt (die Audiospur ist stumm)."
+            ))
+        if peak < 0.15:
+            audio_arr = np.clip(audio_arr * (0.6 / peak), -1.0, 1.0).astype(np.float32)
+
+        use_cuda = False
+        try:
+            import torch as _th
+            use_cuda = bool(_th.cuda.is_available())
+        except Exception:
+            use_cuda = False
+
+        # 1. Primary Engine: faster-whisper (CTranslate2, 4-6x faster, MIT License, 100% offline once cached)
+        try:
+            os.environ.setdefault("CT2_USE_MKL", "0")
+            from faster_whisper import WhisperModel
+            _app_root = os.path.dirname(os.path.abspath(__file__))
+            fw_cache = os.path.join(_app_root, "whisper_models", "faster_whisper")
+            os.makedirs(fw_cache, exist_ok=True)
+            if getattr(self, "fw_model", None) is None or getattr(self, "fw_model_name", None) != target_model:
+                self.after(0, lambda m=target_model: self._log(logbox, self.L(
+                    f"[AI] Hızlı konuşma motoru yükleniyor (faster-whisper / {m})...",
+                    f"[AI] Loading fast speech engine (faster-whisper / {m})...",
+                    f"[AI] Schnelle Spracherkennung wird geladen (faster-whisper / {m})..."
+                )))
+                device = "cuda" if use_cuda else "cpu"
+                compute_type = "float16" if use_cuda else "int8"
+                cpu_threads = max(2, min(6, os.cpu_count() or 4))
+                try:
+                    self.fw_model = WhisperModel(
+                        target_model,
+                        device=device,
+                        compute_type=compute_type,
+                        cpu_threads=cpu_threads,
+                        download_root=fw_cache,
+                    )
+                    self.fw_model_name = target_model
+                except RuntimeError as e_mem:
+                    if ("mkl_malloc" in str(e_mem) or "alloc" in str(e_mem).lower()) and target_model != "medium":
+                        self.after(0, lambda: self._log(logbox, self.L(
+                            "[BİLGİ] Boş RAM large-v3-turbo için yetersiz; faster-whisper 'medium' (int8) modeline geçiliyor...",
+                            "[INFO] Insufficient free RAM for large-v3-turbo; switching to faster-whisper 'medium' (int8)...",
+                            "[INFO] Nicht genügend freier RAM für large-v3-turbo; wechsle zu faster-whisper 'medium' (int8)..."
+                        )))
+                        self.fw_model = WhisperModel(
+                            "medium",
+                            device=device,
+                            compute_type=compute_type,
+                            cpu_threads=cpu_threads,
+                            download_root=fw_cache,
+                        )
+                        self.fw_model_name = "medium"
+                    else:
+                        raise
+                self.after(0, lambda: self._log(logbox, self.t("log_loaded")))
+
+            fw_kwargs = {
+                "beam_size": 5,
+                "word_timestamps": True,
+                "vad_filter": True,
+                "vad_parameters": {"min_silence_duration_ms": 350},
+                "condition_on_previous_text": True,
+                "no_speech_threshold": 0.6,
+                "log_prob_threshold": -1.0,
+                "compression_ratio_threshold": 2.4,
+            }
+            if src_code != "auto":
+                fw_kwargs["language"] = src_code
+
+            seg_gen, info = self.fw_model.transcribe(audio_arr, **fw_kwargs)
+            detected_lang = str(getattr(info, "language", src_code if src_code != "auto" else "tr")).lower()
+            raw_segments = []
+            for s in seg_gen:
+                txt_s = str(getattr(s, "text", "")).strip()
+                if not txt_s:
+                    continue
+                words_list = []
+                low_words = []
+                for w in (getattr(s, "words", None) or []):
+                    w_str = str(getattr(w, "word", ""))
+                    w_prob = float(getattr(w, "probability", 1.0))
+                    words_list.append({
+                        "start": float(getattr(w, "start", s.start)),
+                        "end": float(getattr(w, "end", s.end)),
+                        "word": w_str,
+                        "probability": w_prob,
+                    })
+                    if w_prob < 0.55 and w_str.strip():
+                        low_words.append(w_str.strip())
+                raw_segments.append({
+                    "start": float(s.start),
+                    "end": float(s.end),
+                    "text": txt_s,
+                    "speaker": "",
+                    "note": "",
+                    "low_conf_words": low_words,
+                    "words": words_list,
+                })
+                self.after(0, lambda st=s.start, tx=txt_s: self._log(logbox, f"[{format_ts_hms(st)}] {tx}"))
+            return raw_segments, detected_lang
+        except ImportError:
+            pass
+        except Exception as e_fw:
+            err_str = str(e_fw)
+            if "11001" in err_str or "getaddrinfo" in err_str or "urlopen" in err_str or "LocalEntryNotFoundError" in err_str:
+                raise RuntimeError(self.L(
+                    f"İLK KURULUM İNDİRMESİ GEREKLİ ({target_model}): Ses tanıma yapay zeka paketi bilgisayarınıza sadece İLK KULLANIMDA 1 kez indirilir ve sonrasında ömür boyu %100 internetsiz (offline) çalışır. Lütfen ilk kurulum için internet bağlantınızı açıp tekrar deneyin.",
+                    f"FIRST-TIME MODEL DOWNLOAD REQUIRED ({target_model}): The offline speech AI model is downloaded only ONCE on first use and runs 100% offline forever after. Please connect to the internet once for this initial setup.",
+                    f"ERSTMALIGER DOWNLOAD ERFORDERLICH ({target_model}): Das KI-Sprachmodell wird nur einmalig heruntergeladen und läuft danach 100% offline."
+                ))
+            self.after(0, lambda err=err_str: self._log(logbox, f"[WARN] faster-whisper fallback ({err}), openai-whisper kullanılıyor..."))
+
+        # 2. Fallback Engine: openai-whisper
         whisper = _lazy_import_whisper()
         if self.model is None:
             self.after(0, lambda: self._log(logbox, self.t("log_loading")))
             try:
                 self.model = whisper.load_model("medium")
             except Exception as e_load:
-                # If offline on first run, check if any local speech model (.pt) is already cached on disk
                 cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "whisper")
                 loaded_fallback = False
                 for fallback_name in ("medium", "small", "base", "tiny"):
@@ -3968,31 +4363,12 @@ class ILBERTechV2(ctk.CTk):
                     raise
             self.after(0, lambda: self._log(logbox, self.t("log_loaded")))
 
-        src_code = LANG_MAP.get(src_selection, "auto")
-        audio_arr = whisper.load_audio(filepath)
-        peak = float(np.max(np.abs(audio_arr))) if len(audio_arr) else 0.0
-        if peak < 1e-4:
-            raise RuntimeError(self.L(
-                "Ses dosyasında konuşma/ses sinyali algılanamadı (dosya tamamen sessiz veya ses kanalı boş).",
-                "No audio signal detected in the file (the audio track is completely silent).",
-                "In der Datei wurde kein Audiosignal erkannt (die Audiospur ist stumm)."
-            ))
-        if peak < 0.15:
-            audio_arr = np.clip(audio_arr * (0.6 / peak), -1.0, 1.0).astype(np.float32)
-
-        use_fp16 = False
-        try:
-            import torch as _th
-            use_fp16 = bool(_th.cuda.is_available())
-        except Exception:
-            use_fp16 = False
-
         whisper_kwargs = {
             "verbose": True,
-            "fp16": use_fp16,
-            "condition_on_previous_text": False,
-            "no_speech_threshold": 0.5,
-            "logprob_threshold": -0.8,
+            "fp16": use_cuda,
+            "condition_on_previous_text": True,
+            "no_speech_threshold": 0.6,
+            "logprob_threshold": -1.0,
             "compression_ratio_threshold": 2.4,
             "word_timestamps": True,
             "hallucination_silence_threshold": 1.5,
@@ -4005,7 +4381,6 @@ class ILBERTechV2(ctk.CTk):
         try:
             result = self.model.transcribe(audio_arr, **whisper_kwargs)
             if not result.get("segments") and src_code == "auto":
-                # Fallback for very short microphone clips where auto-lang detection needs a hint
                 whisper_kwargs["language"] = self.ui_lang if self.ui_lang in ("tr", "en", "de") else "tr"
                 result = self.model.transcribe(audio_arr, **whisper_kwargs)
         finally:
@@ -4017,10 +4392,18 @@ class ILBERTechV2(ctk.CTk):
             txt_s = str(s.get("text", "")).strip()
             if not txt_s:
                 continue
-            low_words = [
-                str(w.get("word", "")).strip()
+            words_list = [
+                {
+                    "start": float(w.get("start", s["start"])),
+                    "end": float(w.get("end", s["end"])),
+                    "word": str(w.get("word", "")),
+                    "probability": float(w.get("probability", 1.0)),
+                }
                 for w in (s.get("words") or [])
-                if float(w.get("probability", 1.0)) < 0.55 and str(w.get("word", "")).strip()
+                if str(w.get("word", "")).strip()
+            ]
+            low_words = [
+                w["word"].strip() for w in words_list if w["probability"] < 0.55 and w["word"].strip()
             ]
             raw_segments.append({
                 "start": float(s["start"]),
@@ -4029,6 +4412,7 @@ class ILBERTechV2(ctk.CTk):
                 "speaker": "",
                 "note": "",
                 "low_conf_words": low_words,
+                "words": words_list,
             })
         if not raw_segments and str(result.get("text", "")).strip():
             raw_segments = [{
@@ -4097,7 +4481,7 @@ class ILBERTechV2(ctk.CTk):
                     "[2] MIC: Transcribing recording locally with timestamps...",
                     "[2] MIC: Aufnahme wird lokal mit Zeitstempeln transkribiert..."
                 )))
-                segments, detected_lang = self._transcribe_media(filepath, src, logbox, verbatim=False)
+                segments, detected_lang = self._transcribe_media(filepath, src, logbox, verbatim=True, model_size="large-v3-turbo")
                 self.after(0, lambda d=detected_lang: self._log(logbox, self.L(
                     f"      ✓ Tespit edilen kaynak dil: {d.upper()}",
                     f"      ✓ Detected source language: {d.upper()}",
@@ -4223,7 +4607,14 @@ class ILBERTechV2(ctk.CTk):
                         f"[4] GLOBE Direct Cross-Translation ({src_code.upper()} ➔ {tc.upper()} - {tn})...",
                         f"[4] GLOBE Direktübersetzung ({src_code.upper()} ➔ {tc.upper()} - {tn})..."
                     )))
-                    t_lines = self._translate_lines_m2m100(src_lines, src_code, t_code, logbox, label_prefix=f"GLOBE [{tgt_name}]")
+                    t_lines = self._translate_segments_contextual(
+                        [{"text": ln} for ln in src_lines],
+                        src_code,
+                        t_code,
+                        tgt_name,
+                        logbox,
+                        label_prefix=f"GLOBE [{tgt_name}]",
+                    )
 
                     raw_tgt_segs = []
                     for i, s in enumerate(edited_src_segments):
@@ -4366,24 +4757,34 @@ class ILBERTechV2(ctk.CTk):
             # 4. SEGMENT: FIELD (Araştırmacılar & Saha Araç Kutusu — Diarization, Anonimleştirme, Saha Notu, NVivo/MAXQDA)
             # =========================================================================
             elif mode == "tool_ai_rapor":
-                self.after(0, lambda: self._log(logbox, self.L(
-                    "[2] FIELD: Araştırma kaydı birebir (duraksama ve ağız özellikleri korunarak) deşifre ediliyor...",
-                    "[2] FIELD: Transcribing research recording verbatim (preserving pauses and dialect)...",
-                    "[2] FIELD: Forschungsaufnahme wird wortgetreu transkribiert..."
+                sel_model_lbl = ctrls.get("f_model").get() if "f_model" in ctrls else "Hassas (large-v3-turbo)"
+                model_size = "medium" if "medium" in sel_model_lbl.lower() else "large-v3-turbo"
+                mark_pauses = bool(ctrls.get("f_pause_chk").get()) if "f_pause_chk" in ctrls else False
+
+                self.after(0, lambda ms=model_size: self._log(logbox, self.L(
+                    f"[2] FIELD: Araştırma kaydı birebir deşifre ediliyor (Model: {ms})...",
+                    f"[2] FIELD: Transcribing research recording verbatim (Model: {ms})...",
+                    f"[2] FIELD: Forschungsaufnahme wird wortgetreu transkribiert (Modell: {ms})..."
                 )))
-                raw_segments, detected_lang = self._transcribe_media(filepath, src, logbox, verbatim=True)
+                raw_segments, detected_lang = self._transcribe_media(filepath, src, logbox, verbatim=True, model_size=model_size)
 
                 num_spks = int(ctrls.get("f_spks").get()) if "f_spks" in ctrls else 2
                 p_code = ctrls.get("f_pcode").get().strip() if "f_pcode" in ctrls else "P01"
                 interviewer_lbl = ctrls.get("f_inter").get().strip() if "f_inter" in ctrls else "Görüşmeci"
 
                 self.after(0, lambda n=num_spks: self._log(logbox, self.L(
-                    f"[3] FIELD: Ses frekansı ve akustik özellikler üzerinden {n} konuşmacı ayrıştırılıyor (Audio Diarization)...",
-                    f"[3] FIELD: Separating {n} speakers via acoustic voice features (Audio Diarization)...",
-                    f"[3] FIELD: {n} Sprecher werden über akustische Stimmmerkmale getrennt (Audio-Diarisierung)..."
+                    f"[3] FIELD: Yapay zeka ses imzası (Neural Diarization) ile {n} konuşmacı kelime düzeyinde ayrıştırılıyor...",
+                    f"[3] FIELD: Separating {n} speakers at word-level via Neural Speaker Diarization...",
+                    f"[3] FIELD: {n} Sprecher werden per Neural Speaker Diarization auf Wortebene getrennt..."
                 )))
-                default_labels = ["Konuşmacı 1", "Konuşmacı 2", "Konuşmacı 3", "Konuşmacı 4", "Konuşmacı 5"][:num_spks]
-                diarized_segments = acoustic_diarize_segments(filepath, raw_segments, num_speakers=num_spks, speaker_labels=default_labels)
+                default_labels = ["Konuşmacı 1", "Konuşmacı 2", "Konuşmacı 3", "Konuşmacı 4", "Konuşmacı 5", "Konuşmacı 6"][:num_spks]
+                diarized_segments = acoustic_diarize_segments(
+                    filepath,
+                    raw_segments,
+                    num_speakers=num_spks,
+                    speaker_labels=default_labels,
+                    mark_pauses=mark_pauses,
+                )
 
                 self.after(0, lambda: self._log(logbox, self.L(
                     "[4] FIELD: Olası ses tanıma hataları için AI kelime önerileri taranıyor...",
@@ -4423,12 +4824,18 @@ class ILBERTechV2(ctk.CTk):
                     tgt_lang_label = ctrls.get("f_tr_tgt").get() if "f_tr_tgt" in ctrls else "English"
                     tgt_code = LANG_MAP.get(tgt_lang_label, "en")
                     self.after(0, lambda: self._log(logbox, self.L(
-                        f"[5.5] FIELD: Metin {tgt_lang_label} diline çevriliyor...",
-                        f"[5.5] FIELD: Translating transcript into {tgt_lang_label}...",
-                        f"[5.5] FIELD: Transkript wird in {tgt_lang_label} übersetzt..."
+                        f"[5.5] FIELD: Metin bağlamsal AI ile {tgt_lang_label} diline çevriliyor...",
+                        f"[5.5] FIELD: Translating transcript contextually into {tgt_lang_label}...",
+                        f"[5.5] FIELD: Transkript wird kontextbezogen in {tgt_lang_label} übersetzt..."
                     )))
-                    src_lines = [s["text"] for s in ed_segments]
-                    translated_lines = self._translate_lines_m2m100(src_lines, detected_lang, tgt_code, logbox, label_prefix="FIELD")
+                    translated_lines = self._translate_segments_contextual(
+                        ed_segments,
+                        detected_lang,
+                        tgt_code,
+                        tgt_lang_label,
+                        logbox,
+                        label_prefix="FIELD",
+                    )
 
                 self.after(0, lambda: self._log(logbox, self.L(
                     "[6] FIELD Çıktıları (Birebir Word, Okunabilir Word, NVivo/MAXQDA/ATLAS.ti) üretiliyor...",
@@ -4571,7 +4978,16 @@ class ILBERTechV2(ctk.CTk):
                     )))
 
                     def _m2m_runner(arr, sc, tc):
-                        return self._translate_lines_m2m100(arr, sc, tc, logbox, label_prefix="DOC")
+                        if (sc, tc) in (("en", "tr"), ("tr", "en")):
+                            return self._translate_lines_opus_mt(arr, sc, tc, logbox, label_prefix="DOC")
+                        return self._translate_segments_contextual(
+                            [{"text": ln} for ln in arr],
+                            sc,
+                            tc,
+                            tgt_name,
+                            logbox,
+                            label_prefix="DOC",
+                        )
 
                     def _polish_log(pct):
                         self.after(0, lambda p=pct: self._log(logbox, self.L(
@@ -4715,6 +5131,8 @@ class ILBERTechV2(ctk.CTk):
 
 
 if __name__ == "__main__":
+    import multiprocessing
+    multiprocessing.freeze_support()
     if "--selftest" in sys.argv:
         import numpy as np
         wh = _lazy_import_whisper()

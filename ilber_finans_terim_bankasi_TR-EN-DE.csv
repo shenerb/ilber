@@ -1,0 +1,188 @@
+﻿ID,Alan,TR,EN,DE,Tür,Not,Yasaklı EN karşılıklar
+FIN-001,Borsa ve piyasa işlemleri,borsa,stock exchange; stock market,Börse; Aktienmarkt,terim,"Bağlama göre: kurum ise 'stock exchange', piyasa ise 'stock market'.",futures
+FIN-002,Borsa ve piyasa işlemleri,pay piyasası,equity market,Aktienmarkt,terim,,
+FIN-003,Borsa ve piyasa işlemleri,endeks,index,Index,terim,Örn. BIST 100 endeksi = BIST 100 index.,
+FIN-004,Borsa ve piyasa işlemleri,seans,trading session,Handelssitzung,terim,,
+FIN-005,Borsa ve piyasa işlemleri,açılış seansı,opening auction,Eröffnungsauktion,terim,,
+FIN-006,Borsa ve piyasa işlemleri,kapanış seansı,closing auction,Schlussauktion,terim,,
+FIN-007,Borsa ve piyasa işlemleri,emir,order,Order; Auftrag,terim,Borsa bağlamında 'command' değil.,command
+FIN-008,Borsa ve piyasa işlemleri,alış emri,buy order,Kauforder,terim,,
+FIN-009,Borsa ve piyasa işlemleri,satış emri,sell order,Verkaufsorder,terim,,
+FIN-010,Borsa ve piyasa işlemleri,limit emir,limit order,Limitorder,terim,,
+FIN-011,Borsa ve piyasa işlemleri,piyasa emri,market order,Market-Order; Bestens-/Billigst-Auftrag,terim,,
+FIN-012,Borsa ve piyasa işlemleri,zarar durdur emri,stop-loss order,Stop-Loss-Order,terim,,
+FIN-013,Borsa ve piyasa işlemleri,açığa satış,short selling,Leerverkauf,terim,,open sale
+FIN-014,Borsa ve piyasa işlemleri,kredili işlem,margin trading,Wertpapierkredit; Margin-Handel,terim,,credit transaction
+FIN-015,Borsa ve piyasa işlemleri,kaldıraç,leverage,Hebel,terim,,lever
+FIN-016,Borsa ve piyasa işlemleri,teminat,collateral; margin,Sicherheit; Sicherheitsleistung (Margin),terim,Vadeli işlemlerde 'margin'.,
+FIN-017,Borsa ve piyasa işlemleri,vadeli işlem sözleşmesi,futures contract,Terminkontrakt; Future,terim,,
+FIN-018,Borsa ve piyasa işlemleri,opsiyon,option,Option,terim,,
+FIN-019,Borsa ve piyasa işlemleri,takas,clearing and settlement,Clearing und Abwicklung,terim,,barter; exchange
+FIN-020,Borsa ve piyasa işlemleri,saklama,custody,Verwahrung,terim,,
+FIN-021,Borsa ve piyasa işlemleri,işlem hacmi,trading volume,Handelsvolumen; Umsatz,terim,,
+FIN-022,Borsa ve piyasa işlemleri,likidite,liquidity,Liquidität,terim,,
+FIN-023,Borsa ve piyasa işlemleri,volatilite; oynaklık,volatility,Volatilität,terim,,
+FIN-024,Borsa ve piyasa işlemleri,piyasa derinliği,market depth,Markttiefe,terim,,
+FIN-025,Borsa ve piyasa işlemleri,tavan fiyat,upper price limit; limit-up price,obere Preisgrenze,terim,,ceiling price
+FIN-026,Borsa ve piyasa işlemleri,taban fiyat,lower price limit; limit-down price,untere Preisgrenze,terim,,floor price
+FIN-027,Borsa ve piyasa işlemleri,boğa piyasası,bull market,Bullenmarkt,terim,,
+FIN-028,Borsa ve piyasa işlemleri,ayı piyasası,bear market,Bärenmarkt,terim,,
+FIN-029,Borsa ve piyasa işlemleri,düzeltme,correction,Korrektur,terim,Fiyat düşüşü anlamında.,
+FIN-030,Borsa ve piyasa işlemleri,kâr realizasyonu,profit-taking,Gewinnmitnahme,terim,,profit realization
+FIN-031,Borsa ve piyasa işlemleri,balon,bubble,Blase,terim,Örn. borsa balonu = stock market bubble.,balloon
+FIN-032,Borsa ve piyasa işlemleri,yatırımcı,investor,Anleger,terim,,
+FIN-033,Borsa ve piyasa işlemleri,küçük yatırımcı,retail investor,Kleinanleger; Privatanleger,terim,,small investor
+FIN-034,Borsa ve piyasa işlemleri,kurumsal yatırımcı,institutional investor,institutioneller Anleger,terim,,corporate investor
+FIN-035,Borsa ve piyasa işlemleri,yabancı yatırımcı,foreign investor,ausländischer Anleger,terim,,
+FIN-036,Borsa ve piyasa işlemleri,aracı kurum,brokerage firm; investment firm,Wertpapierdienstleistungsunternehmen; Broker,terim,SPK mevzuatında 'intermediary institution' da kullanılır.,
+FIN-037,Borsa ve piyasa işlemleri,yatırım hesabı,investment account; brokerage account,Wertpapierdepot; Depot,terim,,
+FIN-038,Borsa ve piyasa işlemleri,portföy,portfolio,Portfolio; Depot,terim,,
+FIN-039,Borsa ve piyasa işlemleri,getiri,return,Rendite,terim,Tahvilde 'yield'.,
+FIN-040,Borsa ve piyasa işlemleri,risk iştahı,risk appetite,Risikobereitschaft,terim,,
+FIN-041,Borsa ve piyasa işlemleri,tek fiyat yöntemi,single price method,Einheitskursverfahren,terim,SPK/BIST tedbir yöntemi.,
+FIN-042,Borsa ve piyasa işlemleri,brüt takas,gross settlement,Bruttoabwicklung,terim,SPK/BIST tedbir yöntemi.,
+FIN-043,Pay senetleri ve şirket işlemleri,hisse; hisse senedi; pay; pay senedi,share; stock,Aktie,terim,KRİTİK: 'hisse' duygu (his) DEĞİLDİR. Ltd. şirkette 'hisse' = share/stake (Anteil).,feeling; feelings; sense
+FIN-044,Pay senetleri ve şirket işlemleri,pay sahibi; hissedar,shareholder,Aktionär; Anteilseigner,terim,,
+FIN-045,Pay senetleri ve şirket işlemleri,hakim ortak,controlling shareholder,Mehrheitsaktionär; beherrschender Gesellschafter,terim,,dominant partner
+FIN-046,Pay senetleri ve şirket işlemleri,ortaklık yapısı,shareholding structure,Aktionärsstruktur,terim,,partnership structure
+FIN-047,Pay senetleri ve şirket işlemleri,halka arz,initial public offering (IPO),Börsengang (IPO),terim,,public offer to the people
+FIN-048,Pay senetleri ve şirket işlemleri,halka açıklık oranı,free float ratio,Streubesitzquote,terim,,publicity rate
+FIN-049,Pay senetleri ve şirket işlemleri,piyasa değeri,market capitalisation,Marktkapitalisierung; Börsenwert,terim,,market value
+FIN-050,Pay senetleri ve şirket işlemleri,temettü,dividend,Dividende,terim,,
+FIN-051,Pay senetleri ve şirket işlemleri,bedelsiz sermaye artırımı,bonus issue; capital increase from internal resources,Kapitalerhöhung aus Gesellschaftsmitteln,terim,,free capital increase
+FIN-052,Pay senetleri ve şirket işlemleri,bedelli sermaye artırımı,rights issue; cash capital increase,Kapitalerhöhung gegen Bareinlage,terim,,paid capital increase
+FIN-053,Pay senetleri ve şirket işlemleri,rüçhan hakkı,pre-emptive right; subscription right,Bezugsrecht,terim,,priority right
+FIN-054,Pay senetleri ve şirket işlemleri,pay geri alımı,share buyback,Aktienrückkauf,terim,,
+FIN-055,Pay senetleri ve şirket işlemleri,ödenmiş sermaye,paid-in capital,eingezahltes Kapital,terim,,
+FIN-056,Pay senetleri ve şirket işlemleri,kayıtlı sermaye tavanı,authorised capital ceiling,Obergrenze des genehmigten Kapitals,terim,,registered capital ceiling
+FIN-057,Pay senetleri ve şirket işlemleri,pay devri,share transfer,Anteilsübertragung,terim,,
+FIN-058,Pay senetleri ve şirket işlemleri,birleşme,merger,Fusion; Verschmelzung,terim,,
+FIN-059,Pay senetleri ve şirket işlemleri,devralma,acquisition; takeover,Übernahme,terim,,
+FIN-060,Pay senetleri ve şirket işlemleri,zorunlu pay alım teklifi,mandatory tender offer,Pflichtangebot,terim,,
+FIN-061,Pay senetleri ve şirket işlemleri,fiyat/kazanç oranı (F/K),price-to-earnings ratio (P/E),Kurs-Gewinn-Verhältnis (KGV),terim,,
+FIN-062,Pay senetleri ve şirket işlemleri,piyasa değeri/defter değeri (PD/DD),price-to-book ratio (P/B),Kurs-Buchwert-Verhältnis (KBV),terim,,
+FIN-063,Pay senetleri ve şirket işlemleri,özel durum açıklaması,material event disclosure,Ad-hoc-Mitteilung,terim,,special situation statement
+FIN-064,Pay senetleri ve şirket işlemleri,izahname,prospectus,Wertpapierprospekt,terim,,
+FIN-065,Pay senetleri ve şirket işlemleri,genel kurul,general meeting of shareholders,Hauptversammlung,terim,,general assembly
+FIN-066,Pay senetleri ve şirket işlemleri,yönetim kurulu,board of directors,Vorstand; Verwaltungsrat,terim,Türk AŞ tek kademeli; DE'de bağlama göre seçilir.,management board
+FIN-067,Fonlar ve portföy yönetimi,fon,fund,Fonds,terim,,
+FIN-068,Fonlar ve portföy yönetimi,fon krizi,fund crisis,Fondskrise,terim,KRİTİK: genel 'finansal kriz' DEĞİLDİR; belirli fonlarla ilgili krizdir.,financial crisis
+FIN-069,Fonlar ve portföy yönetimi,yatırım fonu,investment fund,Investmentfonds,terim,,
+FIN-070,Fonlar ve portföy yönetimi,borsa yatırım fonu (BYF),exchange-traded fund (ETF),börsengehandelter Fonds (ETF),terim,,stock exchange investment fund
+FIN-071,Fonlar ve portföy yönetimi,serbest fon,hedge fund,Hedgefonds,terim,,free fund
+FIN-072,Fonlar ve portföy yönetimi,para piyasası fonu,money market fund,Geldmarktfonds,terim,,
+FIN-073,Fonlar ve portföy yönetimi,hisse senedi fonu,equity fund,Aktienfonds,terim,,
+FIN-074,Fonlar ve portföy yönetimi,gayrimenkul yatırım fonu (GYF),real estate investment fund,Immobilienfonds,terim,,
+FIN-075,Fonlar ve portföy yönetimi,gayrimenkul yatırım ortaklığı (GYO),real estate investment trust (REIT),Immobilien-Investmentgesellschaft (REIT),terim,,
+FIN-076,Fonlar ve portföy yönetimi,girişim sermayesi yatırım fonu (GSYF),venture capital investment fund,Wagniskapitalfonds,terim,,
+FIN-077,Fonlar ve portföy yönetimi,portföy yönetim şirketi,portfolio management company; asset management company,Kapitalverwaltungsgesellschaft (KVG),terim,,
+FIN-078,Fonlar ve portföy yönetimi,fon yöneticisi,fund manager,Fondsmanager,terim,,
+FIN-079,Fonlar ve portföy yönetimi,fon katılma payı,fund unit,Fondsanteil,terim,,participation share
+FIN-080,Fonlar ve portföy yönetimi,fon birim pay fiyatı,unit price; NAV per unit,Anteilspreis; Nettoinventarwert je Anteil,terim,,
+FIN-081,Fonlar ve portföy yönetimi,net aktif değer,net asset value (NAV),Nettoinventarwert (NIW),terim,,net active value
+FIN-082,Fonlar ve portföy yönetimi,toplam gider oranı,total expense ratio (TER),Gesamtkostenquote (TER),terim,,
+FIN-083,Fonlar ve portföy yönetimi,yönetim ücreti,management fee,Verwaltungsvergütung,terim,,
+FIN-084,Fonlar ve portföy yönetimi,performans ücreti,performance fee,erfolgsabhängige Vergütung,terim,,
+FIN-085,Fonlar ve portföy yönetimi,bireysel emeklilik sistemi (BES),private pension system,private Altersvorsorge (BES),terim,,individual retirement system
+FIN-086,"Tahviller, faiz ve para piyasası",tahvil,bond,Anleihe,terim,,
+FIN-087,"Tahviller, faiz ve para piyasası",devlet tahvili,government bond,Staatsanleihe,terim,,
+FIN-088,"Tahviller, faiz ve para piyasası",hazine bonosu,treasury bill,Schatzwechsel,terim,,
+FIN-089,"Tahviller, faiz ve para piyasası",özel sektör tahvili,corporate bond,Unternehmensanleihe,terim,,private sector bond
+FIN-090,"Tahviller, faiz ve para piyasası",kira sertifikası,lease certificate (sukuk),Leasingzertifikat (Sukuk),terim,,rent certificate
+FIN-091,"Tahviller, faiz ve para piyasası",kupon,coupon,Kupon,terim,,
+FIN-092,"Tahviller, faiz ve para piyasası",vade,maturity; term,Laufzeit; Fälligkeit,terim,,
+FIN-093,"Tahviller, faiz ve para piyasası",faiz,interest,Zins,terim,,
+FIN-094,"Tahviller, faiz ve para piyasası",faiz oranı,interest rate,Zinssatz,terim,,
+FIN-095,"Tahviller, faiz ve para piyasası",politika faizi,policy rate,Leitzins,terim,,politics interest
+FIN-096,"Tahviller, faiz ve para piyasası",repo,repo; repurchase agreement,Repo; Rückkaufvereinbarung,terim,,
+FIN-097,"Tahviller, faiz ve para piyasası",döviz,foreign currency; foreign exchange,Devisen; Fremdwährung,terim,,
+FIN-098,"Tahviller, faiz ve para piyasası",döviz kuru,exchange rate,Wechselkurs,terim,,
+FIN-099,"Tahviller, faiz ve para piyasası",kur korumalı mevduat (KKM),FX-protected deposit,wechselkursgeschützte Einlage,terim,,
+FIN-100,"Bankacılık, kredi ve tahsilat",mevduat,deposit,Einlage,terim,,
+FIN-101,"Bankacılık, kredi ve tahsilat",vadeli mevduat,time deposit,Termineinlage; Festgeld,terim,,futures deposit
+FIN-102,"Bankacılık, kredi ve tahsilat",vadesiz mevduat,demand deposit,Sichteinlage,terim,,
+FIN-103,"Bankacılık, kredi ve tahsilat",kredi,loan; credit,Kredit; Darlehen,terim,,
+FIN-104,"Bankacılık, kredi ve tahsilat",konut kredisi,mortgage loan,Baufinanzierung; Immobiliendarlehen,terim,,housing credit
+FIN-105,"Bankacılık, kredi ve tahsilat",taksit,instalment,Rate,terim,,
+FIN-106,"Bankacılık, kredi ve tahsilat",takipteki alacak,non-performing loan (NPL),notleidender Kredit,terim,,followed receivable
+FIN-107,"Bankacılık, kredi ve tahsilat",teminat mektubu,letter of guarantee; bank guarantee,Bankgarantie; Avalbürgschaft,terim,,collateral letter
+FIN-108,"Bankacılık, kredi ve tahsilat",akreditif,letter of credit,Akkreditiv,terim,,
+FIN-109,"Bankacılık, kredi ve tahsilat",çek,cheque,Scheck,terim,,
+FIN-110,"Bankacılık, kredi ve tahsilat",senet,promissory note,Solawechsel,terim,Borsa bağlamında 'pay senedi' = share.,
+FIN-111,"Bankacılık, kredi ve tahsilat",icra takibi,enforcement proceedings,Zwangsvollstreckung,terim,,
+FIN-112,"Bankacılık, kredi ve tahsilat",haciz,attachment; seizure,Pfändung,terim,,
+FIN-113,"Bankacılık, kredi ve tahsilat",konkordato,composition with creditors (concordat),gerichtliches Vergleichsverfahren,terim,,
+FIN-114,"Bankacılık, kredi ve tahsilat",iflas,bankruptcy,Insolvenz; Konkurs,terim,,
+FIN-115,Muhasebe ve finansal tablolar,bilanço,balance sheet,Bilanz,terim,,
+FIN-116,Muhasebe ve finansal tablolar,gelir tablosu,income statement,Gewinn- und Verlustrechnung (GuV),terim,,
+FIN-117,Muhasebe ve finansal tablolar,nakit akış tablosu,cash flow statement,Kapitalflussrechnung,terim,,
+FIN-118,Muhasebe ve finansal tablolar,net kâr,net profit,Nettogewinn; Jahresüberschuss,terim,,
+FIN-119,Muhasebe ve finansal tablolar,FAVÖK,EBITDA,EBITDA,terim,,
+FIN-120,Muhasebe ve finansal tablolar,hasılat; ciro,revenue,Umsatzerlöse; Umsatz,terim,,turnover
+FIN-121,Muhasebe ve finansal tablolar,özkaynak,equity,Eigenkapital,terim,,own resources
+FIN-122,Muhasebe ve finansal tablolar,varlık; aktif,asset,Vermögenswert; Aktiva,terim,,
+FIN-123,Muhasebe ve finansal tablolar,yükümlülük; borç,liability,Verbindlichkeit,terim,,
+FIN-124,Muhasebe ve finansal tablolar,bağımsız denetim,independent audit,Abschlussprüfung,terim,,
+FIN-125,Muhasebe ve finansal tablolar,enflasyon muhasebesi,inflation accounting (IAS 29),Inflationsbilanzierung (IAS 29),terim,,
+FIN-126,Muhasebe ve finansal tablolar,dönem kârı,profit for the period,Periodenergebnis,terim,,
+FIN-127,"Düzenleme, kurumlar ve piyasa suçları",Sermaye Piyasası Kurulu (SPK),Capital Markets Board of Türkiye (CMB),Kapitalmarktaufsicht der Türkei (SPK),kurum adı,,
+FIN-128,"Düzenleme, kurumlar ve piyasa suçları",Borsa İstanbul (BIST),Borsa Istanbul,Borsa Istanbul,kurum adı,"Özel ad, çevrilmez.",Istanbul Stock Exchange
+FIN-129,"Düzenleme, kurumlar ve piyasa suçları",Merkezi Kayıt Kuruluşu (MKK),Central Securities Depository of Türkiye (MKK),Zentralverwahrer der Türkei (MKK),kurum adı,Eski İngilizce adı: Central Registry Agency.,
+FIN-130,"Düzenleme, kurumlar ve piyasa suçları",Takasbank,"Takasbank (Istanbul Clearing, Settlement and Custody Bank)",Takasbank (Clearinghaus),kurum adı,,
+FIN-131,"Düzenleme, kurumlar ve piyasa suçları",Kamuyu Aydınlatma Platformu (KAP),Public Disclosure Platform (KAP),Plattform für öffentliche Bekanntmachungen (KAP),kurum adı,,Public Enlightenment Platform
+FIN-132,"Düzenleme, kurumlar ve piyasa suçları",Vadeli İşlem ve Opsiyon Piyasası (VİOP),Futures and Options Market (VIOP),Termin- und Optionsmarkt (VIOP),kurum adı,,
+FIN-133,"Düzenleme, kurumlar ve piyasa suçları",Türkiye Cumhuriyet Merkez Bankası (TCMB),Central Bank of the Republic of Türkiye (CBRT),Zentralbank der Republik Türkei (TCMB),kurum adı,,
+FIN-134,"Düzenleme, kurumlar ve piyasa suçları",Bankacılık Düzenleme ve Denetleme Kurumu (BDDK),Banking Regulation and Supervision Agency (BRSA),Bankenregulierungs- und -aufsichtsbehörde (BDDK),kurum adı,,
+FIN-135,"Düzenleme, kurumlar ve piyasa suçları",Tasarruf Mevduatı Sigorta Fonu (TMSF),Savings Deposit Insurance Fund (SDIF),Einlagensicherungsfonds (TMSF),kurum adı,,
+FIN-136,"Düzenleme, kurumlar ve piyasa suçları",piyasa dolandırıcılığı,market fraud,Marktmanipulation,terim,6362 s. SPKn m.107 (işlem bazlı / bilgi bazlı).,market flooding
+FIN-137,"Düzenleme, kurumlar ve piyasa suçları",işlem bazlı piyasa dolandırıcılığı,transaction-based market fraud,handelsgestützte Marktmanipulation,terim,,
+FIN-138,"Düzenleme, kurumlar ve piyasa suçları",bilgi bazlı piyasa dolandırıcılığı,information-based market fraud,informationsgestützte Marktmanipulation,terim,,
+FIN-139,"Düzenleme, kurumlar ve piyasa suçları",piyasa bozucu eylemler,market-disruptive actions,marktstörende Handlungen,terim,SPKn m.104.,
+FIN-140,"Düzenleme, kurumlar ve piyasa suçları",manipülasyon,manipulation; market manipulation,Marktmanipulation,terim,,
+FIN-141,"Düzenleme, kurumlar ve piyasa suçları",bilgi suistimali,insider trading; abuse of inside information,Insiderhandel,terim,SPKn m.106.,information abuse
+FIN-142,"Düzenleme, kurumlar ve piyasa suçları",içeriden öğrenen,insider,Insider,terim,,
+FIN-143,"Düzenleme, kurumlar ve piyasa suçları",tedbir kararı,precautionary measure; trading restriction,Maßnahme; Handelsbeschränkung,terim,SPK'nın hisse/yatırımcı bazlı tedbirleri.,
+FIN-144,"Düzenleme, kurumlar ve piyasa suçları",işlem yasağı,trading ban,Handelsverbot,terim,,
+FIN-145,"Düzenleme, kurumlar ve piyasa suçları",suç duyurusu,criminal complaint,Strafanzeige,terim,,crime announcement
+FIN-146,"Düzenleme, kurumlar ve piyasa suçları",saadet zinciri,Ponzi scheme; pyramid scheme,Schneeballsystem,terim,,chain of happiness
+FIN-147,"Düzenleme, kurumlar ve piyasa suçları",dolandırıcılık,fraud,Betrug,terim,,
+FIN-148,"Düzenleme, kurumlar ve piyasa suçları",dolandırmak,to defraud; to swindle,betrügen,terim,KRİTİK: 'flood' DEĞİLDİR.,flood; flooded
+FIN-149,Kripto varlıklar,kripto varlık,crypto asset,Kryptowert; Krypto-Asset,terim,,
+FIN-150,Kripto varlıklar,kripto varlık hizmet sağlayıcı,crypto asset service provider (CASP),Kryptowerte-Dienstleister,terim,,
+FIN-151,Kripto varlıklar,kripto para borsası,crypto exchange,Krypto-Börse,terim,,
+FIN-152,Kripto varlıklar,cüzdan,wallet,Wallet,terim,,
+FIN-153,Kripto varlıklar,stabil kripto para,stablecoin,Stablecoin,terim,,
+FIN-154,Kripto varlıklar,madencilik,mining,Mining,terim,,
+FIN-155,Kripto varlıklar,akıllı sözleşme,smart contract,Smart Contract,terim,,intelligent contract
+FIN-156,Makroekonomi,finansal kriz,financial crisis,Finanzkrise,terim,'fon krizi' ile karıştırılmamalı.,
+FIN-157,Makroekonomi,enflasyon,inflation,Inflation,terim,,
+FIN-158,Makroekonomi,resesyon,recession,Rezession,terim,,
+FIN-159,Makroekonomi,cari açık,current account deficit,Leistungsbilanzdefizit,terim,,current deficit
+FIN-160,Makroekonomi,bütçe açığı,budget deficit,Haushaltsdefizit,terim,,
+FIN-161,Makroekonomi,kredi notu,credit rating,Bonitätsnote; Rating,terim,,credit grade
+FIN-162,Makroekonomi,not indirimi,downgrade,Herabstufung,terim,,
+FIN-163,Makroekonomi,risk primi (CDS),CDS spread,CDS-Aufschlag,terim,,
+FIN-164,Borsa argosu ve deyimler,kağıt,stock; share,Papier; Titel,borsa argosu,Borsa argosu: hisse senedi.,paper
+FIN-165,Borsa argosu ve deyimler,tahta,order book; the stock (colloquial),Orderbuch,borsa argosu,,board; wood
+FIN-166,Borsa argosu ve deyimler,sığ tahta,thinly traded stock; illiquid stock,marktenger Wert,borsa argosu,,shallow board
+FIN-167,Borsa argosu ve deyimler,tahtacı,stock operator; pump-and-dump operator,Kursmanipulator,borsa argosu,,board man; carpenter
+FIN-168,Borsa argosu ve deyimler,tahtayı yapmak; hisseyi yukarı çekmek,to ramp up a stock; to push the price up,eine Aktie hochtreiben,borsa argosu,,to make the board
+FIN-169,Borsa argosu ve deyimler,pompalamak,to pump (a stock),hochpushen; pumpen,borsa argosu,,
+FIN-170,Borsa argosu ve deyimler,pompala-boşalt,pump-and-dump,Pump and Dump,borsa argosu,,
+FIN-171,Borsa argosu ve deyimler,mal boşaltmak; mal kaçırmak,to offload shares; to dump shares,Aktien abstoßen,borsa argosu,Genelde küçük yatırımcıya satış ima eder.,to smuggle goods
+FIN-172,Borsa argosu ve deyimler,tavan olmak,to hit the upper limit; to go limit-up,die obere Preisgrenze erreichen,borsa argosu,,to become ceiling
+FIN-173,Borsa argosu ve deyimler,taban olmak,to hit the lower limit; to go limit-down,die untere Preisgrenze erreichen,borsa argosu,,to become floor
+FIN-174,Borsa argosu ve deyimler,tavan serisi,a run of limit-up sessions,Serie von Limit-up-Tagen,borsa argosu,,ceiling series
+FIN-175,Borsa argosu ve deyimler,maliyetlenmek,to build a position,eine Position aufbauen,borsa argosu,,to become costly
+FIN-176,Borsa argosu ve deyimler,stop olmak,to get stopped out,ausgestoppt werden,borsa argosu,,
+FIN-177,Borsa argosu ve deyimler,kâr almak,to take profits,Gewinne mitnehmen,borsa argosu,,to receive profit
+FIN-178,Borsa argosu ve deyimler,dip,bottom; low,Tief; Tiefpunkt,borsa argosu,,
+FIN-179,Borsa argosu ve deyimler,zirve,peak; high,Hoch; Höchststand,borsa argosu,,summit
+FIN-180,Borsa argosu ve deyimler,yeşil kapatmak,to close higher,im Plus schließen,borsa argosu,,to close green
+FIN-181,Borsa argosu ve deyimler,kırmızı kapatmak,to close lower,im Minus schließen,borsa argosu,,to close red
+FIN-182,Borsa argosu ve deyimler,vurgun,swindle; scam,Abzocke; Coup,borsa argosu,,
+FIN-183,Borsa argosu ve deyimler,küçük yatırımcıyı soymak,to fleece retail investors,Kleinanleger abzocken,borsa argosu,,to undress small investors
+FIN-184,Borsa argosu ve deyimler,sağ cepten alıp sol cebe koymak,to take it out of one pocket and put it into the other,"linke Tasche, rechte Tasche",deyim,Para aynı çevre içinde el değiştiriyor; manipülasyon bağlamında ilişkili hesaplar arası işlem ima eder.,the right hand received it; the left hand gave
+FIN-185,Borsa argosu ve deyimler,işin açığı,frankly; to be honest,ehrlich gesagt; offen gesagt,deyim,,the opening of the work
+FIN-186,Borsa argosu ve deyimler,bilerek isteyerek,deliberately; knowingly and willingly,absichtlich; vorsätzlich,deyim,,a matter of choice and knowledge
+FIN-187,Borsa argosu ve deyimler,parayı batırmak,to lose one's money,sein Geld verlieren,deyim,,to sink the money

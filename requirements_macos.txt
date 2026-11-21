@@ -10,6 +10,9 @@ pdfplumber>=0.11.0
 srt>=3.5.3
 imageio-ffmpeg>=0.5.1
 openai-whisper>=20231117
+faster-whisper>=1.0.0
+sherpa-onnx>=1.10.0
+sacremoses>=0.1.0
 torch>=2.2.0,<2.5.0
 torchaudio>=2.2.0,<2.5.0
 transformers==4.44.2

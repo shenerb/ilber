@@ -56,10 +56,19 @@ python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform
     --add-data "icons:icons" \
     --add-data "ilber_logo.jpg:." \
     --add-data "ilber_logo.ico:." \
+    --add-data "ilber_finans_terim_bankasi_TR-EN-DE.csv:." \
+    --add-data "ilber_deyimler_TR-EN-DE.csv:." \
+    --add-data "ilber_genel_terim_bankasi_25dil.csv:." \
+    --add-data "diarization_models:diarization_models" \
+    --exclude-module "numba" \
+    --exclude-module "llvmlite" \
     --collect-all "customtkinter" \
     --collect-all "numpy" \
     --collect-all "torch" \
     --collect-all "transformers" \
+    --collect-all "faster_whisper" \
+    --collect-all "ctranslate2" \
+    --collect-all "sherpa_onnx" \
     --collect-all "sounddevice" \
     --collect-all "_sounddevice_data" \
     --collect-data "whisper" \
@@ -91,6 +100,11 @@ python -m PyInstaller --noconfirm --onedir --windowed --name "ILBERTech_Platform
     --hidden-import "torch" \
     --hidden-import "torchaudio" \
     --hidden-import "whisper" \
+    --hidden-import "faster_whisper" \
+    --hidden-import "ctranslate2" \
+    --hidden-import "sherpa_onnx" \
+    --hidden-import "sacremoses" \
+    --hidden-import "transformers.models.marian" \
     --hidden-import "tiktoken" \
     --hidden-import "tiktoken_ext" \
     --hidden-import "tiktoken_ext.openai_public" \

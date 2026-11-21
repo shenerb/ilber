@@ -351,21 +351,8 @@ class AudioVideoPreviewer:
         return None
 
 
-def acoustic_diarize_segments(media_path, segments, num_speakers=2, speaker_labels=None):
-    """
-    Perform local audio-based speaker diarization on timestamped Whisper segments.
-    Extracts 16kHz mono PCM via FFmpeg and computes acoustic voice feature vectors
-    (fundamental pitch / ZCR, spectral centroid, low/mid/high frequency band ratios)
-    for each segment, then clusters speakers acoustically.
-    """
-    if not segments:
-        return []
-    num_speakers = max(1, min(6, int(num_speakers)))
-    if not speaker_labels or len(speaker_labels) < num_speakers:
-        speaker_labels = [f"Konuşmacı {i+1}" for i in range(num_speakers)]
-
-    # Decode full audio to 16kHz mono int16 array via FFmpeg
-    audio_np = None
+def _decode_audio_16k_mono(media_path):
+    """Decode any audio/video file to 16kHz mono float32 numpy array via FFmpeg."""
     sr = 16000
     try:
         cmd = [
@@ -375,13 +362,347 @@ def acoustic_diarize_segments(media_path, segments, num_speakers=2, speaker_labe
         creationflags = 0x08000000 if os.name == "nt" else 0
         proc = subprocess.run(cmd, capture_output=True, creationflags=creationflags)
         if proc.returncode == 0 and proc.stdout:
-            audio_np = np.frombuffer(proc.stdout, dtype=np.int16).astype(np.float32) / 32768.0
+            return np.frombuffer(proc.stdout, dtype=np.int16).astype(np.float32) / 32768.0
     except Exception:
-        audio_np = None
+        pass
+    return None
 
+
+def _resolve_diarization_models():
+    """Locate offline sherpa-onnx diarization models (pyannote-segmentation-3.0 + 3dspeaker)."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.join(base_dir, "diarization_models"),
+        os.path.join(getattr(sys, "_MEIPASS", base_dir), "diarization_models"),
+        os.path.join(os.path.dirname(os.path.abspath(sys.executable)), "..", "Resources", "diarization_models"),
+        os.path.join(os.path.expanduser("~"), ".cache", "ilber", "diarization_models"),
+    ]
+    seg_rel_options = [
+        os.path.join("sherpa-onnx-pyannote-segmentation-3-0", "model.int8.onnx"),
+        os.path.join("sherpa-onnx-pyannote-segmentation-3-0", "model.onnx"),
+    ]
+    emb_rel_options = [
+        "3dspeaker_eres2net.onnx",
+        "3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx",
+    ]
+    for root in candidates:
+        seg_path = next((os.path.join(root, p) for p in seg_rel_options if os.path.isfile(os.path.join(root, p))), None)
+        emb_path = next((os.path.join(root, p) for p in emb_rel_options if os.path.isfile(os.path.join(root, p))), None)
+        if seg_path and emb_path:
+            return seg_path, emb_path
+
+    # One-time auto-download to user cache if online
+    cache_root = candidates[-1]
+    try:
+        import urllib.request
+        import tarfile
+        os.makedirs(cache_root, exist_ok=True)
+        seg_dir = os.path.join(cache_root, "sherpa-onnx-pyannote-segmentation-3-0")
+        if not os.path.isdir(seg_dir):
+            seg_tgz = os.path.join(cache_root, "seg.tar.bz2")
+            urllib.request.urlretrieve(
+                "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2",
+                seg_tgz,
+            )
+            with tarfile.open(seg_tgz, "r:bz2") as tf:
+                tf.extractall(cache_root)
+            try:
+                os.remove(seg_tgz)
+            except Exception:
+                pass
+        emb_dst = os.path.join(cache_root, "3dspeaker_eres2net.onnx")
+        if not os.path.isfile(emb_dst):
+            urllib.request.urlretrieve(
+                "https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx",
+                emb_dst,
+            )
+        seg_path = next((os.path.join(cache_root, p) for p in seg_rel_options if os.path.isfile(os.path.join(cache_root, p))), None)
+        if seg_path and os.path.isfile(emb_dst):
+            return seg_path, emb_dst
+    except Exception:
+        pass
+    return None, None
+
+
+def _split_into_atomic_utterances(segments, mark_pauses=False):
+    """
+    Split Whisper segments into atomic single-speaker utterances using word-level
+    sentence boundaries (?, !, .) so Q&A inside a single segment can be separated cleanly.
+    """
+    utterances = []
+    for seg in segments:
+        words = seg.get("words") or []
+        if not words:
+            txt = str(seg.get("text", "")).strip()
+            if txt:
+                utterances.append({
+                    "start": float(seg.get("start", 0.0)),
+                    "end": float(seg.get("end", 0.0)),
+                    "text": txt,
+                    "note": str(seg.get("note", "")),
+                    "low_conf_words": list(seg.get("low_conf_words", [])),
+                })
+            continue
+
+        cur_words = []
+        for w in words:
+            w_txt = str(w.get("word", ""))
+            if not w_txt.strip():
+                continue
+            cur_words.append({
+                "start": float(w.get("start", seg.get("start", 0.0))),
+                "end": float(w.get("end", seg.get("end", 0.0))),
+                "word": w_txt,
+                "prob": float(w.get("probability", 1.0)),
+            })
+            if w_txt.rstrip().endswith(("?", "!", ".")):
+                utterances.append(_build_utterance_from_words(cur_words, mark_pauses=mark_pauses))
+                cur_words = []
+        if cur_words:
+            utterances.append(_build_utterance_from_words(cur_words, mark_pauses=mark_pauses))
+    return [u for u in utterances if u["text"]]
+
+
+def _build_utterance_from_words(words_grp, mark_pauses=False):
+    parts = []
+    low_words = []
+    for idx_w, w in enumerate(words_grp):
+        if mark_pauses and idx_w > 0:
+            gap = w["start"] - words_grp[idx_w - 1]["end"]
+            if gap >= 2.5:
+                parts.append(" (...)")
+            elif gap >= 1.2:
+                parts.append(" (..)")
+            elif gap >= 0.45:
+                parts.append(" (.)")
+        parts.append(w["word"])
+        w_clean = w["word"].strip()
+        if w["prob"] < 0.55 and w_clean:
+            low_words.append(w_clean)
+    return {
+        "start": words_grp[0]["start"],
+        "end": words_grp[-1]["end"],
+        "text": "".join(parts).strip(),
+        "note": "",
+        "low_conf_words": low_words,
+    }
+
+
+def _neural_embed_utterances(audio_np, utterances):
+    """
+    Extract L2-normalized neural speaker embeddings (3D-Speaker ERes2Net via sherpa-onnx)
+    for each atomic utterance.
+    """
+    if audio_np is None or len(audio_np) < 1600 or not utterances:
+        return None
+    try:
+        import sherpa_onnx
+    except ImportError:
+        return None
+
+    _, emb_path = _resolve_diarization_models()
+    if not emb_path:
+        return None
+
+    try:
+        n_threads = max(2, min(6, os.cpu_count() or 4))
+        cfg = sherpa_onnx.SpeakerEmbeddingExtractorConfig(
+            model=emb_path,
+            num_threads=n_threads,
+            provider="cpu",
+        )
+        if not cfg.validate():
+            return None
+        extractor = sherpa_onnx.SpeakerEmbeddingExtractor(cfg)
+    except Exception:
+        return None
+
+    sr = 16000
+    dim = extractor.dim
+    embeddings = []
+    valid_mask = []
+    for utt in utterances:
+        i0 = max(0, int((utt["start"] - 0.05) * sr))
+        i1 = min(len(audio_np), int((utt["end"] + 0.05) * sr))
+        clip = audio_np[i0:i1]
+        if len(clip) < int(0.35 * sr):
+            # Pad very short utterances symmetrically around center if needed
+            pad_len = max(0, int(0.45 * sr) - len(clip))
+            if len(clip) > 0 and pad_len > 0:
+                clip = np.pad(clip, (0, pad_len), mode="constant")
+        emb_vec = None
+        if len(clip) >= int(0.30 * sr):
+            try:
+                stream = extractor.create_stream()
+                stream.accept_waveform(sr, clip.tolist())
+                stream.input_finished()
+                if extractor.is_ready(stream):
+                    raw = np.array(extractor.compute(stream), dtype=np.float32)
+                    norm = float(np.linalg.norm(raw))
+                    if norm > 1e-6:
+                        emb_vec = raw / norm
+            except Exception:
+                emb_vec = None
+        if emb_vec is not None:
+            embeddings.append(emb_vec)
+            valid_mask.append(True)
+        else:
+            embeddings.append(np.zeros(dim, dtype=np.float32))
+            valid_mask.append(False)
+
+    if sum(valid_mask) < 2:
+        return None
+    return np.stack(embeddings, axis=0), valid_mask
+
+
+def _cluster_embeddings_cosine(embeddings, valid_mask, utterances, num_speakers):
+    """
+    Cluster L2-normalized neural speaker embeddings using:
+    1) Duration-weighted mean-centering (removes shared microphone/room channel vector),
+    2) Ward hierarchical clustering (immune to single-outlier cluster hijacking),
+    3) Duration-weighted cosine centroid refinement.
+    """
+    n = len(utterances)
+    durations = np.array([max(0.2, utt["end"] - utt["start"]) for utt in utterances], dtype=np.float32)
+    valid_idx = [i for i, ok in enumerate(valid_mask) if ok]
+    if len(valid_idx) < num_speakers or num_speakers <= 1:
+        return [0] * n
+
+    # 1. Remove shared room/microphone channel vector via duration-weighted mean centering
+    w_valid = np.sqrt(durations[valid_idx])[:, None]
+    mean_vec = np.sum(embeddings[valid_idx] * w_valid, axis=0) / (float(np.sum(w_valid)) + 1e-8)
+    centered = embeddings.copy()
+    for i in valid_idx:
+        v = embeddings[i] - mean_vec
+        norm = float(np.linalg.norm(v))
+        if norm > 1e-6:
+            centered[i] = v / norm
+
+    # 2. Ward hierarchical clustering on valid utterances
+    labels = np.zeros(n, dtype=int)
+    try:
+        from scipy.cluster.hierarchy import linkage, fcluster
+        X_valid = centered[valid_idx]
+        Z = linkage(X_valid, method="ward")
+        raw_cl = fcluster(Z, t=num_speakers, criterion="maxclust") - 1
+        for pos, i in enumerate(valid_idx):
+            labels[i] = int(raw_cl[pos])
+    except Exception:
+        # Fallback to farthest-first on centered embeddings
+        anchor_pool = [i for i in valid_idx if durations[i] >= 0.7] or valid_idx
+        chosen = [max(anchor_pool, key=lambda i: durations[i])]
+        for _ in range(1, num_speakers):
+            best_i = min(
+                (i for i in anchor_pool if i not in chosen),
+                key=lambda i: max(float(np.dot(centered[i], centered[c])) for c in chosen),
+                default=None,
+            )
+            if best_i is None:
+                break
+            chosen.append(best_i)
+        centroids_fb = np.stack([centered[c] for c in chosen], axis=0)
+        sims = centered @ centroids_fb.T
+        labels = np.argmax(sims, axis=1)
+
+    # 3. Duration-weighted cosine centroid refinement (3 passes)
+    k_actual = min(num_speakers, len(set(int(labels[i]) for i in valid_idx)))
+    if k_actual > 1:
+        centroids = np.zeros((k_actual, centered.shape[1]), dtype=np.float32)
+        uniq_k = sorted(set(int(labels[i]) for i in valid_idx))
+        remap_k = {old_k: new_k for new_k, old_k in enumerate(uniq_k)}
+        for i in valid_idx:
+            labels[i] = remap_k[int(labels[i])]
+        for _ in range(5):
+            for k in range(k_actual):
+                members = [i for i in valid_idx if labels[i] == k]
+                if members:
+                    # Prefer utterances >= 0.5s when updating centroids
+                    long_m = [i for i in members if durations[i] >= 0.5] or members
+                    w = np.sqrt(durations[long_m])[:, None]
+                    avg = np.sum(centered[long_m] * w, axis=0)
+                    norm = float(np.linalg.norm(avg))
+                    if norm > 1e-6:
+                        centroids[k] = avg / norm
+            sims = centered @ centroids.T
+            new_labels = np.argmax(sims, axis=1)
+            if np.array_equal(new_labels[valid_idx], labels[valid_idx]):
+                break
+            for i in valid_idx:
+                labels[i] = int(new_labels[i])
+
+    # Assign any invalid/ultra-short utterances to the nearest neighbor speaker
+    for i in range(n):
+        if not valid_mask[i]:
+            labels[i] = labels[i - 1] if i > 0 else 0
+
+    return labels.tolist()
+
+
+def acoustic_diarize_segments(media_path, segments, num_speakers=2, speaker_labels=None, mark_pauses=False):
+    """
+    Perform offline speaker diarization on timestamped Whisper segments.
+    Splits segments at sentence boundaries using word_timestamps, extracts
+    3D-Speaker ERes2Net neural voice embeddings per utterance via sherpa-onnx,
+    and clusters speakers with duration-weighted Farthest-First Cosine K-Means.
+    """
+    if not segments:
+        return []
+    num_speakers = max(1, min(6, int(num_speakers)))
+    if not speaker_labels or len(speaker_labels) < num_speakers:
+        speaker_labels = [f"Konuşmacı {i+1}" for i in range(num_speakers)]
+
+    utterances = _split_into_atomic_utterances(segments, mark_pauses=mark_pauses)
+    if not utterances:
+        return []
+
+    if num_speakers == 1:
+        return [{
+            "start": u["start"],
+            "end": u["end"],
+            "speaker": speaker_labels[0],
+            "text": u["text"],
+            "note": u["note"],
+            "low_conf_words": u["low_conf_words"],
+        } for u in utterances]
+
+    sr = 16000
+    audio_np = _decode_audio_16k_mono(media_path)
+
+    # 1. Primary: Neural speaker embeddings per atomic utterance (sherpa-onnx 3D-Speaker)
+    ordered_labels = None
+    if audio_np is not None:
+        emb_res = _neural_embed_utterances(audio_np, utterances)
+        if emb_res is not None:
+            embeddings, valid_mask = emb_res
+            raw_labels = _cluster_embeddings_cosine(embeddings, valid_mask, utterances, num_speakers)
+            remap = {}
+            next_id = 0
+            ordered_labels = []
+            for lbl in raw_labels:
+                if int(lbl) not in remap:
+                    remap[int(lbl)] = next_id
+                    next_id += 1
+                ordered_labels.append(remap[int(lbl)])
+
+    if ordered_labels is not None:
+        out_segments = []
+        for i, u in enumerate(utterances):
+            spk_idx = ordered_labels[i]
+            spk_name = speaker_labels[min(spk_idx, len(speaker_labels) - 1)]
+            out_segments.append({
+                "start": u["start"],
+                "end": u["end"],
+                "speaker": spk_name,
+                "text": u["text"],
+                "note": u["note"],
+                "low_conf_words": u["low_conf_words"],
+            })
+        return out_segments
+
+    # 2. Fallback: Lightweight acoustic K-Means clustering
     features = []
     valid_indices = []
-    for idx, seg in enumerate(segments):
+    for idx, seg in enumerate(utterances):
         s_sec = float(seg.get("start", 0.0))
         e_sec = float(seg.get("end", s_sec + 1.0))
         if audio_np is not None and len(audio_np) > sr:
@@ -392,15 +713,12 @@ def acoustic_diarize_segments(media_path, segments, num_speakers=2, speaker_labe
             clip = np.array([], dtype=np.float32)
 
         if len(clip) >= 400:
-            # 1. Zero-crossing rate (correlates with fundamental pitch/voicing)
             zcr = float(np.mean(np.abs(np.diff(np.sign(clip)))))
-            # 2. Spectral features via FFT
             win = clip[:min(len(clip), sr * 4)]
             spec = np.abs(np.fft.rfft(win))
             freqs = np.fft.rfftfreq(len(win), d=1.0 / sr)
             spec_sum = float(np.sum(spec)) + 1e-8
             centroid = float(np.sum(freqs * spec) / spec_sum) / 4000.0
-            # Sub-band energy ratios (Voice fundamental 80-300Hz, Formants 300-1200Hz, High 1200-4000Hz)
             b_low = float(np.sum(spec[(freqs >= 80) & (freqs < 300)])) / spec_sum
             b_mid = float(np.sum(spec[(freqs >= 300) & (freqs < 1200)])) / spec_sum
             b_high = float(np.sum(spec[(freqs >= 1200) & (freqs < 4000)])) / spec_sum
@@ -411,18 +729,15 @@ def acoustic_diarize_segments(media_path, segments, num_speakers=2, speaker_labe
 
     X = np.array(features, dtype=np.float32)
     if len(valid_indices) >= num_speakers and num_speakers > 1:
-        # Standardize features
         mean = np.mean(X[valid_indices], axis=0)
         std = np.std(X[valid_indices], axis=0) + 1e-6
         Xn = (X - mean) / std
-
-        # Deterministic K-Means initialization (spread across quantiles of primary acoustic axis)
         proj = Xn[:, 0] + Xn[:, 1] + Xn[:, 2]
         quantiles = np.linspace(0.15, 0.85, num_speakers)
         init_idx = [int(np.argmin(np.abs(proj - np.quantile(proj, q)))) for q in quantiles]
         centroids = Xn[init_idx].copy()
 
-        labels = np.zeros(len(segments), dtype=int)
+        labels = np.zeros(len(utterances), dtype=int)
         for _ in range(25):
             dists = np.linalg.norm(Xn[:, None, :] - centroids[None, :, :], axis=2)
             new_labels = np.argmin(dists, axis=1)
@@ -431,14 +746,6 @@ def acoustic_diarize_segments(media_path, segments, num_speakers=2, speaker_labe
                     centroids[k] = np.mean(Xn[new_labels == k], axis=0)
             labels = new_labels
 
-        # Smooth very short isolated speaker flips when pause between segments is tiny (<0.25s)
-        for i in range(1, len(segments) - 1):
-            pause_prev = float(segments[i]["start"]) - float(segments[i - 1]["end"])
-            dur_curr = float(segments[i]["end"]) - float(segments[i]["start"])
-            if pause_prev < 0.25 and dur_curr < 1.2 and labels[i - 1] == labels[i + 1]:
-                labels[i] = labels[i - 1]
-
-        # Order speaker IDs so the first speaker in the recording is Speaker 0
         remap = {}
         next_id = 0
         ordered_labels = []
@@ -448,10 +755,10 @@ def acoustic_diarize_segments(media_path, segments, num_speakers=2, speaker_labe
                 next_id += 1
             ordered_labels.append(remap[int(lbl)])
     else:
-        ordered_labels = [0 for _ in segments]
+        ordered_labels = [0 for _ in utterances]
 
     out_segments = []
-    for i, seg in enumerate(segments):
+    for i, seg in enumerate(utterances):
         spk_idx = ordered_labels[i] if i < len(ordered_labels) else 0
         spk_name = speaker_labels[spk_k] if (spk_k := min(spk_idx, len(speaker_labels) - 1)) >= 0 else "Konuşmacı 1"
         out_segments.append({
@@ -460,6 +767,7 @@ def acoustic_diarize_segments(media_path, segments, num_speakers=2, speaker_labe
             "speaker": spk_name,
             "text": str(seg.get("text", "")).strip(),
             "note": str(seg.get("note", "")),
+            "low_conf_words": list(seg.get("low_conf_words", [])),
         })
     return out_segments
 
@@ -3343,6 +3651,13 @@ def _is_translatable_string(s):
 # Built-in High-Precision Technical, Academic & Commercial Terminology Dictionary (EN <-> TR, DE <-> TR)
 _BUILTIN_DOMAIN_GLOSSARY = {
     ("en", "tr"): {
+        "FOREWORD": "ÖNSÖZ",
+        "DEFINITIONS": "TANIMLAR",
+        "Applicability/Scope": "Uygulama / Kapsam",
+        "INSTRUCTIONS/REQUIREMENTS": "TALİMATLAR / GEREKLİLİKLER",
+        "ATTACHMENTS": "EKLER",
+        "REFERENCES": "KAYNAKLAR",
+        "Occupational Health and Safety": "İş Sağlığı ve Güvenliği",
         "Quotation No.": "Teklif No.",
         "Quotation is valid for 60 days": "Teklif 60 gün süreyle geçerlidir",
         "Quotation is valid for 30 days": "Teklif 30 gün süreyle geçerlidir",
@@ -3467,8 +3782,432 @@ _BUILTIN_DOMAIN_GLOSSARY = {
         "5 set": "5 Set",
         "1 set": "1 Set",
         "1 ea": "1 Adet",
-    }
+        # --- Medical (Tıp) EN -> TR ---
+        "hypertension": "hipertansiyon",
+        "diabetes mellitus": "diyabet (şeker hastalığı)",
+        "myocardial infarction": "miyokard enfarktüsü (kalp krizi)",
+        "heart failure": "kalp yetmezliği",
+        "blood pressure": "kan basıncı (tansiyon)",
+        "complete blood count": "tam kan sayımı (hemogram)",
+        "magnetic resonance imaging": "manyetik rezonans görüntüleme (MR)",
+        "computed tomography": "bilgisayarlı tomografi (BT)",
+        "intensive care unit": "yoğun bakım ünitesi",
+        "clinical trial": "klinik çalışma",
+        "informed consent": "aydınlatılmış onam",
+        "adverse event": "advers olay (yan etki)",
+        "differential diagnosis": "ayırıcı tanı",
+        "prognosis": "prognoz (hastalık seyri)",
+        "pathology": "patoloji",
+        "oncology": "onkoloji",
+        "cardiology": "kardiyoloji",
+        "neurology": "nöroloji",
+        "intravenous": "intravenöz (damar içi)",
+        "subcutaneous": "subkütan (cilt altı)",
+        # --- Engineering (Mühendislik) EN -> TR ---
+        "finite element analysis": "sonlu elemanlar analizi (FEA)",
+        "computational fluid dynamics": "hesaplamalı akışkanlar dinamiği (HAD)",
+        "tensile strength": "çekme dayanımı",
+        "yield strength": "akma dayanımı",
+        "thermal conductivity": "ısıl iletkenlik",
+        "quality assurance": "kalite güvence",
+        "quality control": "kalite kontrol",
+        "preventive maintenance": "önleyici bakım",
+        "corrective maintenance": "düzeltici bakım",
+        "bill of materials": "malzeme listesi (BOM)",
+        "standard operating procedure": "standart işletim prosedürü (SOP)",
+        "root cause analysis": "kök neden analizi",
+        "circuit breaker": "devre kesici (sigorta)",
+        "overcurrent protection": "aşırı akım koruması",
+        "insulated tools": "yalıtımlı el aletleri",
+        "personal protective equipment": "kişisel koruyucu donanım (KKD)",
+        "calibration certificate": "kalibrasyon sertifikası",
+        "tolerance": "tolerans",
+        # --- Finance & Accounting (Maliye / Finans) EN -> TR ---
+        "balance sheet": "bilanço",
+        "income statement": "gelir tablosu",
+        "cash flow statement": "nakit akış tablosu",
+        "value-added tax": "katma değer vergisi (KDV)",
+        "withholding tax": "stopaj vergisi",
+        "corporate tax": "kurumlar vergisi",
+        "accounts receivable": "alacak hesapları",
+        "accounts payable": "borç hesapları",
+        "gross profit": "brüt kâr",
+        "net profit": "net kâr",
+        "operating profit": "faaliyet kârı",
+        "depreciation": "amortisman",
+        "working capital": "işletme sermayesi",
+        "return on investment": "yatırım getirisi (ROI)",
+        "letter of credit": "akreditif",
+        "purchase order": "satın alma siparişi",
+        "proforma invoice": "proforma fatura",
+        "fiscal year": "mali yıl",
+        "audit report": "denetim raporu",
+        # --- Legal & Contracts (Hukuk) EN -> TR ---
+        "power of attorney": "vekaletname",
+        "force majeure": "mücbir sebep",
+        "non-disclosure agreement": "gizlilik sözleşmesi (NDA)",
+        "governing law": "uygulanacak hukuk",
+        "jurisdiction": "yetkili yargı mercii",
+        "arbitration": "tahkim",
+        "breach of contract": "sözleşme ihlali",
+        "indemnification": "tazminat (zararın karşılanması)",
+        "intellectual property": "fikri mülkiyet",
+        "severability": "bölünebilirlik",
+        "confidentiality": "gizlilik",
+        "liability": "hukuki sorumluluk",
+        "plaintiff": "davacı",
+        "defendant": "davalı",
+        "affidavit": "yeminli beyan",
+        "notary public": "noter",
+        "sworn translator": "yeminli tercüman",
+        "in witness whereof": "işbu keyfiyeti teyiden",
+        "hereinafter referred to as": "bundan böyle ... olarak anılacaktır",
+        "null and void": "hükümsüz ve geçersiz",
+    },
+    ("tr", "en"): {
+        "Fotokopiden Tercüme Edilmiştir": "Translated from a photocopy",
+        "SATIŞ FATURASI": "BILL OF SALE",
+        "Satış Faturasını": "Bill of Sale",
+        "Satış Faturası": "Bill of Sale",
+        "Teknenin Adı": "Vessel Name",
+        "Marka / Model": "Make / Model",
+        "Gövde Numarası": "Hull Number",
+        "Gövde numarasının": "Hull number",
+        "Kayıt Limanı / Numarası": "Port of Registry / Number",
+        "Tekne Tipi": "Vessel Type",
+        "Yapım Yeri / Yılı": "Place / Year of Build",
+        "Şahsi Yat": "Private Yacht",
+        "Tekne Ölçüleri": "Vessel Dimensions",
+        "Metre": "Meters",
+        "Brüt Kayıtlı Tonaj": "Gross Registered Tonnage",
+        "Motor Markası ve Modeli": "Engine Make and Model",
+        "Motor Sayısı": "Number of Engines",
+        "Motor Gücü": "Engine Power",
+        "Motor Seri Numarası": "Engine Serial Numbers",
+        "Gövde Malzemesi": "Hull Material",
+        "Kiriş": "Beam",
+        "Derinlik": "Depth",
+        "Uzunluk": "Length",
+        "Satıcılar Adına": "For and on behalf of the Sellers",
+        "Yeminli İngilizce Tercümanı": "Sworn English Translator",
+        "Kartal 4.Noterliği": "Kartal 4th Notary Public Office",
+        "Kartal 4. Noterliği": "Kartal 4th Notary Public Office",
+        "gemi tasdiknamesi": "Certificate of Registry",
+        "motor etiketlerinin": "engine plates",
+        "Alıcı(lar)": "the Buyer(s)",
+        "buradan itibaren": "hereinafter",
+        "takyidatlardan": "encumbrances",
+        "denizcilik ipoteklerinden": "maritime liens",
+        "İşbu keyfiyeti teyiden": "In witness whereof",
+        "ödemesi alınmıştır": "payment has been received",
+        # --- Medical (Tıp) TR -> EN ---
+        "yüksek tansiyon": "hypertension",
+        "hipertansiyon": "hypertension",
+        "kalp yetmezliği": "heart failure",
+        "kalp krizi": "myocardial infarction",
+        "şeker hastalığı": "diabetes mellitus",
+        "tam kan sayımı": "complete blood count",
+        "manyetik rezonans": "magnetic resonance imaging (MRI)",
+        "bilgisayarlı tomografi": "computed tomography (CT)",
+        "yoğun bakım ünitesi": "intensive care unit (ICU)",
+        "aydınlatılmış onam": "informed consent",
+        "etik kurul onayı": "ethics committee approval",
+        "ayırıcı tanı": "differential diagnosis",
+        "klinik çalışma": "clinical trial",
+        "yan etki": "adverse effect",
+        # --- Engineering (Mühendislik) TR -> EN ---
+        "Fizik mühendisliği": "Physics Engineering",
+        "Fizik Mühendisliği": "Physics Engineering",
+        "Makine Mühendisliği": "Mechanical Engineering",
+        "Elektrik-Elektronik Mühendisliği": "Electrical and Electronics Engineering",
+        "Bilgisayar Mühendisliği": "Computer Engineering",
+        "İnşaat Mühendisliği": "Civil Engineering",
+        "Endüstri Mühendisliği": "Industrial Engineering",
+        "sonlu elemanlar analizi": "finite element analysis (FEA)",
+        "çekme dayanımı": "tensile strength",
+        "akma dayanımı": "yield strength",
+        "ısıl iletkenlik": "thermal conductivity",
+        "kalite güvence": "quality assurance",
+        "kalite kontrol": "quality control",
+        "önleyici bakım": "preventive maintenance",
+        "kök neden analizi": "root cause analysis",
+        "malzeme listesi": "bill of materials (BOM)",
+        "kişisel koruyucu donanım": "personal protective equipment (PPE)",
+        "kalibrasyon sertifikası": "calibration certificate",
+        # --- Finance & Accounting (Maliye / Finans) TR -> EN ---
+        "bilanço": "balance sheet",
+        "gelir tablosu": "income statement",
+        "nakit akış tablosu": "cash flow statement",
+        "katma değer vergisi": "value-added tax (VAT)",
+        "stopaj vergisi": "withholding tax",
+        "kurumlar vergisi": "corporate tax",
+        "brüt kâr": "gross profit",
+        "net kâr": "net profit",
+        "faaliyet kârı": "operating profit",
+        "amortisman": "depreciation",
+        "işletme sermayesi": "working capital",
+        "yatırım getirisi": "return on investment (ROI)",
+        "akreditif": "letter of credit",
+        "satın alma siparişi": "purchase order",
+        "proforma fatura": "proforma invoice",
+        "mali yıl": "fiscal year",
+        "denetim raporu": "audit report",
+        "vergi dairesi": "tax office",
+        "vergi kimlik numarası": "tax identification number",
+        # --- Legal & Contracts (Hukuk) TR -> EN ---
+        "vekaletname": "power of attorney",
+        "mücbir sebep": "force majeure",
+        "gizlilik sözleşmesi": "non-disclosure agreement (NDA)",
+        "uygulanacak hukuk": "governing law",
+        "yetkili mahkeme": "competent court",
+        "tahkim": "arbitration",
+        "sözleşme ihlali": "breach of contract",
+        "fikri mülkiyet": "intellectual property",
+        "davacı": "plaintiff",
+        "davalı": "defendant",
+        "yeminli tercüman": "sworn translator",
+        "yeminli beyan": "affidavit",
+        "hükümsüz": "null and void",
+        "tazminat": "indemnification",
+        "imza sirküleri": "signature circular",
+        "ticaret sicil gazetesi": "trade registry gazette",
+        "faaliyet belgesi": "certificate of activity",
+        "ikametgah": "certificate of residence",
+        "nüfus kayıt örneği": "civil registry extract",
+        "temyiz": "appeal",
+    },
+    ("de", "tr"): {
+        # --- Medical (Tıp) DE -> TR ---
+        "Bluthochdruck": "hipertansiyon",
+        "Herzinsuffizienz": "kalp yetmezliği",
+        "Herzinfarkt": "miyokard enfarktüsü (kalp krizi)",
+        "Diabetes mellitus": "diyabet (şeker hastalığı)",
+        "Blutdruck": "kan basıncı (tansiyon)",
+        "großes Blutbild": "tam kan sayımı (hemogram)",
+        "Magnetresonanztomographie": "manyetik rezonans görüntüleme (MR)",
+        "Computertomographie": "bilgisayarlı tomografi (BT)",
+        "Intensivstation": "yoğun bakım ünitesi",
+        "klinische Studie": "klinik çalışma",
+        "Einverständniserklärung": "aydınlatılmış onam",
+        "Nebenwirkung": "yan etki",
+        "Differentialdiagnose": "ayırıcı tanı",
+        # --- Engineering (Mühendislik) DE -> TR ---
+        "Finite-Elemente-Methode": "sonlu elemanlar analizi (FEA)",
+        "Zugfestigkeit": "çekme dayanımı",
+        "Streckgrenze": "akma dayanımı",
+        "Wärmeleitfähigkeit": "ısıl iletkenlik",
+        "Qualitätssicherung": "kalite güvence",
+        "Qualitätskontrolle": "kalite kontrol",
+        "vorbeugende Wartung": "önleyici bakım",
+        "Ursachenanalyse": "kök neden analizi",
+        "Stückliste": "malzeme listesi (BOM)",
+        "Schutzschalter": "devre kesici (sigorta)",
+        "Überstromschutz": "aşırı akım koruması",
+        "persönliche Schutzausrüstung": "kişisel koruyucu donanım (KKD)",
+        "Kalibrierzertifikat": "kalibrasyon sertifikası",
+        # --- Finance (Maliye / Finans) DE -> TR ---
+        "Bilanz": "bilanço",
+        "Gewinn- und Verlustrechnung": "gelir tablosu",
+        "Kapitalflussrechnung": "nakit akış tablosu",
+        "Mehrwertsteuer": "katma değer vergisi (KDV)",
+        "Quellensteuer": "stopaj vergisi",
+        "Körperschaftsteuer": "kurumlar vergisi",
+        "Bruttogewinn": "brüt kâr",
+        "Nettogewinn": "net kâr",
+        "Betriebsergebnis": "faaliyet kârı",
+        "Abschreibung": "amortisman",
+        "Betriebskapital": "işletme sermayesi",
+        "Akkreditiv": "akreditif",
+        "Bestellung": "satın alma siparişi",
+        "Proforma-Rechnung": "proforma fatura",
+        "Geschäftsjahr": "mali yıl",
+        "Prüfungsbericht": "denetim raporu",
+        # --- Legal (Hukuk) DE -> TR ---
+        "Vollmacht": "vekaletname",
+        "höhere Gewalt": "mücbir sebep",
+        "Geheimhaltungsvereinbarung": "gizlilik sözleşmesi (NDA)",
+        "anwendbares Recht": "uygulanacak hukuk",
+        "Gerichtsstand": "yetkili yargı mercii",
+        "Schiedsverfahren": "tahkim",
+        "Vertragsbruch": "sözleşme ihlali",
+        "Schadensersatz": "tazminat",
+        "geistiges Eigentum": "fikri mülkiyet",
+        "Kläger": "davacı",
+        "Beklagter": "davalı",
+        "Notar": "noter",
+        "vereidigter Übersetzer": "yeminli tercüman",
+        "eidesstattliche Versicherung": "yeminli beyan",
+        "null und nichtig": "hükümsüz ve geçersiz",
+        "Unterschriftenprobe": "imza sirküleri",
+        "Handelsregister": "ticaret sicili",
+    },
+    ("tr", "de"): {
+        # --- Medical (Tıp) TR -> DE ---
+        "hipertansiyon": "Bluthochdruck",
+        "yüksek tansiyon": "Bluthochdruck",
+        "kalp yetmezliği": "Herzinsuffizienz",
+        "kalp krizi": "Herzinfarkt",
+        "şeker hastalığı": "Diabetes mellitus",
+        "tam kan sayımı": "großes Blutbild",
+        "yoğun bakım ünitesi": "Intensivstation",
+        "aydınlatılmış onam": "Einverständniserklärung",
+        "ayırıcı tanı": "Differentialdiagnose",
+        "klinik çalışma": "klinische Studie",
+        "yan etki": "Nebenwirkung",
+        # --- Engineering (Mühendislik) TR -> DE ---
+        "Fizik mühendisliği": "Physikalische Technik",
+        "Fizik Mühendisliği": "Physikalische Technik",
+        "Makine Mühendisliği": "Maschinenbau",
+        "Elektrik-Elektronik Mühendisliği": "Elektrotechnik und Elektronik",
+        "Bilgisayar Mühendisliği": "Informatik / Computertechnik",
+        "İnşaat Mühendisliği": "Bauingenieurwesen",
+        "Endüstri Mühendisliği": "Wirtschaftsingenieurwesen",
+        "sonlu elemanlar analizi": "Finite-Elemente-Methode",
+        "çekme dayanımı": "Zugfestigkeit",
+        "akma dayanımı": "Streckgrenze",
+        "ısıl iletkenlik": "Wärmeleitfähigkeit",
+        "kalite güvence": "Qualitätssicherung",
+        "kalite kontrol": "Qualitätskontrolle",
+        "önleyici bakım": "vorbeugende Wartung",
+        "kök neden analizi": "Ursachenanalyse",
+        "malzeme listesi": "Stückliste",
+        "kişisel koruyucu donanım": "persönliche Schutzausrüstung",
+        "kalibrasyon sertifikası": "Kalibrierzertifikat",
+        # --- Finance (Maliye / Finans) TR -> DE ---
+        "bilanço": "Bilanz",
+        "gelir tablosu": "Gewinn- und Verlustrechnung",
+        "nakit akış tablosu": "Kapitalflussrechnung",
+        "katma değer vergisi": "Mehrwertsteuer",
+        "stopaj vergisi": "Quellensteuer",
+        "kurumlar vergisi": "Körperschaftsteuer",
+        "brüt kâr": "Bruttogewinn",
+        "net kâr": "Nettogewinn",
+        "faaliyet kârı": "Betriebsergebnis",
+        "amortisman": "Abschreibung",
+        "işletme sermayesi": "Betriebskapital",
+        "akreditif": "Akkreditiv",
+        "satın alma siparişi": "Bestellung",
+        "proforma fatura": "Proforma-Rechnung",
+        "mali yıl": "Geschäftsjahr",
+        "denetim raporu": "Prüfungsbericht",
+        # --- Legal (Hukuk) TR -> DE ---
+        "vekaletname": "Vollmacht",
+        "mücbir sebep": "höhere Gewalt",
+        "gizlilik sözleşmesi": "Geheimhaltungsvereinbarung",
+        "uygulanacak hukuk": "anwendbares Recht",
+        "yetkili mahkeme": "zuständiges Gericht",
+        "tahkim": "Schiedsverfahren",
+        "sözleşme ihlali": "Vertragsbruch",
+        "fikri mülkiyet": "geistiges Eigentum",
+        "davacı": "Kläger",
+        "davalı": "Beklagter",
+        "yeminli tercüman": "vereidigter Übersetzer",
+        "yeminli beyan": "eidesstattliche Versicherung",
+        "hükümsüz": "null und nichtig",
+        "tazminat": "Schadensersatz",
+        "imza sirküleri": "Unterschriftenprobe",
+        "ticaret sicil gazetesi": "Handelsregisterblatt",
+    },
+    ("de", "en"): {
+        "Bluthochdruck": "hypertension",
+        "Herzinsuffizienz": "heart failure",
+        "Herzinfarkt": "myocardial infarction",
+        "Intensivstation": "intensive care unit (ICU)",
+        "Finite-Elemente-Methode": "finite element analysis (FEA)",
+        "Zugfestigkeit": "tensile strength",
+        "Qualitätssicherung": "quality assurance",
+        "Bilanz": "balance sheet",
+        "Gewinn- und Verlustrechnung": "income statement",
+        "Mehrwertsteuer": "value-added tax (VAT)",
+        "Vollmacht": "power of attorney",
+        "höhere Gewalt": "force majeure",
+        "Geheimhaltungsvereinbarung": "non-disclosure agreement (NDA)",
+        "anwendbares Recht": "governing law",
+        "Schiedsverfahren": "arbitration",
+        "vereidigter Übersetzer": "sworn translator",
+    },
+    ("en", "de"): {
+        "hypertension": "Bluthochdruck",
+        "heart failure": "Herzinsuffizienz",
+        "myocardial infarction": "Herzinfarkt",
+        "intensive care unit": "Intensivstation",
+        "finite element analysis": "Finite-Elemente-Methode",
+        "tensile strength": "Zugfestigkeit",
+        "quality assurance": "Qualitätssicherung",
+        "balance sheet": "Bilanz",
+        "income statement": "Gewinn- und Verlustrechnung",
+        "value-added tax": "Mehrwertsteuer",
+        "power of attorney": "Vollmacht",
+        "force majeure": "höhere Gewalt",
+        "non-disclosure agreement": "Geheimhaltungsvereinbarung",
+        "governing law": "anwendbares Recht",
+        "arbitration": "Schiedsverfahren",
+        "sworn translator": "vereidigter Übersetzer",
+    },
 }
+
+
+def _load_external_term_bank_csv():
+    """Load bundled 3-lang and 25-lang terminology CSVs into _BUILTIN_DOMAIN_GLOSSARY."""
+    import csv
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    csv_files = (
+        "ilber_finans_terim_bankasi_TR-EN-DE.csv",
+        "ilber_deyimler_TR-EN-DE.csv",
+        "ilber_genel_terim_bankasi_25dil.csv",
+    )
+    # Track existing lowercase keys per pair so no case-insensitive duplicates are added
+    seen_lower = {pair: {k.lower() for k in bucket} for pair, bucket in _BUILTIN_DOMAIN_GLOSSARY.items()}
+
+    for fname in csv_files:
+        csv_path = _resolve_app_resource_path(fname) or os.path.join(base_dir, fname)
+        if not os.path.isfile(csv_path):
+            continue
+        try:
+            with open(csv_path, "r", encoding="utf-8-sig", newline="") as f:
+                reader = csv.DictReader(f)
+                fieldnames = reader.fieldnames or []
+                # Map column header -> ISO lang code (supports both 'TR'/'EN'/'DE' and 'Türkçe (tr)')
+                lang_cols = []
+                for col in fieldnames:
+                    c_up = col.strip().upper()
+                    if c_up in ("TR", "EN", "DE"):
+                        lang_cols.append((col, c_up.lower()))
+                    else:
+                        m_lc = re.search(r"\(([a-z]{2})\)\s*$", col.strip().lower())
+                        if m_lc:
+                            lang_cols.append((col, m_lc.group(1)))
+                if len(lang_cols) < 2:
+                    continue
+
+                for row in reader:
+                    parsed_langs = {}
+                    for col_name, lc in lang_cols:
+                        raw_v = str(row.get(col_name, "")).strip()
+                        items = [x.strip() for x in raw_v.split(";") if x.strip()]
+                        if items:
+                            parsed_langs[lc] = items
+                    for src_l, s_items in parsed_langs.items():
+                        for tgt_l, t_items in parsed_langs.items():
+                            if src_l == tgt_l:
+                                continue
+                            # Index all pairs involving TR/EN/DE (keeps memory lean while covering all app pairs)
+                            if src_l not in ("tr", "en", "de") and tgt_l not in ("tr", "en", "de"):
+                                continue
+                            t_main = t_items[0]
+                            pair = (src_l, tgt_l)
+                            bucket = _BUILTIN_DOMAIN_GLOSSARY.setdefault(pair, {})
+                            s_set = seen_lower.setdefault(pair, set())
+                            for s_term in s_items:
+                                s_low = s_term.lower()
+                                if len(s_term) >= 4 and s_low not in s_set:
+                                    bucket[s_term] = t_main
+                                    s_set.add(s_low)
+        except Exception:
+            pass
+
+
+_load_external_term_bank_csv()
 
 
 def _find_matching_glossary_terms(text, glossary_dict):
@@ -3826,7 +4565,14 @@ def translate_texts_high_quality(
         if not _is_translatable_string(raw_t):
             out_texts.append(str(raw_t or ""))
         else:
-            out_texts.append(_translate_single_segment_smart(raw_t, effective_glossary, m2m_cache))
+            tr_val = _translate_single_segment_smart(raw_t, effective_glossary, m2m_cache)
+            if src_code == "tr" and tgt_code == "en":
+                # Remove redundant bilingual parentheses e.g. 'United Kingdom (United Kingdom)', 'LONDON (London)'
+                tr_val = re.sub(r"\b([A-Za-z][A-Za-z\s]{1,30}?)\s*\(\s*\1\s*\)", r"\1", tr_val, flags=re.IGNORECASE)
+                # Convert Turkish thousand separators (8.000.000 -> 8,000,000) and decimal commas (19,22 -> 19.22)
+                tr_val = re.sub(r"(?<!\d)(\d{1,3}(?:\.\d{3}){2,})(?!\d)", lambda m: m.group(1).replace(".", ","), tr_val)
+                tr_val = re.sub(r"(?<!\d)(\d+),(\d{1,2})(?!\d)", r"\1.\2", tr_val)
+            out_texts.append(tr_val)
 
     return out_texts
 
